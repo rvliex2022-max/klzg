@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تأكيد الحساب — Brain Battle</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+        background-color: #f4f6f9;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .top-header {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .back-btn {
+        background-color: #e2e8f0;
+        color: #1e293b;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .back-btn:hover {
+        background-color: #cbd5e1;
+    }
+
+    .login-wrapper {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .login-card {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .login-card h2 {
+        color: #1e293b;
+        margin-bottom: 8px;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .email-highlight {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    .code-inputs {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        direction: ltr;
+        margin: 28px 0 8px;
+    }
+
+    .code-inputs input {
+        width: 44px;
+        height: 52px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: 700;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        outline: none;
+        color: #1e293b;
+    }
+
+    .code-inputs input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px #2563eb22;
+    }
+
+    .code-inputs input.filled {
+        border-color: #93c5fd;
+    }
+
+    .timer {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+
+    .timer strong {
+        color: #1e293b;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+        background-color: #1d4ed8;
+    }
+
+    .btn-submit:disabled {
+        background-color: #93b4f2;
+        cursor: not-allowed;
+    }
+
+    .resend-link {
+        margin-top: 18px;
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .resend-link button {
+        background: none;
+        border: none;
+        color: #2563eb;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        padding: 0;
+    }
+
+    .resend-link button:disabled {
+        color: #94a3b8;
+        cursor: not-allowed;
+    }
+
+    .error-msg {
+        color: #dc2626;
+        font-size: 13px;
+        margin-bottom: 14px;
+        min-height: 16px;
+    }
+
+    .success-msg {
+        color: #16a34a;
+        font-size: 13px;
+        margin-bottom: 14px;
+        display: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #ffffff88;
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin .7s linear infinite;
+        vertical-align: middle;
+        margin-left: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+    <a href="signup.html" class="back-btn">رجوع</a>
+</header>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>📩 تأكيد الحساب</h2>
+        <p class="subtitle">أرسلنا كود مكوّن من 6 أرقام إلى</p>
+        <p class="subtitle email-highlight" id="userEmail">—</p>
+
+        <div class="code-inputs" id="codeInputs">
+            <input type="text" inputmode="numeric" maxlength="1" data-i="0">
+            <input type="text" inputmode="numeric" maxlength="1" data-i="1">
+            <input type="text" inputmode="numeric" maxlength="1" data-i="2">
+            <input type="text" inputmode="numeric" maxlength="1" data-i="3">
+            <input type="text" inputmode="numeric" maxlength="1" data-i="4">
+            <input type="text" inputmode="numeric" maxlength="1" data-i="5">
+        </div>
+
+        <div class="timer" id="timerBox">الكود صالح لمدة <strong id="timeLeft">05:00</strong></div>
+
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg">تم تأكيد حسابك بنجاح! جارٍ تحويلك...</div>
+
+        <button class="btn-submit" id="verifyBtn" onclick="verifyCode()">تأكيد</button>
+
+        <div class="resend-link">
+            لم يصلك الكود؟
+            <button id="resendBtn" onclick="resendCode()" disabled>إعادة الإرسال (<span id="resendTimer">30</span>)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const EMAILJS_PUBLIC_KEY  = "YOUR_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID  = "YOUR_SERVICE_ID";
+const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+
+if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+let pendingUser = JSON.parse(sessionStorage.getItem('bb_pending_user') || 'null');
+let countdownInterval = null;
+let resendInterval = null;
+
+if (!pendingUser) {
+    window.location.href = 'signup.html';
+}
+
+document.getElementById('userEmail').textContent = pendingUser.email;
+
+const inputs = Array.from(document.querySelectorAll('#codeInputs input'));
+
+inputs.forEach((inp, i) => {
+    inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, 1);
+        inp.classList.toggle('filled', inp.value !== '');
+        if (inp.value && i < inputs.length - 1) inputs[i + 1].focus();
+        clearError();
+    });
+    inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i - 1].focus();
+    });
+    inp.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const digits = (e.clipboardData.getData('text').match(/\d/g) || []).slice(0, inputs.length);
+        digits.forEach((d, idx) => { if (inputs[idx]) { inputs[idx].value = d; inputs[idx].classList.add('filled'); } });
+        const next = Math.min(digits.length, inputs.length - 1);
+        inputs[next].focus();
+    });
+});
+
+function clearError() {
+    document.getElementById('errorMsg').textContent = '';
+}
+
+function startExpiryCountdown() {
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+        const remaining = Math.max(0, pendingUser.expiresAt - Date.now());
+        const m = String(Math.floor(remaining / 60000)).padStart(2, '0');
+        const s = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
+        document.getElementById('timeLeft').textContent = `${m}:${s}`;
+        if (remaining <= 0) {
+            clearInterval(countdownInterval);
+            document.getElementById('errorMsg').textContent = 'انتهت صلاحية الكود، اضغط "إعادة الإرسال" لطلب كود جديد';
+            document.getElementById('verifyBtn').disabled = true;
+        }
+    }, 250);
+}
+
+function startResendCooldown(seconds) {
+    const btn = document.getElementById('resendBtn');
+    const span = document.getElementById('resendTimer');
+    let left = seconds;
+    btn.disabled = true;
+    span.textContent = left;
+    clearInterval(resendInterval);
+    resendInterval = setInterval(() => {
+        left--;
+        span.textContent = left;
+        if (left <= 0) {
+            clearInterval(resendInterval);
+            btn.disabled = false;
+            btn.textContent = 'إعادة الإرسال';
+        }
+    }, 1000);
+}
+
+function generateCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+async function resendCode() {
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    const newCode = generateCode();
+    pendingUser.code = newCode;
+    pendingUser.expiresAt = Date.now() + 5 * 60 * 1000;
+    sessionStorage.setItem('bb_pending_user', JSON.stringify(pendingUser));
+
+    try {
+        if (window.emailjs && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                to_name: pendingUser.fullname,
+                to_email: pendingUser.email,
+                code: newCode
+            });
+        }
+        document.getElementById('verifyBtn').disabled = false;
+        document.getElementById('errorMsg').textContent = '';
+        inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
+        inputs[0].focus();
+        startExpiryCountdown();
+    } catch (err) {
+        document.getElementById('errorMsg').textContent = 'تعذّر إعادة إرسال الكود، حاول لاحقًا';
+        console.error(err);
+    }
+    startResendCooldown(30);
+}
+
+async function verifyCode() {
+    const entered = inputs.map(i => i.value).join('');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const verifyBtn = document.getElementById('verifyBtn');
+
+    errorMsg.textContent = '';
+
+    if (entered.length < 6) {
+        errorMsg.textContent = 'أدخل الكود كاملًا (6 أرقام)';
+        return;
+    }
+
+    if (Date.now() > pendingUser.expiresAt) {
+        errorMsg.textContent = 'انتهت صلاحية الكود، اطلب كود جديد';
+        return;
+    }
+
+    if (entered !== pendingUser.code) {
+        errorMsg.textContent = 'الكود غير صحيح، حاول مرة أخرى';
+        inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
+        inputs[0].focus();
+        return;
+    }
+
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = 'جارٍ التفعيل<span class="spinner"></span>';
+
+    const users = JSON.parse(localStorage.getItem('bb_users') || '[]');
+    users.push({
+        fullname: pendingUser.fullname,
+        email: pendingUser.email,
+        password: pendingUser.password,
+        verified: true,
+        joinedAt: Date.now()
+    });
+    localStorage.setItem('bb_users', JSON.stringify(users));
+    sessionStorage.removeItem('bb_pending_user');
+
+    successMsg.style.display = 'block';
+    setTimeout(() => { window.location.href = 'login.html'; }, 900);
+}
+
+startExpiryCountdown();
+startResendCooldown(30);
+inputs[0].focus();
+</script>
+
+</body>
+</html>
