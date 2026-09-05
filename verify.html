@@ -195,8 +195,8 @@
 
 <div class="login-wrapper">
     <div class="login-card">
-        <h2>📩 تأكيد الحساب</h2>
-        <p class="subtitle">أرسلنا كود مكوّن من 6 أرقام إلى</p>
+        <h2 id="TtlVerify">📩 تأكيد الحساب</h2>
+        <p class="subtitle" id="SubTtl">أرسلنا كود مكوّن من 6 أرقام إلى</p>
         <p class="subtitle email-highlight" id="userEmail">—</p>
 
         <div class="code-inputs" id="codeInputs">
@@ -215,7 +215,7 @@
 
         <button class="btn-submit" id="verifyBtn" onclick="verifyCode()">تأكيد</button>
 
-        <div class="resend-link">
+        <div class="resend-link" id="resendLink">
             لم يصلك الكود؟
             <button id="resendBtn" onclick="resendCode()" disabled>إعادة الإرسال (<span id="resendTimer">30</span>)</button>
         </div>
@@ -223,9 +223,47 @@
 </div>
 
 <script>
-const EMAILJS_PUBLIC_KEY  = "YOUR_PUBLIC_KEY";
-const EMAILJS_SERVICE_ID  = "YOUR_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+
+const i18n = {
+  ar: {
+    TtlVerify: "📩 تأكيد الحساب",
+    SubTtl: "أرسلنا كود مكوّن من 6 أرقام إلى",
+    timerBox: "الكود صالح لمدة",
+    errorMsgExpired: 'انتهت صلاحية الكود، اضغط "إعادة الإرسال" لطلب كود جديد',
+    successMsg: 'تم تأكيد حسابك بنجاح! جارٍ تحويلك...',
+    verifyBtn: "تأكيد",
+    resendLink: "لم يصلك الكود؟",
+    resendBtn: "إعادة الإرسال"
+  },
+  en:{
+    TtlVerify: "📩 Verify Account",
+    SubTtl: "We sent a 6-digit code to",
+    timerBox: "The code is valid for",
+    errorMsgExpired: 'The code has expired, click "Resend" to request a new code',
+    successMsg: 'Your account has been successfully verified! Redirecting...',
+    verifyBtn: "Verify",
+    resendLink: "Didn't receive the code?",
+    resendBtn: "Resend"
+  }
+};
+
+function applyTranslations(l) {
+  document.documentElement.lang = l;
+  document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
+  const t = i18n[l];
+  document.getElementById('TtlVerify').textContent = t.TtlVerify;
+  document.getElementById('SubTtl').textContent = t.SubTtl;
+  document.getElementById('timerBox').textContent = t.timerBox + ' ';
+  document.getElementById('errorMsg').textContent = '';
+  document.getElementById('successMsg').textContent = t.successMsg;
+  document.getElementById('verifyBtn').textContent = t.verifyBtn;
+  document.getElementById('resendLink').firstChild.textContent = t.resendLink;
+  document.getElementById('resendBtn').textContent = t.resendBtn;
+}
+
+const EMAILJS_PUBLIC_KEY  = "l4A_cZFEUEwyCzUn1";
+const EMAILJS_SERVICE_ID  = "service_kvvq0zo";
+const EMAILJS_TEMPLATE_ID = "template_d4m9id9";
 
 if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
@@ -375,6 +413,7 @@ async function verifyCode() {
 startExpiryCountdown();
 startResendCooldown(30);
 inputs[0].focus();
+applyTranslations(localStorage.getItem('lang') || 'ar');
 </script>
 
 </body>

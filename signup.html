@@ -171,34 +171,33 @@
 <body>
 
 <header class="top-header">
-    <a href="Fk it.html" class="back-btn">رجوع</a>
-    <a href="verify.html" class="btn-submit">انشاء الحساب</a>
+    <a href="For you.html" class="back-btn" id="BackBtn">رجوع</a>
 </header>
 
 <div class="login-wrapper">
     <div class="login-card">
-        <h2>🧠 إنشاء حساب جديد</h2>
-        <p class="subtitle">انضم إلى Brain Battle وابدأ التحدي</p>
+        <h2 id="TtlSignup">🧠 إنشاء حساب جديد</h2>
+        <p class="subtitle" id="SubTtl">انضم إلى Brain Battle وابدأ التحدي</p>
 
         <form id="signupForm" onsubmit="return handleSignup(event)">
             <div class="input-group">
-                <label for="fullname">الاسم</label>
+                <label for="fullname" id="FullnameText">الاسم</label>
                 <input type="text" id="fullname" placeholder="مثلاً Rayan" maxlength="18" required>
             </div>
 
             <div class="input-group">
-                <label for="email">البريد الإلكتروني</label>
+                <label for="email" id="EmailText">البريد الإلكتروني</label>
                 <input type="email" id="email" placeholder="example@email.com" required>
             </div>
 
             <div class="input-group">
-                <label for="password">كلمة المرور</label>
+                <label for="password" id="PasswordText">كلمة المرور</label>
                 <input type="password" id="password" placeholder="••••••••" required>
                 <div class="hint">6 أحرف على الأقل</div>
             </div>
 
             <div class="input-group">
-                <label for="confirmPassword">تأكيد كلمة المرور</label>
+                <label for="confirmPassword" id="ConfirmPasswordText">تأكيد كلمة المرور</label>
                 <input type="password" id="confirmPassword" placeholder="••••••••" required>
             </div>
 
@@ -208,16 +207,86 @@
             <button type="submit" class="btn-submit" id="submitBtn">إنشاء الحساب</button>
         </form>
 
-        <div class="footer-link">
+        <div class="footer-link" id="FooterLink">
             لديك حساب بالفعل؟ <a href="login.html">سجّل دخولك</a>
         </div>
     </div>
 </div>
 
 <script>
-const EMAILJS_PUBLIC_KEY  = "YOUR_PUBLIC_KEY";
-const EMAILJS_SERVICE_ID  = "YOUR_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+const i18n = {
+  ar: {
+    backBtn: "رجوع",
+    TtlSignup: "🧠 إنشاء حساب جديد",
+    SubTtl: "انضم إلى Brain Battle وابدأ التحدي",
+    FullnameText: "الاسم",
+    EmailText: "البريد الإلكتروني",
+    PasswordText: "كلمة المرور",
+    ConfirmPasswordText: "تأكيد كلمة المرور",
+    placeholderFullname: "مثلاً Rayan",
+    placeholderEmail: "example@email.com",
+    placeholderPassword: "••••••••",
+    placeholderConfirmPassword: "••••••••",
+    successMsg: "تم إرسال كود التحقق إلى إيميلك! جارٍ تحويلك...",
+    submitBtn: "إنشاء الحساب",
+    FooterLink: "لديك حساب بالفعل؟ <a href='login.html'>سجّل دخولك</a>",
+    fillAllFields: "يرجى تعبئة جميع الحقول",
+    passwordLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    passwordMismatch: "كلمتا المرور غير متطابقتين",
+    emailExists: "هذا الإيميل مسجل بحساب موجود بالفعل",
+    sendError: "تعذّر إرسال كود التحقق. تأكد من إعداد EmailJS ثم حاول مرة أخرى"
+  },
+  en: {
+    backBtn: "Back",
+    TtlSignup: "🧠 Create a New Account",
+    SubTtl: "Join Brain Battle and start the challenge",
+    FullnameText: "Full Name",
+    EmailText: "Email",
+    PasswordText: "Password",
+    ConfirmPasswordText: "Confirm Password",
+    placeholderFullname: "e.g., Rayan",
+    placeholderEmail: "example@email.com",
+    placeholderPassword: "••••••••",
+    placeholderConfirmPassword: "••••••••",
+    successMsg: "Verification code sent to your email! Redirecting...",
+    submitBtn: "Create Account",
+    FooterLink: "Already have an account? <a href='login.html'>Log in</a>",
+    fillAllFields: "Please fill in all fields",
+    passwordLength: "Password must be at least 6 characters",
+    passwordMismatch: "Passwords do not match",
+    emailExists: "This email is already registered",
+    sendError: "Failed to send verification code. Make sure EmailJS is set up and try again"
+  }
+};
+
+function applyTranslations(l) {
+  document.documentElement.lang = l;
+  document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
+  const t = i18n[l];
+  document.getElementById('BackBtn').textContent = t.backBtn;
+  document.getElementById('TtlSignup').textContent = t.TtlSignup;
+  document.getElementById('SubTtl').textContent = t.SubTtl;
+  document.getElementById('FullnameText').textContent = t.FullnameText;
+  document.getElementById('EmailText').textContent = t.EmailText;
+  document.getElementById('PasswordText').textContent = t.PasswordText;
+  document.getElementById('ConfirmPasswordText').textContent = t.ConfirmPasswordText;
+  document.getElementById('fullname').placeholder = t.placeholderFullname;
+  document.getElementById('email').placeholder = t.placeholderEmail;
+  document.getElementById('password').placeholder = t.placeholderPassword;
+  document.getElementById('confirmPassword').placeholder = t.placeholderConfirmPassword;
+  document.getElementById('successMsg').textContent = t.successMsg;
+  document.getElementById('submitBtn').textContent = t.submitBtn;
+  document.getElementById('FooterLink').innerHTML = t.FooterLink;
+  document.getElementById('errorMsg').textContent = t.fillAllFields;
+  document.getElementById('errorMsg').textContent = t.passwordLength;
+  document.getElementById('errorMsg').textContent = t.passwordMismatch;
+  document.getElementById('errorMsg').textContent = t.emailExists;
+  document.getElementById('errorMsg').textContent = t.sendError;
+}
+
+const EMAILJS_PUBLIC_KEY  = "l4A_cZFEUEwyCzUn1";
+const EMAILJS_SERVICE_ID  = "service_kvvq0zo";
+const EMAILJS_TEMPLATE_ID = "template_d4m9id9";
 
 if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
@@ -239,26 +308,26 @@ async function handleSignup(e) {
     successMsg.style.display = 'none';
 
     if (!fullname || !email || !password || !confirmPassword) {
-        errorMsg.textContent = 'يرجى تعبئة جميع الحقول';
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].fillAllFields;
         errorMsg.style.display = 'block';
         return false;
     }
 
     if (password.length < 6) {
-        errorMsg.textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].passwordLength;
         errorMsg.style.display = 'block';
         return false;
     }
 
     if (password !== confirmPassword) {
-        errorMsg.textContent = 'كلمتا المرور غير متطابقتين';
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].passwordMismatch;
         errorMsg.style.display = 'block';
         return false;
     }
 
     const users = JSON.parse(localStorage.getItem('bb_users') || '[]');
     if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-        errorMsg.textContent = 'هذا الإيميل مسجل بحساب موجود بالفعل';
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].emailExists;
         errorMsg.style.display = 'block';
         return false;
     }
@@ -284,18 +353,20 @@ async function handleSignup(e) {
         });
 
         sessionStorage.setItem('bb_pending_user', JSON.stringify(pendingUser));
+        successMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].successMsg;
         successMsg.style.display = 'block';
         setTimeout(() => { window.location.href = 'verify.html'; }, 900);
     } catch (err) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'إنشاء الحساب';
-        errorMsg.textContent = 'تعذّر إرسال كود التحقق. تأكد من إعداد EmailJS ثم حاول مرة أخرى.';
+        submitBtn.textContent = i18n[localStorage.getItem('lang') || 'ar'].submitBtn;
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].sendError;
         errorMsg.style.display = 'block';
         console.error(err);
     }
 
     return false;
 }
+applyTranslations(localStorage.getItem('lang') || 'ar');
 </script>
 
 </body>

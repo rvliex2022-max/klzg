@@ -127,7 +127,7 @@
 .bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none}
 .wrap{max-width:1050px;margin:0 auto;padding:70px 18px 28px;position:relative}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .logo{font-weight:900;font-size:22px;letter-spacing:.5px}.badge{font-size:12px;background:#151a2b;border:1px solid #292f49;padding:8px 12px;border-radius:999px;color:#aeb8d8}
-.card{background:#111625cc;border:1px solid #252d46;border-radius:24px;padding:24px;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px)}
+.card{background:#111625cc;border:1px solid #252d46;border-radius:24px;padding:24px;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);width:700px;height:500px}
 h1{font-size:42px;margin:4px 0 10px;line-height:1.1}p{color:#aeb7cf}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
 input,select{width:100%;background:#0a0e19;border:1px solid #303750;color:white;border-radius:13px;padding:14px;font-size:16px;outline:none}
 button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:15px;cursor:pointer;background:#7c5cff;color:white;transition:.15s}button:hover{transform:translateY(-1px);filter:brightness(1.08)}button.secondary{background:#1b2235;color:#dbe2ff}button.danger{background:#d94b67}
@@ -139,7 +139,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 </head>
 <body>
    <header class="top-header">
-    <a href="login.html" class="login-btn">تسجيل الدخول</a>
+    <a href="login.html" class="login-btn" id="loginBtnText">تسجيل الدخول</a>
    
 </header>
     <div class="bg"></div><div class="wrap">
@@ -10223,10 +10223,11 @@ const i18n = {
     correct: (p) => `صحيح! +${p} نقطة ⚡`,
     timeUp: "انتهى الوقت",
     wrong: "إجابة خاطئة",
-    won: "فزت!", lost: "خسرت الجولة", tie: "تعادل!", doneSolo: "أنهيت جولتك",
+    won: "فزت! 🏆", lost: "خسرت الجولة 😔", tie: "تعادل!", doneSolo: "أنهيت جولتك",
     yourScore: (s, m) => `نتيجتك: ${s} من ${m}`,
     oppScoreLine: (n, s) => `${n}: ${s} نقطة`,
-    oppNotDone: (n) => `${n}: لم ينهِ الجولة بعد…`
+    oppNotDone: (n) => `${n}: لم ينهِ الجولة بعد…`,
+    loginBtn: "تسجيل الدخول"
   },
   en: {
     badge: "1v1 • Speed + Accuracy",
@@ -10261,17 +10262,19 @@ const i18n = {
     copied: "Room code copied: ",
     qCounter: (i, n) => `Question ${i} / ${n}`,
     correct: (p) => `Correct! +${p} pts ⚡`,
-    timeUp: "Time's up",
+    timeUp: "Time's up!",
     wrong: "Wrong answer",
-    won: "You won!", lost: "You lost", tie: "Draw!", doneSolo: "You finished your round",
+    won: "You won! 🏆", lost: "You lost 😔", tie: "Draw!", doneSolo: "You finished your round",
     yourScore: (s, m) => `Your score: ${s} of ${m}`,
     oppScoreLine: (n, s) => `${n}: ${s} pts`,
-    oppNotDone: (n) => `${n}: hasn't finished yet…`
+    oppNotDone: (n) => `${n}: hasn't finished yet…`,
+    loginBtn: "Login"
   }
 };
 
 function setLanguage(l){
     currentLang = l
+    localStorage.setItem('lang', l);
     document.documentElement.lang = l;
     document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
     document.getElementById('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
@@ -10310,6 +10313,7 @@ function updateStaticTexts() {
   if($("g1")) $("g1").textContent = playerName || t.lblYou;
   if($("g2")) $("g2").textContent = oppName || t.lblOpp;
   if(questions.length && $("counter")) $("counter").textContent = t.qCounter(idx+1, questions.length);
+  if(document.getElementById("loginBtnText")) document.getElementById("loginBtnText").textContent = t.loginBtn;
 }
 function shuffle(arr){let a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function bankForLang(l){return l === 'en' ? EN_QUESTION_BANK : AR_QUESTION_BANK;}
@@ -10437,4 +10441,5 @@ else resultText=i18n[currentLang].tie;
 $("winner").textContent=resultText;
 $("finalScore").innerHTML="${i18n[currentLang].yourScore(score,maxScore)}<br>${oppLine}";
 }
+setLanguage(localStorage.getItem('lang') || 'ar');
 </script></body></html>

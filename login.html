@@ -137,37 +137,84 @@
 <body>
 
 <header class="top-header">
-    <a href="Fk it.html" class="back-btn">رجوع</a>
+    <a href="For you.html" class="back-btn" id="backBtn">رجوع</a>
 </header>
 
 <div class="login-wrapper">
     <div class="login-card">
-        <h2>🧠 تسجيل الدخول</h2>
-        <p class="subtitle">سجّل دخولك للمتابعة إلى Brain Battle</p>
+        <h2 id="TtlLogin">🧠 تسجيل الدخول</h2>
+        <p class="subtitle" id="SubTtl">سجّل دخولك للمتابعة إلى Brain Battle</p>
 
         <form id="loginForm" onsubmit="return handleLogin(event)">
             <div class="input-group">
-                <label for="username">اسم المستخدم أو البريد الإلكتروني</label>
+                <label for="username" id="UsernameText">اسم المستخدم أو البريد الإلكتروني</label>
                 <input type="text" id="username" placeholder="اكتب اسمك أو بريدك" required>
             </div>
 
             <div class="input-group">
-                <label for="password">كلمة المرور</label>
+                <label for="password" id="PasswordText">كلمة المرور</label>
                 <input type="password" id="password" placeholder="••••••••" required>
             </div>
 
             <div class="error-msg" id="errorMsg">يرجى تعبئة جميع الحقول بشكل صحيح</div>
 
-            <button type="submit" class="btn-submit">دخول</button>
+            <button type="submit" class="btn-submit" id="SubmitBtn">دخول</button>
         </form>
 
-        <div class="footer-link">
+        <div class="footer-link" id="FooterLink">
             ليس لديك حساب؟ <a href="signup.html">أنشئ حسابًا جديدًا</a>
         </div>
     </div>
 </div>
 
 <script>
+
+const i18n = {
+  ar: {
+    backBtn: "رجوع",
+    TtlLogin: "🧠 تسجيل الدخول",
+    SubTtl: "سجّل دخولك للمتابعة إلى Brain Battle",
+    UsernameText: "اسم المستخدم أو البريد الإلكتروني",
+    PasswordText: "كلمة المرور",
+    UserPlaceholder: "اكتب اسمك أو بريدك",
+    PassPlaceholder: "••••••••",
+    errorMsg: "يرجى تعبئة جميع الحقول بشكل صحيح",
+    SubmitBtn: "دخول",
+    FooterLink: "ليس لديك حساب؟ <a href=\"signup.html\">أنشئ حسابًا جديدًا</a>",
+
+
+  },
+  en: {
+    backBtn: "Back",
+    TtlLogin: "🧠 Login",
+    SubTtl: "Log in to continue to Brain Battle",
+    UsernameText: "Username or Email",
+    PasswordText: "Password",
+    UserPlaceholder: "Enter your username or email",
+    PassPlaceholder: "••••••••",
+    errorMsg: "Please fill in all fields correctly",
+    SubmitBtn: "Login",
+    FooterLink: "Don't have an account? <a href=\"signup.html\">Create a new account</a>",
+
+  }
+};
+
+function applyTranslations(l) {
+  document.documentElement.lang = l;
+  document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
+  const t = i18n[l];
+  document.getElementById('backBtn').textContent = t.backBtn;
+  document.getElementById('TtlLogin').textContent = t.TtlLogin;
+  document.getElementById('SubTtl').textContent = t.SubTtl;
+  document.getElementById('UsernameText').textContent = t.UsernameText;
+  document.getElementById('PasswordText').textContent = t.PasswordText;
+  document.getElementById('username').placeholder = t.UserPlaceholder;
+  document.getElementById('password').placeholder = t.PassPlaceholder;
+  document.getElementById('errorMsg').textContent = t.errorMsg;
+  document.getElementById('SubmitBtn').textContent = t.SubmitBtn;
+  document.getElementById('FooterLink').innerHTML = t.FooterLink;
+}
+
 function handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('username').value.trim();
@@ -183,6 +230,7 @@ function handleLogin(e) {
     alert('تم تسجيل الدخول باسم: ' + username);
     return false;
 }
+applyTranslations(localStorage.getItem('lang') || 'ar');
 </script>
 
 </body>
