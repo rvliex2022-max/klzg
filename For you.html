@@ -10439,7 +10439,7 @@ else if(score<oppFinalScore)resultText=i18n[currentLang].lost;
 else resultText=i18n[currentLang].tie;
 }else{resultText=i18n[currentLang].doneSolo}
 $("winner").textContent=resultText;
-$("finalScore").innerHTML="${i18n[currentLang].yourScore(score,maxScore)}<br>${oppLine}";
+$("finalScore").innerHTML='${i18n[currentLang].yourScore(score,maxScore)}<br>${oppLine}';
 }
 setLanguage(localStorage.getItem('lang') || 'ar');
 </script></body></html>
