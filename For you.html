@@ -116,12 +116,22 @@
             background-color: #1d4ed8;
         }
   
-#langToggleBtn {
+.bottom-bar{
   position: fixed;
   bottom: 20px;
   left: 20px;
   z-index: 9999;
+  display: flex;
+  gap: 10px;
+}
+#langToggleBtn, #messagesBtn {
   box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  margin: 0;
+}
+#messagesBtn{
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Tahoma,sans-serif;background:#080b14;color:#f7f8ff;min-height:100vh}
 .bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none}
@@ -174,7 +184,10 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 <section id="end" class="card hidden center"><div class="muted" id="lblFinalResult">النتيجة النهائية</div><div id="winner" class="result"></div><p id="finalScore"></p><div class="actions center"><button id="btnPlayAgain" onclick="location.reload()">لعب مرة ثانية</button><button class="danger" id="btnExit3" onclick="exitGame()">خروج</button></div></section>
 </div>
 
-<button id="langToggleBtn" onclick="toggleLanguage()">English</button>
+<div class="bottom-bar">
+  <button id="messagesBtn" class="secondary" onclick="location.href='messages.html'">💬 <span id="messagesBtnText">الرسائل</span></button>
+  <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
+</div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
@@ -10227,7 +10240,8 @@ const i18n = {
     yourScore: (s, m) => `نتيجتك: ${s} من ${m}`,
     oppScoreLine: (n, s) => `${n}: ${s} نقطة`,
     oppNotDone: (n) => `${n}: لم ينهِ الجولة بعد…`,
-    loginBtn: "تسجيل الدخول"
+    loginBtn: "تسجيل الدخول",
+    messagesBtn: "الرسائل"
   },
   en: {
     badge: "1v1 • Speed + Accuracy",
@@ -10268,7 +10282,8 @@ const i18n = {
     yourScore: (s, m) => `Your score: ${s} of ${m}`,
     oppScoreLine: (n, s) => `${n}: ${s} pts`,
     oppNotDone: (n) => `${n}: hasn't finished yet…`,
-    loginBtn: "Login"
+    loginBtn: "Login",
+    messagesBtn: "Messages"
   }
 };
 
@@ -10314,6 +10329,7 @@ function updateStaticTexts() {
   if($("g2")) $("g2").textContent = oppName || t.lblOpp;
   if(questions.length && $("counter")) $("counter").textContent = t.qCounter(idx+1, questions.length);
   if(document.getElementById("loginBtnText")) document.getElementById("loginBtnText").textContent = t.loginBtn;
+  if(document.getElementById("messagesBtnText")) document.getElementById("messagesBtnText").textContent = t.messagesBtn;
 }
 function shuffle(arr){let a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function bankForLang(l){return l === 'en' ? EN_QUESTION_BANK : AR_QUESTION_BANK;}
@@ -10404,7 +10420,7 @@ function beginGameLocal(){
 idx=0;score=0;oppScore=0;myFinished=false;oppFinished=false;oppFinalScore=0;
 $("gs1").textContent="0";$("gs2").textContent="0";
 $("g1").textContent=playerName;$("g2").textContent=oppName;
-$("langToggleBtn").classList.add("hidden");
+document.querySelector(".bottom-bar").classList.add("hidden");
 show("game");render();
 }
 

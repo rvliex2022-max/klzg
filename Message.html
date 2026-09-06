@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الرسائل — Brain Battle</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Tahoma,sans-serif;background:#080b14;color:#f7f8ff;min-height:100vh}
+.bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none}
+.wrap{max-width:1050px;margin:0 auto;padding:70px 18px 28px;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.logo{font-weight:900;font-size:22px;letter-spacing:.5px}
+.badge{font-size:12px;background:#151a2b;border:1px solid #292f49;padding:8px 12px;border-radius:999px;color:#aeb8d8}
+
+button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:15px;cursor:pointer;background:#7c5cff;color:white;transition:.15s}
+button:hover{transform:translateY(-1px);filter:brightness(1.08)}
+button.secondary{background:#1b2235;color:#dbe2ff}
+button.small{padding:8px 12px;font-size:13px;border-radius:10px}
+button.danger{background:#d94b67}
+input{width:100%;background:#0a0e19;border:1px solid #303750;color:white;border-radius:13px;padding:12px 14px;font-size:14px;outline:none}
+input:focus{border-color:#7c5cff}
+.mini{font-size:12px;color:#7f8aa7}
+.muted{color:#8490af;font-size:13px}
+
+.msg-card{
+  background:#111625cc;border:1px solid #252d46;border-radius:24px;
+  box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);
+  display:flex; height:min(72vh,640px); overflow:hidden;
+}
+
+.sidebar{
+  width:300px; min-width:220px; border-inline-start:1px solid #252d46;
+  display:flex; flex-direction:column;
+}
+.sidebar-search{ padding:16px 16px 8px; }
+.sidebar-section-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 16px 6px; }
+.sidebar-section-label{ font-size:11px; color:#7f8aa7; letter-spacing:.3px; }
+.req-count{ background:#d94b67; color:#fff; font-size:10.5px; font-weight:800; padding:1px 7px; border-radius:10px; }
+
+.conv-list{ overflow-y:auto; flex:1; padding:0 8px 8px; }
+.conv-item{
+  display:flex; align-items:flex-start; gap:12px;
+  padding:12px; border-radius:16px; cursor:pointer;
+  border:1px solid transparent; margin-bottom:6px;
+  transition: background .15s ease, border-color .15s ease;
+}
+.conv-item:hover{ background:#171e31; }
+.conv-item.active{ background:#171e31cc; border-color:#7c5cff55; }
+
+.conv-avatar{
+  width:38px; height:38px; border-radius:50%;
+  background:#0c1120; border:1px solid #28304a;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex-shrink:0; position:relative;
+}
+
+.conv-meta{ flex:1; min-width:0; }
+.conv-top-row{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.conv-name{ font-size:14.5px; font-weight:700; color:#f7f8ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.conv-preview{ font-size:12.5px; color:#8490af; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px; }
+
+.request-item{
+  padding:12px; border-radius:16px; background:#171e31; border:1px solid #303953;
+  margin:0 8px 8px;
+}
+.request-item .req-name{ font-weight:700; font-size:14px; margin-bottom:8px; }
+.request-actions{ display:flex; gap:8px; }
+
+.chat{ flex:1; display:flex; flex-direction:column; min-width:0; }
+
+.chat-header{
+  display:flex; align-items:center; gap:10px; padding:16px 20px;
+  border-bottom:1px solid #252d46;
+}
+.chat-header .conv-avatar{ width:34px; height:34px; font-size:15px; }
+.chat-header-name{ font-size:15.5px; font-weight:800; }
+.chat-header-sub{ font-size:11.5px; color:#7f8aa7; }
+
+.chat-header-actions{
+  margin-inline-start:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.chat-header-actions button{
+  padding:8px 11px;
+  font-size:12px;
+  border-radius:10px;
+}
+.chat-header-actions .block-btn{ background:#d94b67; color:#fff; }
+.chat-header-actions .remove-chat-btn{ background:#1b2235; color:#dbe2ff; }
+.chat-header-actions button:hover{ transform:translateY(-1px); filter:brightness(1.08); }
+
+.chat-body{ flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:4px; }
+
+.date-divider{
+  align-self:center; background:#151a2b; border:1px solid #292f49; color:#aeb8d8;
+  font-size:11.5px; padding:4px 14px; border-radius:999px; margin:12px 0;
+}
+
+.msg-row{ display:flex; margin-bottom:4px; flex-direction:column; }
+.msg-row.out{ align-items:flex-end; }
+.msg-row.in{ align-items:flex-start; }
+.msg-sender{ font-size:11px; color:#7f8aa7; margin:0 4px 3px; }
+
+.bubble{
+  max-width:62%; background:#171e31; border:1px solid #303953;
+  padding:10px 14px 8px; border-radius:14px;
+  border-start-start-radius:4px; line-height:1.55; font-size:14.5px;
+}
+.msg-row.out .bubble{
+  background:#2a2350; border-color:#4635a3;
+  border-start-start-radius:14px; border-start-end-radius:4px;
+}
+.bubble .msg-time{ display:block; text-align:end; font-size:10.5px; color:#7f8aa7; margin-top:4px; }
+
+.chat-input-bar{ display:flex; align-items:center; gap:10px; padding:14px 18px; border-top:1px solid #252d46; }
+.chat-input-bar input{ flex:1; border-radius:999px; }
+.send-btn{
+  background:#7c5cff; color:#fff; border:0; width:42px; height:42px;
+  border-radius:50%; font-size:16px; padding:0; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.send-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+.empty-state{ margin:auto; text-align:center; color:#7f8aa7; font-size:13.5px; padding:20px; }
+
+.conv-list::-webkit-scrollbar, .chat-body::-webkit-scrollbar{ width:8px; }
+.conv-list::-webkit-scrollbar-thumb, .chat-body::-webkit-scrollbar-thumb{ background:#252d46; border-radius:4px; }
+
+.bottom-bar{ position:fixed; bottom:20px; left:20px; z-index:9999; display:flex; gap:10px; }
+#langToggleBtn, #backBtn{ box-shadow:0 4px 14px rgba(0,0,0,0.5); margin:0; }
+#backBtn{ display:flex; align-items:center; gap:6px; }
+
+@media (max-width:760px){
+  .msg-card{ height:78vh; }
+  .sidebar{ position:absolute; inset:0; z-index:2; background:#0d1120; border-radius:24px; transition: transform .2s ease; }
+  .sidebar.hide{ transform: translateX(100%); }
+  .mobile-back{ display:inline-flex !important; }
+  .wrap{ padding:60px 12px 20px; }
+}
+.mobile-back{ display:none; background:none; border:0; color:#7c5cff; font-size:18px; padding:4px; }
+
+.modal-overlay{
+  position:fixed; inset:0; background:#080b14ee; z-index:99999;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.modal-card{
+  background:#111625; border:1px solid #252d46; border-radius:20px;
+  padding:28px; width:100%; max-width:400px; box-shadow:0 18px 60px #0008;
+}
+.modal-card h2{ margin:0 0 8px; font-size:20px; }
+.modal-card p{ color:#aeb7cf; font-size:13.5px; margin:0 0 18px; }
+.modal-card input{ margin-bottom:14px; }
+.modal-close{ background:none; color:#7f8aa7; padding:6px; width:auto; }
+
+.my-code-box{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:#0a0e19; border:1px dashed #465071; border-radius:14px;
+  padding:14px; margin-bottom:18px;
+}
+.my-code-box .code{ font-size:22px; font-weight:900; letter-spacing:4px; }
+
+.setup-banner{
+  background:#3a2412; border:1px solid #6b4a1e; color:#f0cf9a;
+  border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.7;
+  margin-bottom:16px;
+}
+.setup-banner code{ background:#00000055; padding:1px 6px; border-radius:6px; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+
+  <div class="top">
+    <div class="logo">💬 <span id="pageTitle">الرسائل</span></div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="badge" id="badgeText">تعرّف، تحدث، واصنع ذكرياتك.</div>
+      <button class="small secondary" id="openBlockedBtn">🚫 المحظورين</button>
+      <button class="small secondary" id="openAddFriendBtn">➕ إضافة صديق</button>
+    </div>
+  </div>
+
+  <div id="setupBanner" class="setup-banner" style="display:none">
+  </div>
+
+  <div class="msg-card">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="searchBox" placeholder="بحث في الرسائل...">
+      </div>
+
+      <div class="sidebar-section-row">
+        <span class="sidebar-section-label">طلبات الصداقة</span>
+        <span class="req-count" id="reqCount" style="display:none">0</span>
+      </div>
+      <div id="requestsList"></div>
+
+      <div class="sidebar-section-label" style="padding-top:10px">القنوات وجهات الاتصال</div>
+      <div class="conv-list" id="convList"></div>
+    </div>
+
+    <div class="chat">
+      <div class="chat-header">
+        <button class="mobile-back" id="mobileBackBtn">←</button>
+        <div class="conv-avatar" id="headerAvatar">💬</div>
+        <div>
+          <div class="chat-header-name" id="headerName">اختر محادثة</div>
+          <div class="chat-header-sub" id="headerSub"></div>
+        </div>
+
+        <div class="chat-header-actions" id="chatHeaderActions" style="display:none">
+          <button class="block-btn" id="blockUserBtn">🚫 بلوك</button>
+          <button class="remove-chat-btn" id="removeChatBtn">🗑️ Remove chat</button>
+        </div>
+      </div>
+
+      <div class="chat-body" id="chatBody"></div>
+
+      <div class="chat-input-bar">
+        <input type="text" id="msgInput" placeholder="اكتب رسالة..." disabled>
+        <button class="send-btn" id="sendBtn" disabled>➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button id="backBtn" class="secondary" onclick="location.href='For_you.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
+  <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
+</div>
+
+<div class="modal-overlay" id="nameModal">
+  <div class="modal-card">
+    <h2 id="modalTitle">وش اسمك؟</h2>
+    <p id="modalDesc">هذا الاسم بيظهر لأصدقائك في الشات.</p>
+    <input type="text" id="nameInput" maxlength="20" placeholder="مثلاً Rayan">
+    <button id="nameSubmitBtn" style="width:100%">دخول للشات</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addFriendModal" style="display:none">
+  <div class="modal-card">
+    <h2>إضافة صديق</h2>
+    <p>شارك كودك مع صديقك، أو أدخل كوده عشان ترسل له طلب صداقة.</p>
+    <div class="my-code-box">
+      <div>
+        <div class="mini">كودك الشخصي</div>
+        <div class="code" id="myCodeText">------</div>
+      </div>
+      <button class="small secondary" id="copyCodeBtn">نسخ</button>
+    </div>
+    <input type="text" id="friendCodeInput" maxlength="6" placeholder="أدخل كود صديقك" style="text-transform:uppercase">
+    <button id="sendRequestBtn" style="width:100%">إرسال طلب صداقة</button>
+    <div id="addFriendMsg" class="mini" style="margin-top:10px"></div>
+    <button class="modal-close" id="closeAddFriendBtn" style="width:100%;margin-top:6px">إغلاق</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="blockedModal" style="display:none">
+  <div class="modal-card">
+    <h2>الأشخاص المحظورين</h2>
+    <p>هنا تظهر كل الحسابات التي قمت بحظرها.</p>
+    <div class="blocked-list" id="blockedList">
+      <div class="blocked-empty">جارٍ تحميل القائمة...</div>
+    </div>
+    <button class="modal-close" id="closeBlockedBtn" style="width:100%">إغلاق</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc, getDocs, collection,
+  addDoc, query, orderBy, onSnapshot, serverTimestamp, where,
+  limit, updateDoc, deleteDoc, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB_zkWtAyZ29kPHxoX11AiL5eny7rwGQvk",
+  authDomain: "brain-battle-94e96.firebaseapp.com",
+  projectId: "brain-battle-94e96",
+  storageBucket: "brain-battle-94e96.firebasestorage.app",
+  messagingSenderId: "28651263617",
+  appId: "1:28651263617:web:39759f9a81c02a51e25f80"
+};
+
+const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+if (!isConfigured){
+  document.getElementById("setupBanner").style.display = "block";
+}
+
+const GENERAL_CHAT_ID = "general";
+const GENERAL_CHAT_NAME = "Brain Battle";
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+let app, auth, db, uid = null, myName = "", myCode = "";
+let activeChatId = null;
+let activeOtherUid = null;
+let activeOtherName = "";
+let unsubscribeMessages = null;
+let unsubscribeFriendships = null;
+let unsubscribeRequests = null;
+let friendships = [];   
+let pendingRequests = []; 
+
+const $ = (id) => document.getElementById(id);
+
+function randomCode(){
+  let c = "";
+  for (let i=0;i<6;i++) c += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
+  return c;
+}
+
+function initFirebase(){
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user){
+      uid = user.uid;
+      const savedName = localStorage.getItem("chat_display_name");
+      if (savedName){
+        myName = savedName;
+        await ensureUserDoc();
+        $("nameModal").style.display = "none";
+        boot();
+      } else {
+        $("nameModal").style.display = "flex";
+      }
+    } else {
+      signInAnonymously(auth).catch(err => alert("تعذر الاتصال بـ Firebase: " + err.message));
+    }
+  });
+}
+
+async function ensureUserDoc(){
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
+  if (snap.exists() && snap.data().friendCode){
+    myCode = snap.data().friendCode;
+    await setDoc(userRef, { name: myName }, { merge:true });
+    return;
+  }
+
+  let code = randomCode();
+  let attempts = 0;
+  while (attempts < 5){
+    const codeRef = doc(db, "friendCodes", code);
+    const codeSnap = await getDoc(codeRef);
+    if (!codeSnap.exists()){
+      await setDoc(codeRef, { uid, name: myName });
+      break;
+    }
+    code = randomCode();
+    attempts++;
+  }
+  myCode = code;
+  await setDoc(userRef, { name: myName, friendCode: code }, { merge:true });
+}
+
+$("nameSubmitBtn").addEventListener("click", async () => {
+  const val = $("nameInput").value.trim();
+  if (!val) return;
+  myName = val;
+  localStorage.setItem("chat_display_name", val);
+  await ensureUserDoc();
+  $("nameModal").style.display = "none";
+  boot();
+});
+$("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSubmitBtn").click(); });
+
+function boot(){
+  $("msgInput").disabled = false;
+  $("sendBtn").disabled = false;
+  $("myCodeText").textContent = myCode;
+  listenToFriendships();
+  listenToRequests();
+  openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة");
+}
+
+function directChatId(otherUid){ return [uid, otherUid].sort().join("_"); }
+function friendshipId(otherUid){ return [uid, otherUid].sort().join("_"); }
+
+function listenToFriendships(){
+  const q = query(collection(db, "friendships"), where("users", "array-contains", uid));
+  unsubscribeFriendships = onSnapshot(q, (snap) => {
+    friendships = [];
+    snap.forEach(d => {
+      const data = d.data();
+      const otherUid = data.users.find(u => u !== uid);
+      friendships.push({ id: d.id, otherUid, otherName: data.names?.[otherUid] || "صديق" });
+    });
+    renderList($("searchBox").value);
+  });
+}
+
+function listenToRequests(){
+  const q = query(collection(db, "friendRequests"), where("toUid", "==", uid), where("status", "==", "pending"));
+  unsubscribeRequests = onSnapshot(q, (snap) => {
+    pendingRequests = [];
+    snap.forEach(d => pendingRequests.push({ id: d.id, ...d.data() }));
+    renderRequests();
+  });
+}
+
+function renderRequests(){
+  const box = $("requestsList");
+  const count = $("reqCount");
+  box.innerHTML = "";
+  if (pendingRequests.length === 0){
+    count.style.display = "none";
+    return;
+  }
+  count.style.display = "inline-block";
+  count.textContent = pendingRequests.length;
+  pendingRequests.forEach(r => {
+    const item = document.createElement("div");
+    item.className = "request-item";
+    item.innerHTML = `
+      <div class="req-name">${r.fromName}</div>
+      <div class="request-actions">
+        <button class="small" data-accept="${r.id}" data-from="${r.fromUid}" data-fromname="${r.fromName}">قبول</button>
+        <button class="small secondary" data-decline="${r.id}">رفض</button>
+      </div>`;
+    box.appendChild(item);
+  });
+  box.querySelectorAll("[data-accept]").forEach(btn => {
+    btn.addEventListener("click", () => acceptRequest(btn.dataset.accept, btn.dataset.from, btn.dataset.fromname));
+  });
+  box.querySelectorAll("[data-decline]").forEach(btn => {
+    btn.addEventListener("click", () => declineRequest(btn.dataset.decline));
+  });
+}
+
+async function acceptRequest(requestId, fromUid, fromName){
+  try{
+    const fsId = friendshipId(fromUid);
+    await setDoc(doc(db, "friendships", fsId), {
+      users: [uid, fromUid],
+      names: { [uid]: myName, [fromUid]: fromName },
+      createdAt: serverTimestamp()
+    });
+    await deleteDoc(doc(db, "friendRequests", requestId));
+  }catch(err){ alert("تعذر قبول الطلب: " + err.message); }
+}
+async function declineRequest(requestId){
+  try{ await deleteDoc(doc(db, "friendRequests", requestId)); }
+  catch(err){ alert("تعذر رفض الطلب: " + err.message); }
+}
+
+function renderList(filter=""){
+  const list = $("convList");
+  list.innerHTML = "";
+
+  const generalItem = document.createElement("div");
+  generalItem.className = "conv-item" + (activeChatId === GENERAL_CHAT_ID ? " active" : "");
+  generalItem.innerHTML = `
+    <div class="conv-avatar">👥</div>
+    <div class="conv-meta">
+      <div class="conv-top-row"><span class="conv-name">${GENERAL_CHAT_NAME}</span></div>
+      <div class="conv-preview">قناة عامة لكل الأعضاء</div>
+    </div>`;
+  generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة"));
+  list.appendChild(generalItem);
+
+  const filtered = friendships.filter(f => (f.otherName || "").includes(filter));
+  if (friendships.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "mini";
+    empty.style.padding = "10px 12px";
+    empty.textContent = "ما عندك أصدقاء بعد. اضغط \"إضافة صديق\" فوق وشارك كودك.";
+    list.appendChild(empty);
+  }
+
+  filtered.forEach(f => {
+    const chatId = directChatId(f.otherUid);
+    const item = document.createElement("div");
+    item.className = "conv-item" + (activeChatId === chatId ? " active" : "");
+    item.innerHTML = `
+      <div class="conv-avatar">🧑</div>
+      <div class="conv-meta">
+        <div class="conv-top-row"><span class="conv-name">${f.otherName}</span></div>
+        <div class="conv-preview">محادثة خاصة</div>
+      </div>`;
+    item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", "محادثة خاصة", f.otherUid));
+    list.appendChild(item);
+  });
+}
+
+function dateLabel(ts){ if (!ts) return ""; const d = ts.toDate ? ts.toDate() : new Date(); return d.toLocaleDateString("ar-EG"); }
+function timeLabel(ts){ if (!ts) return ""; const d = ts.toDate ? ts.toDate() : new Date(); return d.toTimeString().slice(0,5); }
+
+function openChat(chatId, name, avatar, sub, otherUid = null){
+  activeChatId = chatId;
+  activeOtherUid = otherUid;
+  activeOtherName = name;
+
+  $("headerAvatar").textContent = avatar;
+  $("headerName").textContent = name;
+  $("headerSub").textContent = sub;
+
+  const isPrivate = !!otherUid && chatId !== GENERAL_CHAT_ID;
+  $("chatHeaderActions").style.display = isPrivate ? "flex" : "none";
+  $("msgInput").disabled = false;
+  $("sendBtn").disabled = false;
+
+  renderList($("searchBox").value);
+  listenToMessages(chatId);
+  if (window.innerWidth <= 760) $("sidebar").classList.add("hide");
+}
+
+function listenToMessages(chatId){
+  if (unsubscribeMessages) unsubscribeMessages();
+  const body = $("chatBody");
+  body.innerHTML = `<div class="empty-state">جارٍ تحميل الرسائل...</div>`;
+
+  const msgsRef = collection(db, "chats", chatId, "messages");
+  const q = query(msgsRef, orderBy("timestamp", "asc"), limit(200));
+
+  unsubscribeMessages = onSnapshot(q, (snap) => {
+    body.innerHTML = "";
+    if (snap.empty){
+      body.innerHTML = `<div class="empty-state">ما فيه رسائل بعد، ابدأ الحديث 👋</div>`;
+      return;
+    }
+    let lastDate = null;
+    snap.forEach(d => {
+      const m = d.data();
+      const dl = dateLabel(m.timestamp);
+      if (dl && dl !== lastDate){
+        const chip = document.createElement("div");
+        chip.className = "date-divider";
+        chip.textContent = dl;
+        body.appendChild(chip);
+        lastDate = dl;
+      }
+      const isMine = m.senderId === uid;
+      const row = document.createElement("div");
+      row.className = "msg-row " + (isMine ? "out" : "in");
+      row.innerHTML = `
+        ${!isMine ? `<div class="msg-sender">${m.senderName || "مستخدم"}</div>` : ""}
+        <div class="bubble"><span class="msg-text"></span><span class="msg-time">${timeLabel(m.timestamp)}</span></div>`;
+      row.querySelector(".msg-text").textContent = m.text || "";
+      body.appendChild(row);
+    });
+    body.scrollTop = body.scrollHeight;
+  }, (err) => { body.innerHTML = `<div class="empty-state">تعذر تحميل الرسائل: ${err.message}</div>`; });
+}
+
+async function sendMessage(){
+  const input = $("msgInput");
+  const text = input.value.trim();
+  if (!text || !activeChatId || !uid) return;
+  input.value = "";
+  try{
+    await addDoc(collection(db, "chats", activeChatId, "messages"), {
+      senderId: uid, senderName: myName, text, timestamp: serverTimestamp()
+    });
+  }catch(err){ alert("تعذر إرسال الرسالة: " + err.message); }
+}
+
+$("sendBtn").addEventListener("click", sendMessage);
+$("msgInput").addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+$("searchBox").addEventListener("input", e => renderList(e.target.value));
+$("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.remove("hide"));
+
+/* private chat actions */
+async function blockCurrentUser(){
+  if (!activeOtherUid || !uid || activeChatId === GENERAL_CHAT_ID) return;
+
+  const ok = confirm(`هل أنت متأكد أنك تريد بلوك ${activeOtherName}؟`);
+  if (!ok) return;
+
+  try{
+    await setDoc(doc(db, "blocks", friendshipId(activeOtherUid)), {
+      blockerUid: uid,
+      blockedUid: activeOtherUid,
+      blockedName: activeOtherName,
+      createdAt: serverTimestamp()
+    });
+
+    await deleteDoc(doc(db, "friendships", friendshipId(activeOtherUid)));
+
+    if (unsubscribeMessages) unsubscribeMessages();
+    activeChatId = null;
+    activeOtherUid = null;
+    activeOtherName = "";
+    $("chatHeaderActions").style.display = "none";
+    $("headerAvatar").textContent = "💬";
+    $("headerName").textContent = "اختر محادثة";
+    $("headerSub").textContent = "";
+    $("chatBody").innerHTML = `<div class="empty-state">تم حظر المستخدم 🚫</div>`;
+    $("msgInput").disabled = true;
+    $("sendBtn").disabled = true;
+  }catch(err){
+    alert("تعذر حظر المستخدم: " + err.message);
+  }
+}
+
+async function removeCurrentChat(){
+  if (!activeChatId || !activeOtherUid || activeChatId === GENERAL_CHAT_ID) return;
+
+  const ok = confirm(`حذف المحادثة مع ${activeOtherName}؟ سيتم حذف رسائل هذه المحادثة وإزالتها من جهات الاتصال.`);
+  if (!ok) return;
+
+  try{
+    const msgsRef = collection(db, "chats", activeChatId, "messages");
+    const snap = await getDocs(msgsRef);
+
+    const docs = snap.docs;
+    for (let i = 0; i < docs.length; i += 450){
+      const batch = writeBatch(db);
+      docs.slice(i, i + 450).forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+
+    await deleteDoc(doc(db, "friendships", friendshipId(activeOtherUid)));
+
+    if (unsubscribeMessages) unsubscribeMessages();
+    activeChatId = null;
+    activeOtherUid = null;
+    activeOtherName = "";
+    $("chatHeaderActions").style.display = "none";
+    $("headerAvatar").textContent = "💬";
+    $("headerName").textContent = "اختر محادثة";
+    $("headerSub").textContent = "";
+    $("chatBody").innerHTML = `<div class="empty-state">تم حذف المحادثة 🗑️</div>`;
+    $("msgInput").disabled = true;
+    $("sendBtn").disabled = true;
+  }catch(err){
+    alert("تعذر حذف المحادثة: " + err.message);
+  }
+}
+
+$("blockUserBtn").addEventListener("click", blockCurrentUser);
+$("removeChatBtn").addEventListener("click", removeCurrentChat);
+
+async function loadBlockedUsers(){
+  const list = $("blockedList");
+  list.innerHTML = `<div class="blocked-empty">جارٍ تحميل القائمة...</div>`;
+
+  try{
+    const q = query(
+      collection(db, "blocks"),
+      where("blockerUid", "==", uid)
+    );
+
+    const snap = await getDocs(q);
+    list.innerHTML = "";
+
+    if (snap.empty){
+      list.innerHTML = `<div class="blocked-empty">ما حظرت أي شخص إلى الآن.</div>`;
+      return;
+    }
+
+    snap.forEach(d => {
+      const b = d.data();
+      const item = document.createElement("div");
+      item.className = "blocked-item";
+      item.innerHTML = `
+        <div class="blocked-avatar">🚫</div>
+        <div class="blocked-meta">
+          <div class="blocked-name"></div>
+          <div class="blocked-code">محظور</div>
+        </div>`;
+      item.querySelector(".blocked-name").textContent = b.blockedName || "مستخدم";
+      list.appendChild(item);
+    });
+  }catch(err){
+    list.innerHTML = `<div class="blocked-empty">تعذر تحميل المحظورين: ${err.message}</div>`;
+  }
+}
+
+$("openBlockedBtn").addEventListener("click", async () => {
+  $("blockedModal").style.display = "flex";
+  await loadBlockedUsers();
+});
+
+$("closeBlockedBtn").addEventListener("click", () => {
+  $("blockedModal").style.display = "none";
+});
+
+/* add friend modal */
+$("openAddFriendBtn").addEventListener("click", () => {
+  $("addFriendMsg").textContent = "";
+  $("friendCodeInput").value = "";
+  $("addFriendModal").style.display = "flex";
+});
+$("closeAddFriendBtn").addEventListener("click", () => $("addFriendModal").style.display = "none");
+$("copyCodeBtn").addEventListener("click", () => {
+  navigator.clipboard?.writeText(myCode);
+  $("addFriendMsg").textContent = "تم نسخ الكود ✅";
+});
+
+$("sendRequestBtn").addEventListener("click", async () => {
+  const code = $("friendCodeInput").value.trim().toUpperCase();
+  const msgEl = $("addFriendMsg");
+  if (!code){ msgEl.textContent = "أدخل كود صديقك أول."; return; }
+  if (code === myCode){ msgEl.textContent = "هذا كودك أنت 🙂"; return; }
+  msgEl.textContent = "جارٍ البحث...";
+  try{
+    const codeRef = doc(db, "friendCodes", code);
+    const codeSnap = await getDoc(codeRef);
+    if (!codeSnap.exists()){ msgEl.textContent = "ما فيه أحد بهذا الكود."; return; }
+    const targetUid = codeSnap.data().uid;
+    const targetName = codeSnap.data().name || "مستخدم";
+
+    const alreadyFriend = friendships.some(f => f.otherUid === targetUid);
+    if (alreadyFriend){ msgEl.textContent = "هذا الشخص صديقك أصلاً."; return; }
+
+    await addDoc(collection(db, "friendRequests"), {
+      fromUid: uid, fromName: myName,
+      toUid: targetUid, toName: targetName,
+      status: "pending", timestamp: serverTimestamp()
+    });
+    msgEl.textContent = "تم إرسال طلب الصداقة ✅";
+    $("friendCodeInput").value = "";
+  }catch(err){ msgEl.textContent = "خطأ: " + err.message; }
+});
+
+const i18n = {
+  ar: { pageTitle:"الرسائل", badge:"تعرّف، تحدث، واصنع ذكرياتك.", backBtn:"رجوع للعبة", modalTitle:"وش اسمك؟", modalDesc:"هذا الاسم بيظهر لأصدقائك في الشات.", namePlaceholder:"مثلاً Rayan", nameSubmit:"دخول للشات" },
+  en: { pageTitle:"Messages", badge:"Real chat between site users", backBtn:"Back to game", modalTitle:"What's your name?", modalDesc:"This name will be shown to your friends in chat.", namePlaceholder:"e.g. Rayan", nameSubmit:"Join chat" }
+};
+let currentLang = localStorage.getItem('lang') || 'ar';
+function setLanguage(l){
+  currentLang = l;
+  localStorage.setItem('lang', l);
+  document.documentElement.lang = (l === 'ar') ? 'ar' : 'en';
+  document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
+  $('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
+  const t = i18n[l];
+  $('pageTitle').textContent = t.pageTitle;
+  $('badgeText').textContent = t.badge;
+  $('backBtnText').textContent = t.backBtn;
+  $('modalTitle').textContent = t.modalTitle;
+  $('modalDesc').textContent = t.modalDesc;
+  $('nameInput').placeholder = t.namePlaceholder;
+  $('nameSubmitBtn').textContent = t.nameSubmit;
+}
+window.toggleLanguage = () => setLanguage(currentLang === 'ar' ? 'en' : 'ar');
+setLanguage(currentLang);
+
+if (isConfigured){ initFirebase(); }
+else { $("nameModal").style.display = "none"; }
+</script>
+</body>
+</html>
