@@ -6,7 +6,10 @@
 <title>تسجيل الدخول — Brain Battle</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-    const supabase = window.supabaseClient.createClient("https://qymwzjcnhhsbkhxshtmo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5bXd6amNuaGhzYmtoeHNodG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMwNTUsImV4cCI6MjEwNDI0OTA1NX0.tpHlCc_d9VRtFeG0BROS9dAbINFLGL3BPijkoVps3Kg");
+    const supabaseClient = window.supabase.createClient(
+        "https://qymwzjcnhhsbkhxshtmo.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5bXd6amNuaGhzYmtoeHNodG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMwNTUsImV4cCI6MjEwNDI0OTA1NX0.tpHlCc_d9VRtFeG0BROS9dAbINFLGL3BPijkoVps3Kg"
+    );
 </script>
 <style>
     * {
@@ -141,7 +144,7 @@
 <body>
 
 <header class="top-header">
-    <a href="For you.html" class="back-btn" id="backBtn">رجوع</a>
+    <a href="index.html" class="back-btn" id="backBtn">رجوع</a>
 </header>
 
 <div class="login-wrapper">
@@ -185,8 +188,7 @@ const i18n = {
     errorMsg: "يرجى تعبئة جميع الحقول بشكل صحيح",
     SubmitBtn: "دخول",
     FooterLink: "ليس لديك حساب؟ <a href=\"signup.html\">أنشئ حسابًا جديدًا</a>",
-
-
+    usernameNotFound: "اسم المستخدم غير موجود",
   },
   en: {
     backBtn: "Back",
@@ -199,7 +201,7 @@ const i18n = {
     errorMsg: "Please fill in all fields correctly",
     SubmitBtn: "Login",
     FooterLink: "Don't have an account? <a href=\"signup.html\">Create a new account</a>",
-
+    usernameNotFound: "Username not found",
   }
 };
 
@@ -221,16 +223,47 @@ function applyTranslations(l) {
 
 async function handleLogin(e) {
     e.preventDefault();
-    const email = document.getElementById('username').value.trim();
+
+    const usernameOrEmail = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
     const errorMsg = document.getElementById('errorMsg');
+    const lang = localStorage.getItem('lang') || 'ar';
 
-    if (!email || !password) {
+    errorMsg.style.display = 'none';
+
+    if (!usernameOrEmail || !password) {
+        errorMsg.textContent = i18n[lang].errorMsg;
         errorMsg.style.display = 'block';
         return false;
     }
 
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    let email = usernameOrEmail;
+
+    if (!usernameOrEmail.includes('@')) {
+        const { data, error } = await supabaseClient
+            .rpc('get_email_by_fullname', {
+                input_fullname: usernameOrEmail
+            });
+
+        if (error) {
+            errorMsg.textContent = error.message;
+            errorMsg.style.display = 'block';
+            return false;
+        }
+
+        if (!data) {
+            errorMsg.textContent = i18n[lang].usernameNotFound;
+            errorMsg.style.display = 'block';
+            return false;
+        }
+
+        email = data;
+    }
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+    });
 
     if (error) {
         errorMsg.textContent = error.message;
@@ -239,7 +272,7 @@ async function handleLogin(e) {
     }
 
     errorMsg.style.display = 'none';
-    window.location.href = 'For you.html';
+    window.location.href = 'index.html';
     return false;
 }
 applyTranslations(localStorage.getItem('lang') || 'ar');

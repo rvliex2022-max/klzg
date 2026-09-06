@@ -253,12 +253,12 @@ function applyTranslations(l) {
   const t = i18n[l];
   document.getElementById('TtlVerify').textContent = t.TtlVerify;
   document.getElementById('SubTtl').textContent = t.SubTtl;
-  document.getElementById('timerBox').textContent = t.timerBox + ' ';
+  document.getElementById('timerBox').innerHTML = `${t.timerBox} <strong id="timeLeft">05:00</strong>`;
   document.getElementById('errorMsg').textContent = '';
   document.getElementById('successMsg').textContent = t.successMsg;
   document.getElementById('verifyBtn').textContent = t.verifyBtn;
   document.getElementById('resendLink').firstChild.textContent = t.resendLink;
-  document.getElementById('resendBtn').textContent = t.resendBtn;
+  document.getElementById('resendBtn').innerHTML = `${t.resendBtn} (<span id="resendTimer">30</span>)`;
 }
 
 const EMAILJS_PUBLIC_KEY  = "l4A_cZFEUEwyCzUn1";
@@ -401,10 +401,10 @@ async function verifyCode() {
     setTimeout(() => { window.location.href = 'login.html'; }, 900);
 }
 
+applyTranslations(localStorage.getItem('lang') || 'ar');
 startExpiryCountdown();
 startResendCooldown(30);
 inputs[0].focus();
-applyTranslations(localStorage.getItem('lang') || 'ar');
 </script>
 
 </body>

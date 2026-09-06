@@ -175,7 +175,7 @@
 <body>
 
 <header class="top-header">
-    <a href="For you.html" class="back-btn" id="BackBtn">رجوع</a>
+    <a href="index.html" class="back-btn" id="BackBtn">رجوع</a>
 </header>
 
 <div class="login-wrapper">
@@ -185,8 +185,8 @@
 
         <form id="signupForm" onsubmit="return handleSignup(event)">
             <div class="input-group">
-                <label for="fullname" id="FullnameText">الاسم</label>
-                <input type="text" id="fullname" placeholder="مثلاً Rayan" maxlength="18" required>
+                <label for="fullname" id="usernameText">الاسم</label>
+                <input type="text" id="fullname" placeholder="مثلاً vliex" maxlength="18" required>
             </div>
 
             <div class="input-group">
@@ -223,11 +223,11 @@ const i18n = {
     backBtn: "رجوع",
     TtlSignup: "🧠 إنشاء حساب جديد",
     SubTtl: "انضم إلى Brain Battle وابدأ التحدي",
-    FullnameText: "الاسم",
+    usernameText: "الاسم المستعار",
     EmailText: "البريد الإلكتروني",
     PasswordText: "كلمة المرور",
     ConfirmPasswordText: "تأكيد كلمة المرور",
-    placeholderFullname: "مثلاً Rayan",
+    placeholderUsername: "مثلاً vliex",
     placeholderEmail: "example@email.com",
     placeholderPassword: "••••••••",
     placeholderConfirmPassword: "••••••••",
@@ -238,17 +238,18 @@ const i18n = {
     passwordLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
     passwordMismatch: "كلمتا المرور غير متطابقتين",
     emailExists: "هذا الإيميل مسجل بحساب موجود بالفعل",
-    sendError: "تعذّر إرسال كود التحقق. تأكد من إعداد EmailJS ثم حاول مرة أخرى"
+    sendError: "تعذّر إرسال كود التحقق. تأكد من إعداد EmailJS ثم حاول مرة أخرى",
+    usernameExists: "اسم المستخدم موجود بالفعل، جرّب اسمًا آخر"
   },
   en: {
     backBtn: "Back",
     TtlSignup: "🧠 Create a New Account",
     SubTtl: "Join Brain Battle and start the challenge",
-    FullnameText: "Full Name",
+    usernameText: "Username",
     EmailText: "Email",
     PasswordText: "Password",
     ConfirmPasswordText: "Confirm Password",
-    placeholderFullname: "e.g., Rayan",
+    placeholderUsername: "e.g., vliex",
     placeholderEmail: "example@email.com",
     placeholderPassword: "••••••••",
     placeholderConfirmPassword: "••••••••",
@@ -259,7 +260,8 @@ const i18n = {
     passwordLength: "Password must be at least 6 characters",
     passwordMismatch: "Passwords do not match",
     emailExists: "This email is already registered",
-    sendError: "Failed to send verification code. Make sure EmailJS is set up and try again"
+    sendError: "Failed to send verification code. Make sure EmailJS is set up and try again",
+    usernameExists: "Username already exists, try another one"
   }
 };
 
@@ -270,11 +272,11 @@ function applyTranslations(l) {
   document.getElementById('BackBtn').textContent = t.backBtn;
   document.getElementById('TtlSignup').textContent = t.TtlSignup;
   document.getElementById('SubTtl').textContent = t.SubTtl;
-  document.getElementById('FullnameText').textContent = t.FullnameText;
+  document.getElementById('usernameText').textContent = t.usernameText;
   document.getElementById('EmailText').textContent = t.EmailText;
   document.getElementById('PasswordText').textContent = t.PasswordText;
   document.getElementById('ConfirmPasswordText').textContent = t.ConfirmPasswordText;
-  document.getElementById('fullname').placeholder = t.placeholderFullname;
+  document.getElementById('fullname').placeholder = t.placeholderUsername;
   document.getElementById('email').placeholder = t.placeholderEmail;
   document.getElementById('password').placeholder = t.placeholderPassword;
   document.getElementById('confirmPassword').placeholder = t.placeholderConfirmPassword;
@@ -324,7 +326,27 @@ async function handleSignup(e) {
     }
 
     if (password !== confirmPassword) {
-        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].passwordMismatch;
+    errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].passwordMismatch;
+    errorMsg.style.display = 'block';
+    return false;
+}
+
+const lang = localStorage.getItem('lang') || 'ar';
+
+const { data: existingProfile, error: usernameCheckError } = await supabaseClient
+    .from('profiles')
+    .select('id')
+    .ilike('fullname', fullname)
+    .maybeSingle();
+
+    if (usernameCheckError) {
+        errorMsg.textContent = usernameCheckError.message;
+        errorMsg.style.display = 'block';
+        return false;
+    }
+
+    if (existingProfile) {
+        errorMsg.textContent = i18n[lang].usernameExists;
         errorMsg.style.display = 'block';
         return false;
     }
@@ -336,11 +358,18 @@ async function handleSignup(e) {
     });
 
     if (signUpError) {
-        errorMsg.textContent = signUpError.message.includes('already registered')
-            ? i18n[localStorage.getItem('lang') || 'ar'].emailExists
+    const duplicateUsername =
+        signUpError.message.includes('profiles_fullname_unique_idx') ||
+        signUpError.message.includes('duplicate key');
+
+    errorMsg.textContent = duplicateUsername
+        ? i18n[lang].usernameExists
+        : signUpError.message.includes('already registered')
+            ? i18n[lang].emailExists
             : signUpError.message;
-        errorMsg.style.display = 'block';
-        return false;
+
+    errorMsg.style.display = 'block';
+    return false;
     }
 
     const code = generateCode();

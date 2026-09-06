@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>الرسائل — Brain Battle</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+    const supabaseClient = window.supabase.createClient(
+        "https://qymwzjcnhhsbkhxshtmo.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5bXd6amNuaGhzYmtoeHNodG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMwNTUsImV4cCI6MjEwNDI0OTA1NX0.tpHlCc_d9VRtFeG0BROS9dAbINFLGL3BPijkoVps3Kg"
+    );
+</script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Tahoma,sans-serif;background:#080b14;color:#f7f8ff;min-height:100vh}
@@ -178,8 +185,8 @@ input:focus{border-color:#7c5cff}
     <div class="logo">💬 <span id="pageTitle">الرسائل</span></div>
     <div style="display:flex;gap:10px;align-items:center">
       <div class="badge" id="badgeText">تعرّف، تحدث، واصنع ذكرياتك.</div>
-      <button class="small secondary" id="openBlockedBtn">🚫 المحظورين</button>
-      <button class="small secondary" id="openAddFriendBtn">➕ إضافة صديق</button>
+      <button class="small secondary" id="openBlockedBtn">🚫 <span id="openBlockedBtnText">المحظورين</span></button>
+      <button class="small secondary" id="openAddFriendBtn">➕ <span id="openAddFriendBtnText">إضافة صديق</span></button>
     </div>
   </div>
 
@@ -193,12 +200,12 @@ input:focus{border-color:#7c5cff}
       </div>
 
       <div class="sidebar-section-row">
-        <span class="sidebar-section-label">طلبات الصداقة</span>
+        <span class="sidebar-section-label" id="friendRequestsLabel">طلبات الصداقة</span>
         <span class="req-count" id="reqCount" style="display:none">0</span>
       </div>
       <div id="requestsList"></div>
 
-      <div class="sidebar-section-label" style="padding-top:10px">القنوات وجهات الاتصال</div>
+      <div class="sidebar-section-label" id="channelsLabel" style="padding-top:10px">القنوات وجهات الاتصال</div>
       <div class="conv-list" id="convList"></div>
     </div>
 
@@ -212,8 +219,8 @@ input:focus{border-color:#7c5cff}
         </div>
 
         <div class="chat-header-actions" id="chatHeaderActions" style="display:none">
-          <button class="block-btn" id="blockUserBtn">🚫 بلوك</button>
-          <button class="remove-chat-btn" id="removeChatBtn">🗑️ Remove chat</button>
+          <button class="block-btn" id="blockUserBtn">🚫 <span id="blockUserBtnText">بلوك</span></button>
+          <button class="remove-chat-btn" id="removeChatBtn">🗑️ <span id="removeChatBtnText">Remove chat</span></button>
         </div>
       </div>
 
@@ -228,11 +235,11 @@ input:focus{border-color:#7c5cff}
 </div>
 
 <div class="bottom-bar">
-  <button id="backBtn" class="secondary" onclick="location.href='For_you.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
+  <button id="backBtn" class="secondary" onclick="location.href='index.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
   <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
-<div class="modal-overlay" id="nameModal">
+<div class="modal-overlay" id="nameModal" style="display:none">
   <div class="modal-card">
     <h2 id="modalTitle">وش اسمك؟</h2>
     <p id="modalDesc">هذا الاسم بيظهر لأصدقائك في الشات.</p>
@@ -243,11 +250,11 @@ input:focus{border-color:#7c5cff}
 
 <div class="modal-overlay" id="addFriendModal" style="display:none">
   <div class="modal-card">
-    <h2>إضافة صديق</h2>
-    <p>شارك كودك مع صديقك، أو أدخل كوده عشان ترسل له طلب صداقة.</p>
+    <h2 id="addFriendTitle">إضافة صديق</h2>
+    <p id="addFriendDesc">شارك كودك مع صديقك، أو أدخل كوده عشان ترسل له طلب صداقة.</p>
     <div class="my-code-box">
       <div>
-        <div class="mini">كودك الشخصي</div>
+        <div class="mini" id="myCodeLabel">كودك الشخصي</div>
         <div class="code" id="myCodeText">------</div>
       </div>
       <button class="small secondary" id="copyCodeBtn">نسخ</button>
@@ -261,8 +268,8 @@ input:focus{border-color:#7c5cff}
 
 <div class="modal-overlay" id="blockedModal" style="display:none">
   <div class="modal-card">
-    <h2>الأشخاص المحظورين</h2>
-    <p>هنا تظهر كل الحسابات التي قمت بحظرها.</p>
+    <h2 id="blockedTitle">الأشخاص المحظورين</h2>
+    <p id="blockedDesc">هنا تظهر كل الحسابات التي قمت بحظرها.</p>
     <div class="blocked-list" id="blockedList">
       <div class="blocked-empty">جارٍ تحميل القائمة...</div>
     </div>
@@ -317,25 +324,42 @@ function randomCode(){
   return c;
 }
 
+async function getSupabaseUsername() {
+  const { data, error } = await supabaseClient.auth.getUser();
+
+  if (error || !data.user) {
+    window.location.href = "login.html";
+    return null;
+  }
+
+  return (
+    data.user.user_metadata?.fullname ||
+    data.user.user_metadata?.full_name ||
+    data.user.email?.split("@")[0] ||
+    "User"
+  );
+}
+
 function initFirebase(){
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
 
   onAuthStateChanged(auth, async (user) => {
-    if (user){
+    if (user) {
       uid = user.uid;
-      const savedName = localStorage.getItem("chat_display_name");
-      if (savedName){
-        myName = savedName;
-        await ensureUserDoc();
-        $("nameModal").style.display = "none";
-        boot();
-      } else {
-        $("nameModal").style.display = "flex";
-      }
+
+      const username = await getSupabaseUsername();
+      if (!username) return;
+
+      myName = username;
+      localStorage.setItem("chat_display_name", username);
+
+      await ensureUserDoc();
+      $("nameModal").style.display = "none";
+      boot();
     } else {
-      signInAnonymously(auth).catch(err => alert("تعذر الاتصال بـ Firebase: " + err.message));
+      signInAnonymously(auth).catch(err => alert(i18n[currentLang].firebaseConnError(err.message)));
     }
   });
 }
@@ -365,16 +389,16 @@ async function ensureUserDoc(){
   await setDoc(userRef, { name: myName, friendCode: code }, { merge:true });
 }
 
-$("nameSubmitBtn").addEventListener("click", async () => {
-  const val = $("nameInput").value.trim();
-  if (!val) return;
-  myName = val;
-  localStorage.setItem("chat_display_name", val);
-  await ensureUserDoc();
-  $("nameModal").style.display = "none";
-  boot();
-});
-$("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSubmitBtn").click(); });
+// $("nameSubmitBtn").addEventListener("click", async () => {
+//   const val = $("nameInput").value.trim();
+//   if (!val) return;
+//   myName = val;
+//   localStorage.setItem("chat_display_name", val);
+//   await ensureUserDoc();
+//   $("nameModal").style.display = "none";
+//   boot();
+// });
+// $("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSubmitBtn").click(); });
 
 function boot(){
   $("msgInput").disabled = false;
@@ -382,7 +406,7 @@ function boot(){
   $("myCodeText").textContent = myCode;
   listenToFriendships();
   listenToRequests();
-  openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة");
+  openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", i18n[currentLang].generalChatSub);
 }
 
 function directChatId(otherUid){ return [uid, otherUid].sort().join("_"); }
@@ -395,7 +419,7 @@ function listenToFriendships(){
     snap.forEach(d => {
       const data = d.data();
       const otherUid = data.users.find(u => u !== uid);
-      friendships.push({ id: d.id, otherUid, otherName: data.names?.[otherUid] || "صديق" });
+      friendships.push({ id: d.id, otherUid, otherName: data.names?.[otherUid] || i18n[currentLang].friendFallback });
     });
     renderList($("searchBox").value);
   });
@@ -426,8 +450,8 @@ function renderRequests(){
     item.innerHTML = `
       <div class="req-name">${r.fromName}</div>
       <div class="request-actions">
-        <button class="small" data-accept="${r.id}" data-from="${r.fromUid}" data-fromname="${r.fromName}">قبول</button>
-        <button class="small secondary" data-decline="${r.id}">رفض</button>
+        <button class="small" data-accept="${r.id}" data-from="${r.fromUid}" data-fromname="${r.fromName}">${i18n[currentLang].acceptBtn}</button>
+        <button class="small secondary" data-decline="${r.id}">${i18n[currentLang].declineBtn}</button>
       </div>`;
     box.appendChild(item);
   });
@@ -448,11 +472,11 @@ async function acceptRequest(requestId, fromUid, fromName){
       createdAt: serverTimestamp()
     });
     await deleteDoc(doc(db, "friendRequests", requestId));
-  }catch(err){ alert("تعذر قبول الطلب: " + err.message); }
+  }catch(err){ alert(i18n[currentLang].acceptRequestError(err.message)); }
 }
 async function declineRequest(requestId){
   try{ await deleteDoc(doc(db, "friendRequests", requestId)); }
-  catch(err){ alert("تعذر رفض الطلب: " + err.message); }
+  catch(err){ alert(i18n[currentLang].declineRequestError(err.message)); }
 }
 
 function renderList(filter=""){
@@ -465,9 +489,9 @@ function renderList(filter=""){
     <div class="conv-avatar">👥</div>
     <div class="conv-meta">
       <div class="conv-top-row"><span class="conv-name">${GENERAL_CHAT_NAME}</span></div>
-      <div class="conv-preview">قناة عامة لكل الأعضاء</div>
+      <div class="conv-preview">${i18n[currentLang].generalChatPreview}</div>
     </div>`;
-  generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة"));
+  generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", i18n[currentLang].generalChatSub));
   list.appendChild(generalItem);
 
   const filtered = friendships.filter(f => (f.otherName || "").includes(filter));
@@ -475,7 +499,7 @@ function renderList(filter=""){
     const empty = document.createElement("div");
     empty.className = "mini";
     empty.style.padding = "10px 12px";
-    empty.textContent = "ما عندك أصدقاء بعد. اضغط \"إضافة صديق\" فوق وشارك كودك.";
+    empty.textContent = i18n[currentLang].noFriendsYet;
     list.appendChild(empty);
   }
 
@@ -487,14 +511,14 @@ function renderList(filter=""){
       <div class="conv-avatar">🧑</div>
       <div class="conv-meta">
         <div class="conv-top-row"><span class="conv-name">${f.otherName}</span></div>
-        <div class="conv-preview">محادثة خاصة</div>
+        <div class="conv-preview">${i18n[currentLang].privateChatSub}</div>
       </div>`;
-    item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", "محادثة خاصة", f.otherUid));
+    item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", i18n[currentLang].privateChatSub, f.otherUid));
     list.appendChild(item);
   });
 }
 
-function dateLabel(ts){ if (!ts) return ""; const d = ts.toDate ? ts.toDate() : new Date(); return d.toLocaleDateString("ar-EG"); }
+function dateLabel(ts){ if (!ts) return ""; const d = ts.toDate ? ts.toDate() : new Date(); return d.toLocaleDateString(i18n[currentLang].dateLocale); }
 function timeLabel(ts){ if (!ts) return ""; const d = ts.toDate ? ts.toDate() : new Date(); return d.toTimeString().slice(0,5); }
 
 function openChat(chatId, name, avatar, sub, otherUid = null){
@@ -519,7 +543,7 @@ function openChat(chatId, name, avatar, sub, otherUid = null){
 function listenToMessages(chatId){
   if (unsubscribeMessages) unsubscribeMessages();
   const body = $("chatBody");
-  body.innerHTML = `<div class="empty-state">جارٍ تحميل الرسائل...</div>`;
+  body.innerHTML = `<div class="empty-state">${i18n[currentLang].loadingMessages}</div>`;
 
   const msgsRef = collection(db, "chats", chatId, "messages");
   const q = query(msgsRef, orderBy("timestamp", "asc"), limit(200));
@@ -527,7 +551,7 @@ function listenToMessages(chatId){
   unsubscribeMessages = onSnapshot(q, (snap) => {
     body.innerHTML = "";
     if (snap.empty){
-      body.innerHTML = `<div class="empty-state">ما فيه رسائل بعد، ابدأ الحديث 👋</div>`;
+      body.innerHTML = `<div class="empty-state">${i18n[currentLang].noMessagesYet}</div>`;
       return;
     }
     let lastDate = null;
@@ -545,13 +569,13 @@ function listenToMessages(chatId){
       const row = document.createElement("div");
       row.className = "msg-row " + (isMine ? "out" : "in");
       row.innerHTML = `
-        ${!isMine ? `<div class="msg-sender">${m.senderName || "مستخدم"}</div>` : ""}
+        ${!isMine ? `<div class="msg-sender">${m.senderName || i18n[currentLang].userFallback}</div>` : ""}
         <div class="bubble"><span class="msg-text"></span><span class="msg-time">${timeLabel(m.timestamp)}</span></div>`;
       row.querySelector(".msg-text").textContent = m.text || "";
       body.appendChild(row);
     });
     body.scrollTop = body.scrollHeight;
-  }, (err) => { body.innerHTML = `<div class="empty-state">تعذر تحميل الرسائل: ${err.message}</div>`; });
+  }, (err) => { body.innerHTML = `<div class="empty-state">${i18n[currentLang].loadMessagesError(err.message)}</div>`; });
 }
 
 async function sendMessage(){
@@ -563,7 +587,7 @@ async function sendMessage(){
     await addDoc(collection(db, "chats", activeChatId, "messages"), {
       senderId: uid, senderName: myName, text, timestamp: serverTimestamp()
     });
-  }catch(err){ alert("تعذر إرسال الرسالة: " + err.message); }
+  }catch(err){ alert(i18n[currentLang].sendMessageError(err.message)); }
 }
 
 $("sendBtn").addEventListener("click", sendMessage);
@@ -575,7 +599,7 @@ $("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.remove
 async function blockCurrentUser(){
   if (!activeOtherUid || !uid || activeChatId === GENERAL_CHAT_ID) return;
 
-  const ok = confirm(`هل أنت متأكد أنك تريد بلوك ${activeOtherName}؟`);
+  const ok = confirm(i18n[currentLang].confirmBlock(activeOtherName));
   if (!ok) return;
 
   try{
@@ -595,20 +619,20 @@ async function blockCurrentUser(){
     activeOtherName = "";
     $("chatHeaderActions").style.display = "none";
     $("headerAvatar").textContent = "💬";
-    $("headerName").textContent = "اختر محادثة";
+    $("headerName").textContent = i18n[currentLang].headerNamePlaceholder;
     $("headerSub").textContent = "";
-    $("chatBody").innerHTML = `<div class="empty-state">تم حظر المستخدم 🚫</div>`;
+    $("chatBody").innerHTML = `<div class="empty-state">${i18n[currentLang].userBlockedMsg}</div>`;
     $("msgInput").disabled = true;
     $("sendBtn").disabled = true;
   }catch(err){
-    alert("تعذر حظر المستخدم: " + err.message);
+    alert(i18n[currentLang].blockUserError(err.message));
   }
 }
 
 async function removeCurrentChat(){
   if (!activeChatId || !activeOtherUid || activeChatId === GENERAL_CHAT_ID) return;
 
-  const ok = confirm(`حذف المحادثة مع ${activeOtherName}؟ سيتم حذف رسائل هذه المحادثة وإزالتها من جهات الاتصال.`);
+  const ok = confirm(i18n[currentLang].confirmRemoveChat(activeOtherName));
   if (!ok) return;
 
   try{
@@ -632,13 +656,13 @@ async function removeCurrentChat(){
     activeOtherName = "";
     $("chatHeaderActions").style.display = "none";
     $("headerAvatar").textContent = "💬";
-    $("headerName").textContent = "اختر محادثة";
+    $("headerName").textContent = i18n[currentLang].headerNamePlaceholder;
     $("headerSub").textContent = "";
-    $("chatBody").innerHTML = `<div class="empty-state">تم حذف المحادثة 🗑️</div>`;
+    $("chatBody").innerHTML = `<div class="empty-state">${i18n[currentLang].chatDeletedMsg}</div>`;
     $("msgInput").disabled = true;
     $("sendBtn").disabled = true;
   }catch(err){
-    alert("تعذر حذف المحادثة: " + err.message);
+    alert(i18n[currentLang].removeChatError(err.message));
   }
 }
 
@@ -648,7 +672,7 @@ $("removeChatBtn").addEventListener("click", removeCurrentChat);
 /* blocked users */
 async function loadBlockedUsers(){
   const list = $("blockedList");
-  list.innerHTML = `<div class="blocked-empty">جارٍ تحميل القائمة...</div>`;
+  list.innerHTML = `<div class="blocked-empty">${i18n[currentLang].loadingBlockedList}</div>`;
 
   try{
     const q = query(
@@ -660,7 +684,7 @@ async function loadBlockedUsers(){
     list.innerHTML = "";
 
     if (snap.empty){
-      list.innerHTML = `<div class="blocked-empty">ما حظرت أي شخص إلى الآن.</div>`;
+      list.innerHTML = `<div class="blocked-empty">${i18n[currentLang].noBlockedUsers}</div>`;
       return;
     }
 
@@ -672,13 +696,13 @@ async function loadBlockedUsers(){
         <div class="blocked-avatar">🚫</div>
         <div class="blocked-meta">
           <div class="blocked-name"></div>
-          <div class="blocked-code">محظور</div>
+          <div class="blocked-code">${i18n[currentLang].blockedLabel}</div>
         </div>`;
-      item.querySelector(".blocked-name").textContent = b.blockedName || "مستخدم";
+      item.querySelector(".blocked-name").textContent = b.blockedName || i18n[currentLang].userFallback;
       list.appendChild(item);
     });
   }catch(err){
-    list.innerHTML = `<div class="blocked-empty">تعذر تحميل المحظورين: ${err.message}</div>`;
+    list.innerHTML = `<div class="blocked-empty">${i18n[currentLang].loadBlockedError(err.message)}</div>`;
   }
 }
 
@@ -700,38 +724,108 @@ $("openAddFriendBtn").addEventListener("click", () => {
 $("closeAddFriendBtn").addEventListener("click", () => $("addFriendModal").style.display = "none");
 $("copyCodeBtn").addEventListener("click", () => {
   navigator.clipboard?.writeText(myCode);
-  $("addFriendMsg").textContent = "تم نسخ الكود ✅";
+  $("addFriendMsg").textContent = i18n[currentLang].copyCodeSuccess;
 });
 
 $("sendRequestBtn").addEventListener("click", async () => {
   const code = $("friendCodeInput").value.trim().toUpperCase();
   const msgEl = $("addFriendMsg");
-  if (!code){ msgEl.textContent = "أدخل كود صديقك أول."; return; }
-  if (code === myCode){ msgEl.textContent = "هذا كودك أنت 🙂"; return; }
-  msgEl.textContent = "جارٍ البحث...";
+  if (!code){ msgEl.textContent = i18n[currentLang].enterFriendCodeFirst; return; }
+  if (code === myCode){ msgEl.textContent = i18n[currentLang].ownCodeMsg; return; }
+  msgEl.textContent = i18n[currentLang].searchingMsg;
   try{
     const codeRef = doc(db, "friendCodes", code);
     const codeSnap = await getDoc(codeRef);
-    if (!codeSnap.exists()){ msgEl.textContent = "ما فيه أحد بهذا الكود."; return; }
+    if (!codeSnap.exists()){ msgEl.textContent = i18n[currentLang].noUserWithCode; return; }
     const targetUid = codeSnap.data().uid;
-    const targetName = codeSnap.data().name || "مستخدم";
+    const targetName = codeSnap.data().name || i18n[currentLang].userFallback;
 
     const alreadyFriend = friendships.some(f => f.otherUid === targetUid);
-    if (alreadyFriend){ msgEl.textContent = "هذا الشخص صديقك أصلاً."; return; }
+    if (alreadyFriend){ msgEl.textContent = i18n[currentLang].alreadyFriendMsg; return; }
 
     await addDoc(collection(db, "friendRequests"), {
       fromUid: uid, fromName: myName,
       toUid: targetUid, toName: targetName,
       status: "pending", timestamp: serverTimestamp()
     });
-    msgEl.textContent = "تم إرسال طلب الصداقة ✅";
+    msgEl.textContent = i18n[currentLang].requestSentMsg;
     $("friendCodeInput").value = "";
-  }catch(err){ msgEl.textContent = "خطأ: " + err.message; }
+  }catch(err){ msgEl.textContent = i18n[currentLang].genericErrorPrefix + err.message; }
 });
 
 const i18n = {
-  ar: { pageTitle:"الرسائل", badge:"تعرّف، تحدث، واصنع ذكرياتك.", backBtn:"رجوع للعبة", modalTitle:"وش اسمك؟", modalDesc:"هذا الاسم بيظهر لأصدقائك في الشات.", namePlaceholder:"مثلاً Rayan", nameSubmit:"دخول للشات" },
-  en: { pageTitle:"Messages", badge:"Real chat between site users", backBtn:"Back to game", modalTitle:"What's your name?", modalDesc:"This name will be shown to your friends in chat.", namePlaceholder:"e.g. Rayan", nameSubmit:"Join chat" }
+  ar: {
+    pageTitle:"الرسائل", badge:"تعرّف، تحدث، واصنع ذكرياتك.", backBtn:"رجوع للعبة",
+    modalTitle:"وش اسمك؟", modalDesc:"هذا الاسم بيظهر لأصدقائك في الشات.", namePlaceholder:"مثلاً Rayan", nameSubmit:"دخول للشات",
+    openBlockedBtnText:"المحظورين", openAddFriendBtnText:"إضافة صديق",
+    searchPlaceholder:"بحث في جهات الاتصال...",
+    friendRequestsLabel:"طلبات الصداقة", channelsLabel:"القنوات وجهات الاتصال",
+    headerNamePlaceholder:"اختر محادثة",
+    blockUserBtnText:"بلوك", removeChatBtnText:"إزالة المحادثة",
+    msgInputPlaceholder:"اكتب رسالة...",
+    addFriendTitle:"إضافة صديق", addFriendDesc:"شارك كودك مع صديقك، أو أدخل كوده عشان ترسل له طلب صداقة.",
+    myCodeLabel:"كودك الشخصي", copyCodeBtnText:"نسخ", friendCodePlaceholder:"أدخل كود صديقك",
+    sendRequestBtnText:"إرسال طلب صداقة", closeBtnText:"إغلاق",
+    blockedTitle:"الأشخاص المحظورين", blockedDesc:"هنا تظهر كل الحسابات التي قمت بحظرها.",
+    generalChatSub:"قناة عامة", generalChatPreview:"قناة عامة لكل الأعضاء",
+    friendFallback:"صديق", userFallback:"مستخدم",
+    acceptBtn:"قبول", declineBtn:"رفض",
+    privateChatSub:"محادثة خاصة",
+    noFriendsYet:'ما عندك أصدقاء بعد. اضغط "إضافة صديق" فوق وشارك كودك.',
+    loadingMessages:"جارٍ تحميل الرسائل...", noMessagesYet:"ما فيه رسائل بعد، ابدأ الحديث 👋",
+    loadMessagesError:(m)=>`تعذر تحميل الرسائل: ${m}`,
+    sendMessageError:(m)=>`تعذر إرسال الرسالة: ${m}`,
+    confirmBlock:(n)=>`هل أنت متأكد أنك تريد بلوك ${n}؟`,
+    confirmRemoveChat:(n)=>`حذف المحادثة مع ${n}؟ سيتم حذف رسائل هذه المحادثة وإزالتها من جهات الاتصال.`,
+    blockUserError:(m)=>`تعذر حظر المستخدم: ${m}`,
+    removeChatError:(m)=>`تعذر حذف المحادثة: ${m}`,
+    userBlockedMsg:"تم حظر المستخدم 🚫", chatDeletedMsg:"تم حذف المحادثة 🗑️",
+    loadingBlockedList:"جارٍ تحميل القائمة...", noBlockedUsers:"ما حظرت أي شخص إلى الآن.",
+    loadBlockedError:(m)=>`تعذر تحميل المحظورين: ${m}`, blockedLabel:"محظور",
+    acceptRequestError:(m)=>`تعذر قبول الطلب: ${m}`, declineRequestError:(m)=>`تعذر رفض الطلب: ${m}`,
+    firebaseConnError:(m)=>`تعذر الاتصال بـ Firebase: ${m}`,
+    copyCodeSuccess:"تم نسخ الكود ✅", enterFriendCodeFirst:"أدخل كود صديقك أول.",
+    ownCodeMsg:"هذا كودك أنت 🙂", searchingMsg:"جارٍ البحث...",
+    noUserWithCode:"ما فيه أحد بهذا الكود.", alreadyFriendMsg:"هذا الشخص صديقك أصلاً.",
+    requestSentMsg:"تم إرسال طلب الصداقة ✅", genericErrorPrefix:"خطأ: ",
+    dateLocale:"ar-EG"
+  },
+  en: {
+    pageTitle:"Messages", badge:"Real chat between site users", backBtn:"Back to game",
+    modalTitle:"What's your name?", modalDesc:"This name will be shown to your friends in chat.", namePlaceholder:"e.g. Rayan", nameSubmit:"Join chat",
+    openBlockedBtnText:"Blocked", openAddFriendBtnText:"Add friend",
+    searchPlaceholder:"Search contacts...",
+    friendRequestsLabel:"Friend requests", channelsLabel:"Channels & contacts",
+    headerNamePlaceholder:"Select a conversation",
+    blockUserBtnText:"Block", removeChatBtnText:"Remove chat",
+    msgInputPlaceholder:"Type a message...",
+    addFriendTitle:"Add friend", addFriendDesc:"Share your code with a friend, or enter theirs to send a friend request.",
+    myCodeLabel:"Your personal code", copyCodeBtnText:"Copy", friendCodePlaceholder:"Enter friend's code",
+    sendRequestBtnText:"Send friend request", closeBtnText:"Close",
+    blockedTitle:"Blocked users", blockedDesc:"All accounts you've blocked show up here.",
+    generalChatSub:"General channel", generalChatPreview:"Public channel for all members",
+    friendFallback:"Friend", userFallback:"User",
+    acceptBtn:"Accept", declineBtn:"Decline",
+    privateChatSub:"Private chat",
+    noFriendsYet:'You have no friends yet. Press "Add friend" above and share your code.',
+    loadingMessages:"Loading messages...", noMessagesYet:"No messages yet, start the conversation 👋",
+    loadMessagesError:(m)=>`Failed to load messages: ${m}`,
+    sendMessageError:(m)=>`Failed to send message: ${m}`,
+    confirmBlock:(n)=>`Are you sure you want to block ${n}?`,
+    confirmRemoveChat:(n)=>`Delete the chat with ${n}? This chat's messages will be deleted and it will be removed from your contacts.`,
+    blockUserError:(m)=>`Failed to block user: ${m}`,
+    removeChatError:(m)=>`Failed to delete chat: ${m}`,
+    userBlockedMsg:"User blocked 🚫", chatDeletedMsg:"Chat deleted 🗑️",
+    loadingBlockedList:"Loading list...", noBlockedUsers:"You haven't blocked anyone yet.",
+    loadBlockedError:(m)=>`Failed to load blocked users: ${m}`, blockedLabel:"Blocked",
+    acceptRequestError:(m)=>`Failed to accept request: ${m}`, declineRequestError:(m)=>`Failed to decline request: ${m}`,
+    firebaseConnError:(m)=>`Could not connect to Firebase: ${m}`,
+    copyCodeSuccess:"Code copied ✅", enterFriendCodeFirst:"Enter your friend's code first.",
+    ownCodeMsg:"That's your own code 🙂", searchingMsg:"Searching...",
+    noUserWithCode:"No one found with that code.", alreadyFriendMsg:"You're already friends with this person.",
+    requestSentMsg:"Friend request sent ✅", genericErrorPrefix:"Error: ",
+    dateLocale:"en-US"
+  }
 };
 let currentLang = localStorage.getItem('lang') || 'ar';
 function setLanguage(l){
@@ -748,6 +842,33 @@ function setLanguage(l){
   $('modalDesc').textContent = t.modalDesc;
   $('nameInput').placeholder = t.namePlaceholder;
   $('nameSubmitBtn').textContent = t.nameSubmit;
+  $('openBlockedBtnText').textContent = t.openBlockedBtnText;
+  $('openAddFriendBtnText').textContent = t.openAddFriendBtnText;
+  $('searchBox').placeholder = t.searchPlaceholder;
+  $('friendRequestsLabel').textContent = t.friendRequestsLabel;
+  $('channelsLabel').textContent = t.channelsLabel;
+  if (!activeChatId) $('headerName').textContent = t.headerNamePlaceholder;
+  $('blockUserBtnText').textContent = t.blockUserBtnText;
+  $('removeChatBtnText').textContent = t.removeChatBtnText;
+  $('msgInput').placeholder = t.msgInputPlaceholder;
+  $('addFriendTitle').textContent = t.addFriendTitle;
+  $('addFriendDesc').textContent = t.addFriendDesc;
+  $('myCodeLabel').textContent = t.myCodeLabel;
+  $('copyCodeBtn').textContent = t.copyCodeBtnText;
+  $('friendCodeInput').placeholder = t.friendCodePlaceholder;
+  $('sendRequestBtn').textContent = t.sendRequestBtnText;
+  $('closeAddFriendBtn').textContent = t.closeBtnText;
+  $('blockedTitle').textContent = t.blockedTitle;
+  $('blockedDesc').textContent = t.blockedDesc;
+  $('closeBlockedBtn').textContent = t.closeBtnText;
+
+  if (uid){
+    renderList($('searchBox').value);
+    if (activeChatId){
+      $('headerSub').textContent = (activeChatId === GENERAL_CHAT_ID) ? t.generalChatSub : t.privateChatSub;
+      listenToMessages(activeChatId);
+    }
+  }
 }
 window.toggleLanguage = () => setLanguage(currentLang === 'ar' ? 'en' : 'ar');
 setLanguage(currentLang);
