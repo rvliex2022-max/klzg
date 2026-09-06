@@ -571,8 +571,7 @@ $("msgInput").addEventListener("keydown", e => { if (e.key === "Enter") sendMess
 $("searchBox").addEventListener("input", e => renderList(e.target.value));
 $("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.remove("hide"));
 
-/* private chat actions */
-async function blockCurrentUser(){
+========async function blockCurrentUser(){
   if (!activeOtherUid || !uid || activeChatId === GENERAL_CHAT_ID) return;
 
   const ok = confirm(`هل أنت متأكد أنك تريد بلوك ${activeOtherName}؟`);
