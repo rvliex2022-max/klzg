@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-    const supabaseClient = window.supabase.createClient("https://qymwzjcnhhsbkhxshtmo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5bXd6amNuaGhzYmtoeHNodG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMwNTUsImV4cCI6MjEwNDI0OTA1NX0.tpHlCc_d9VRtFeG0BROS9dAbINFLGL3BPijkoVps3Kg");
-</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#080b14;color:#e1e3ee;min-height:100vh}
@@ -65,44 +61,35 @@ header a:hover{color:#7c5cff;transform:translateY(-2px)}
 </div>
 
 <script>
+const STORAGE_KEY = "profile-data";
 const profileImg = document.getElementById("profileImg");
 const profileImageWrap = document.getElementById("profileImageWrap");
 const imageInput = document.getElementById("imageInput");
 const aboutBox = document.getElementById("aboutBox");
-const usernameEl = document.querySelector(".username");
 const saveBtn = document.getElementById("saveBtn");
 const saveStatus = document.getElementById("saveStatus");
 
 let currentAboutText = aboutBox.textContent;
 let currentImageData = null;
-let currentUserId = null;
+let storageAvailable = !!(window.storage && window.storage.get && window.storage.set);
 
 async function loadProfile(){
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if(!user){
-    window.location.href = "login.html";
-    return;
-  }
-  currentUserId = user.id;
-
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("fullname, about, avatar_url")
-    .eq("id", user.id)
-    .single();
-
-  if(error){
-    console.error(error);
-    return;
-  }
-  if(data.fullname) usernameEl.textContent = data.fullname;
-  if(data.about){
-    currentAboutText = data.about;
-    aboutBox.textContent = data.about;
-  }
-  if(data.avatar_url){
-    currentImageData = data.avatar_url;
-    profileImg.src = data.avatar_url;
+  if(!storageAvailable) return;
+  try{
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if(result && result.value){
+      const data = JSON.parse(result.value);
+      if(data.about){
+        currentAboutText = data.about;
+        aboutBox.textContent = data.about;
+      }
+      if(data.image){
+        currentImageData = data.image;
+        profileImg.src = data.image;
+      }
+    }
+  }catch(e){
+    console.log("لا توجد بيانات محفوظة بعد:", e);
   }
 }
 loadProfile();
@@ -148,17 +135,21 @@ aboutBox.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", async () => {
-  if(!currentUserId) return;
-  const { error } = await supabaseClient
-    .from("profiles")
-    .update({ about: currentAboutText, avatar_url: currentImageData })
-    .eq("id", currentUserId);
-
-  if(error){
-    console.error(error);
-    flashStatus("تعذّر الحفظ ⚠");
+  const data = { about: currentAboutText, image: currentImageData };
+  if(storageAvailable){
+    try{
+      const result = await window.storage.set(STORAGE_KEY, JSON.stringify(data), false);
+      if(result){
+        flashStatus(randomSuccessMessage());
+      }else{
+        flashStatus("تعذّر الحفظ ⚠");
+      }
+    }catch(e){
+      console.error("Storage error:", e);
+      flashStatus("تعذّر الحفظ ⚠");
+    }
   }else{
-    flashStatus(randomSuccessMessage());
+    flashStatus(randomSuccessMessage()) ;
   }
 });
 

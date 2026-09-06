@@ -185,7 +185,7 @@
 
         <form id="signupForm" onsubmit="return handleSignup(event)">
             <div class="input-group">
-                <label for="fullname" id="UsernameText">الاسم</label>
+                <label for="fullname" id="FullnameText">الاسم</label>
                 <input type="text" id="fullname" placeholder="مثلاً Rayan" maxlength="18" required>
             </div>
 
@@ -223,11 +223,11 @@ const i18n = {
     backBtn: "رجوع",
     TtlSignup: "🧠 إنشاء حساب جديد",
     SubTtl: "انضم إلى Brain Battle وابدأ التحدي",
-    UsernameText: "الاسم المستعار",
+    FullnameText: "الاسم",
     EmailText: "البريد الإلكتروني",
     PasswordText: "كلمة المرور",
     ConfirmPasswordText: "تأكيد كلمة المرور",
-    placeholderFullname: "مثلاً vliex",
+    placeholderFullname: "مثلاً Rayan",
     placeholderEmail: "example@email.com",
     placeholderPassword: "••••••••",
     placeholderConfirmPassword: "••••••••",
@@ -244,11 +244,11 @@ const i18n = {
     backBtn: "Back",
     TtlSignup: "🧠 Create a New Account",
     SubTtl: "Join Brain Battle and start the challenge",
-    UsernameText: "Username",
+    FullnameText: "Full Name",
     EmailText: "Email",
     PasswordText: "Password",
     ConfirmPasswordText: "Confirm Password",
-    placeholderFullname: "e.g., vliex",
+    placeholderFullname: "e.g., Rayan",
     placeholderEmail: "example@email.com",
     placeholderPassword: "••••••••",
     placeholderConfirmPassword: "••••••••",
@@ -270,7 +270,7 @@ function applyTranslations(l) {
   document.getElementById('BackBtn').textContent = t.backBtn;
   document.getElementById('TtlSignup').textContent = t.TtlSignup;
   document.getElementById('SubTtl').textContent = t.SubTtl;
-  document.getElementById('UsernameText').textContent = t.UsernameText;
+  document.getElementById('FullnameText').textContent = t.FullnameText;
   document.getElementById('EmailText').textContent = t.EmailText;
   document.getElementById('PasswordText').textContent = t.PasswordText;
   document.getElementById('ConfirmPasswordText').textContent = t.ConfirmPasswordText;
