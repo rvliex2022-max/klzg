@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#080b14;color:#e1e3ee;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none;z-index:-1}
+header{width:100%;height:130px;display:flex;justify-content:flex-end;align-items:center;padding:0 100px;gap:70px}
+header a{text-decoration:none;color:#f7f8ff;font-size:26px;font-weight:700;transition:.2s}
+header a:hover{color:#7c5cff;transform:translateY(-2px)}
+.profile-section{width:85%;max-width:1450px;margin:50px auto 0;display:flex;align-items:center;gap:100px}
+.profile-image{width:560px;height:560px;border-radius:80px;overflow:hidden;background:#111625cc;flex-shrink:0;position:relative;cursor:pointer}
+.profile-image img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-image .img-overlay{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;background:#000000aa;color:#fff;font-size:24px;font-weight:600;opacity:0;transition:.2s;text-align:center;padding:20px}
+.profile-image:hover .img-overlay{opacity:1}
+.profile-info{flex:1}
+.username{font-size:34px;font-weight:700;margin-bottom:45px}
+.about-title{font-size:30px;font-weight:500;margin-bottom:28px}
+.about-box{width:100%;min-height:260px;background:#ffffff14;border-radius:30px;padding:30px;font-size:22px;line-height:1.6;border:1px solid #252d46;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);color:#f7f8ff;cursor:text}
+.about-box[data-editing="true"]{outline:3px solid #7c5cff;background:#ffffff1f}
+.about-textarea{width:100%;min-height:260px;background:#ffffff1f;border-radius:30px;padding:30px;font-size:22px;line-height:1.6;border:3px solid #7c5cff;color:#f7f8ff;font-family:Arial,sans-serif;resize:vertical;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px)}
+.stats-section{width:75%;max-width:1250px;margin:120px auto 40px;display:grid;grid-template-columns:1fr 2fr;gap:80px}
+.stat{text-align:center}.stat h2{font-size:32px;margin-bottom:30px}
+.stat-box{height:410px;background:#ffffff14;border-radius:0;border:1px solid #252d46;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:center;font-size:25px;font-weight:600;color:#f7f8ff}
+.save-bar{width:75%;max-width:1250px;margin:0 auto 80px;display:flex;justify-content:flex-start;align-items:center;gap:20px}
+#saveBtn{background:#7c5cff;color:#fff;border:none;padding:18px 45px;font-size:22px;font-weight:700;border-radius:16px;cursor:pointer;box-shadow:0 10px 30px #7c5cff55;transition:.2s}
+#saveBtn:hover{background:#6a4be0;transform:translateY(-2px)}
+#saveBtn:active{transform:translateY(0)}
+#saveStatus{font-size:18px;color:#9be89b;opacity:0;transition:opacity .3s}
+#saveStatus.show{opacity:1}
+@media(max-width:1000px){header{padding:0 30px;gap:25px}header a{font-size:20px}.profile-section{width:90%;flex-direction:column;gap:40px}.profile-image{width:400px;height:400px}.profile-info{width:100%}.stats-section{width:90%;grid-template-columns:1fr;gap:50px}.save-bar{width:90%}}
+@media(max-width:550px){header{height:100px;padding:0 20px;gap:15px}header a{font-size:15px}.profile-image{width:300px;height:300px;border-radius:50px}.username{font-size:28px}.about-title{font-size:24px}.about-box,.about-textarea{min-height:200px;font-size:18px}.stat h2{font-size:26px}.stat-box{height:250px}#saveBtn{padding:14px 30px;font-size:18px}}
+</style>
+</head>
+<body>
+<header>
+<a href="#">Brain Battle</a><a href="#">Contact Us</a><a href="#">Support us</a>
+</header>
+<section class="profile-section">
+<div class="profile-image" id="profileImageWrap" title="Press To Change Image">
+<img id="profileImg" src="profile.jpg" alt="Profile Picture">
+<div class="img-overlay">🖼️ Change Image</div>
+</div>
+<input type="file" id="imageInput" accept="image/*" style="display:none">
+<div class="profile-info">
+<div class="username">Your Name </div>
+<div class="about-title">About me:</div>
+<div class="about-box" id="aboutBox" title="Press To Talk">Tell Your Mommy About Everything  </div>
+</div>
+</section>
+<section class="stats-section">
+<div class="stat"><h2>Your Game Honey</h2><div class="stat-box">No games yet</div></div>
+<div class="stat"><h2>My little Good Boy Brain Level</h2><div class="stat-box">Brain Level: 0</div></div>
+</section>
+<div class="save-bar">
+<button id="saveBtn"> Save Profile</button>
+<span id="saveStatus">تم الحفظ ✓</span>
+</div>
+
+<script>
+const STORAGE_KEY = "profile-data";
+const profileImg = document.getElementById("profileImg");
+const profileImageWrap = document.getElementById("profileImageWrap");
+const imageInput = document.getElementById("imageInput");
+const aboutBox = document.getElementById("aboutBox");
+const saveBtn = document.getElementById("saveBtn");
+const saveStatus = document.getElementById("saveStatus");
+
+let currentAboutText = aboutBox.textContent;
+let currentImageData = null;
+let storageAvailable = !!(window.storage && window.storage.get && window.storage.set);
+
+async function loadProfile(){
+  if(!storageAvailable) return;
+  try{
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if(result && result.value){
+      const data = JSON.parse(result.value);
+      if(data.about){
+        currentAboutText = data.about;
+        aboutBox.textContent = data.about;
+      }
+      if(data.image){
+        currentImageData = data.image;
+        profileImg.src = data.image;
+      }
+    }
+  }catch(e){
+    console.log("لا توجد بيانات محفوظة بعد:", e);
+  }
+}
+loadProfile();
+
+profileImageWrap.addEventListener("click", () => imageInput.click());
+
+imageInput.addEventListener("change", () => {
+  const file = imageInput.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentImageData = e.target.result;
+    profileImg.src = currentImageData;
+  };
+  reader.readAsDataURL(file);
+});
+
+aboutBox.addEventListener("click", () => {
+  if(aboutBox.dataset.editing === "true") return; 
+
+  const textarea = document.createElement("textarea");
+  textarea.className = "about-textarea";
+  textarea.value = currentAboutText === "Tell Your Mommy About Everything  " ? "" : currentAboutText;
+  textarea.placeholder = "Talk Baby Talk...";
+
+  aboutBox.replaceWith(textarea);
+  textarea.focus();
+
+  function finishEditing(){
+    currentAboutText = textarea.value.trim() || "Tell Your Mommy About Everything  ";
+    aboutBox.textContent = currentAboutText;
+    aboutBox.dataset.editing = "false";
+    textarea.replaceWith(aboutBox);
+  }
+
+  textarea.addEventListener("blur", finishEditing);
+  textarea.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      textarea.blur();
+    }
+  });
+});
+
+saveBtn.addEventListener("click", async () => {
+  const data = { about: currentAboutText, image: currentImageData };
+  if(storageAvailable){
+    try{
+      const result = await window.storage.set(STORAGE_KEY, JSON.stringify(data), false);
+      if(result){
+        flashStatus(randomSuccessMessage());
+      }else{
+        flashStatus("تعذّر الحفظ ⚠");
+      }
+    }catch(e){
+      console.error("Storage error:", e);
+      flashStatus("تعذّر الحفظ ⚠");
+    }
+  }else{
+    flashStatus(randomSuccessMessage()) ;
+  }
+});
+
+const successMessages = [
+  "You Are Such A Good Boy ✓",
+  "Your Mommy Is Proud Of You ✓",
+  "Can You Kiss Me Before You leave? 🥺",
+  "Take Care Sweety 🥰",
+  "I Tell You To Take Care Why You Still Do The Wrong Thing? 😡",
+  "I Like Your A** Man 😏",
+  "Go To Gym And Get Some Muscles B**ch💪",
+  "I Will Come To Slap Your A** If You Will Not Give Me Kiss😡",
+  "Spam Kisses For Me My little Good Boy 😘",
+  "I Will Come To Suck Your Teddies Right Now 😏",
+  "This Is My Instagram: @_vliex5 Send Me Something Spicey 😏",
+];
+
+function randomSuccessMessage(){
+  return successMessages[Math.floor(Math.random() * successMessages.length)];
+}
+
+function flashStatus(msg){
+  saveStatus.textContent = msg;
+  saveStatus.classList.add("show");
+  setTimeout(() => saveStatus.classList.remove("show"), 4000);
+}
+</script>
+</body>
+</html>
