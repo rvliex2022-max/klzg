@@ -189,7 +189,7 @@ input:focus{border-color:#7c5cff}
   <div class="msg-card">
     <div class="sidebar" id="sidebar">
       <div class="sidebar-search">
-        <input type="text" id="searchBox" placeholder="بحث في الرسائل...">
+        <input type="text" id="searchBox" placeholder="بحث في جهات الاتصال...">
       </div>
 
       <div class="sidebar-section-row">
@@ -571,7 +571,8 @@ $("msgInput").addEventListener("keydown", e => { if (e.key === "Enter") sendMess
 $("searchBox").addEventListener("input", e => renderList(e.target.value));
 $("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.remove("hide"));
 
-========async function blockCurrentUser(){
+/* private chat actions */
+async function blockCurrentUser(){
   if (!activeOtherUid || !uid || activeChatId === GENERAL_CHAT_ID) return;
 
   const ok = confirm(`هل أنت متأكد أنك تريد بلوك ${activeOtherName}؟`);
@@ -585,6 +586,7 @@ $("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.remove
       createdAt: serverTimestamp()
     });
 
+    // إزالة الصداقة حتى تختفي المحادثة من القائمة.
     await deleteDoc(doc(db, "friendships", friendshipId(activeOtherUid)));
 
     if (unsubscribeMessages) unsubscribeMessages();
@@ -613,6 +615,7 @@ async function removeCurrentChat(){
     const msgsRef = collection(db, "chats", activeChatId, "messages");
     const snap = await getDocs(msgsRef);
 
+    // حذف الرسائل على دفعات لتجنب تجاوز حد Firestore للـ batch.
     const docs = snap.docs;
     for (let i = 0; i < docs.length; i += 450){
       const batch = writeBatch(db);
@@ -620,6 +623,7 @@ async function removeCurrentChat(){
       await batch.commit();
     }
 
+    // إزالة المحادثة من القائمة بحذف علاقة الصداقة.
     await deleteDoc(doc(db, "friendships", friendshipId(activeOtherUid)));
 
     if (unsubscribeMessages) unsubscribeMessages();
@@ -641,6 +645,7 @@ async function removeCurrentChat(){
 $("blockUserBtn").addEventListener("click", blockCurrentUser);
 $("removeChatBtn").addEventListener("click", removeCurrentChat);
 
+/* blocked users */
 async function loadBlockedUsers(){
   const list = $("blockedList");
   list.innerHTML = `<div class="blocked-empty">جارٍ تحميل القائمة...</div>`;
@@ -686,6 +691,7 @@ $("closeBlockedBtn").addEventListener("click", () => {
   $("blockedModal").style.display = "none";
 });
 
+/* add friend modal */
 $("openAddFriendBtn").addEventListener("click", () => {
   $("addFriendMsg").textContent = "";
   $("friendCodeInput").value = "";
