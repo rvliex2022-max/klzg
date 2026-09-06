@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>تسجيل الدخول — Brain Battle</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+    const supabase = window.supabase.createClient("https://qymwzjcnhhsbkhxshtmo.supabase.co/rest/v1/", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5bXd6amNuaGhzYmtoeHNodG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMwNTUsImV4cCI6MjEwNDI0OTA1NX0.tpHlCc_d9VRtFeG0BROS9dAbINFLGL3BPijkoVps3Kg");
+</script>
 <style>
     * {
         margin: 0;
@@ -145,7 +149,7 @@
         <h2 id="TtlLogin">🧠 تسجيل الدخول</h2>
         <p class="subtitle" id="SubTtl">سجّل دخولك للمتابعة إلى Brain Battle</p>
 
-        <form id="loginForm" onsubmit="return handleLogin(event)">
+        <form id="loginForm" onsubmit="handleLogin(event); return false;">
             <div class="input-group">
                 <label for="username" id="UsernameText">اسم المستخدم أو البريد الإلكتروني</label>
                 <input type="text" id="username" placeholder="اكتب اسمك أو بريدك" required>
@@ -215,19 +219,27 @@ function applyTranslations(l) {
   document.getElementById('FooterLink').innerHTML = t.FooterLink;
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
-    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
     const errorMsg = document.getElementById('errorMsg');
 
-    if (!username || !password) {
+    if (!email || !password) {
+        errorMsg.style.display = 'block';
+        return false;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        errorMsg.textContent = error.message;
         errorMsg.style.display = 'block';
         return false;
     }
 
     errorMsg.style.display = 'none';
-    alert('تم تسجيل الدخول باسم: ' + username);
+    window.location.href = 'For you.html';
     return false;
 }
 applyTranslations(localStorage.getItem('lang') || 'ar');

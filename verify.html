@@ -395,15 +395,6 @@ async function verifyCode() {
     verifyBtn.disabled = true;
     verifyBtn.innerHTML = 'جارٍ التفعيل<span class="spinner"></span>';
 
-    const users = JSON.parse(localStorage.getItem('bb_users') || '[]');
-    users.push({
-        fullname: pendingUser.fullname,
-        email: pendingUser.email,
-        password: pendingUser.password,
-        verified: true,
-        joinedAt: Date.now()
-    });
-    localStorage.setItem('bb_users', JSON.stringify(users));
     sessionStorage.removeItem('bb_pending_user');
 
     successMsg.style.display = 'block';
