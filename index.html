@@ -172,7 +172,7 @@
 h1{font-size:42px;margin:4px 0 10px;line-height:1.1}p{color:#aeb7cf}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
 input,select{width:100%;background:#0a0e19;border:1px solid #303750;color:white;border-radius:13px;padding:14px;font-size:16px;outline:none}
 button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:15px;cursor:pointer;background:#7c5cff;color:white;transition:.15s}button:hover{transform:translateY(-1px);filter:brightness(1.08)}button.secondary{background:#1b2235;color:#dbe2ff}button.danger{background:#d94b67}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.room{font-size:34px;font-weight:900;letter-spacing:8px;text-align:center;padding:15px;border:1px dashed #465071;border-radius:16px;margin:15px 0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.matchmaking-btn{background:linear-gradient(135deg,#8b5cf6,#6d4aff);position:relative;overflow:hidden}.matchmaking-btn.searching{background:#252d46}.match-status{width:100%;font-size:13px;color:#9eabd0;min-height:18px}.match-status strong{color:#dbe2ff}.room{font-size:34px;font-weight:900;letter-spacing:8px;text-align:center;padding:15px;border:1px dashed #465071;border-radius:16px;margin:15px 0}
 .players{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}.player{padding:18px;border-radius:18px;background:#0c1120;border:1px solid #28304a;display:flex;justify-content:space-between}.score{font-size:30px;font-weight:900}.muted{color:#8490af;font-size:13px}
 .center{text-align:center}.hidden{display:none!important}.q{font-size:30px;font-weight:850;line-height:1.3;margin:20px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{background:#171e31;border:1px solid #303953;text-align:right}.choice.correct{background:#155c43;border-color:#2bd28b}.choice.wrong{background:#63253a;border-color:#ff6686}.timer{height:9px;background:#242b40;border-radius:99px;overflow:hidden}.bar{height:100%;width:100%;background:#7c5cff;transition:width .1s linear}.status{margin:12px 0;color:#aeb7cf;min-height:22px}.result{font-size:54px;font-weight:950}.mini{font-size:12px;color:#7f8aa7}
 @media(max-width:700px){h1{font-size:32px}.grid,.players,.choices{grid-template-columns:1fr}.q{font-size:24px}.wrap{padding:18px 12px}}
@@ -202,7 +202,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 <div><label class="mini" id="lblRoom">الغرفة</label><input id="roomInput" placeholder="مثلاً 482913" maxlength="6" inputmode="numeric"></div>
 </div>
 <div class="actions">
-<button id="btnCreate" onclick="createRoom()">إنشاء غرفة</button><button class="secondary" id="btnJoin" onclick="joinRoom()">دخول لغرفة</button>
+<button id="btnCreate" onclick="createRoom()">إنشاء غرفة</button><button class="secondary" id="btnJoin" onclick="joinRoom()">دخول لغرفة</button><button id="btnMatchmake" class="matchmaking-btn" onclick="toggleMatchmaking()"> <span id="btnMatchmakeText">ابحث عن خصم الآن</span></button><div id="matchStatus" class="match-status"></div>
 </div>
 </section>
 
@@ -10251,6 +10251,13 @@ const i18n = {
     roomPlaceholder: "مثلاً 482913",
     btnCreate: "إنشاء غرفة",
     btnJoin: "دخول لغرفة",
+    btnMatchmake: "ابحث عن مبارة الآن",
+    btnMatchmakeStop: "إلغاء البحث",
+    matchSearching: "جاري البحث عن خصم متاح…",
+    matchFound: (n) => `تم العثور على خصم: ${n} ⚔️`,
+    matchWaiting: "أنت في قائمة الانتظار — سنوصلك بأول خصم متاح.",
+    matchConnecting: "تم العثور على خصم، جاري الاتصال…",
+    matchError: "تعذر تشغيل البحث عن الخصوم. تأكد من اتصالك بالإنترنت.",
     lblRoomCode: "رمز الغرفة",
     lblYou: "أنت",
     lblOpp: "الخصم",
@@ -10293,6 +10300,13 @@ const i18n = {
     roomPlaceholder: "e.g. 482913",
     btnCreate: "Create Room",
     btnJoin: "Join Room",
+    btnMatchmake: "Find Opponent Now",
+    btnMatchmakeStop: "Cancel Search",
+    matchSearching: "Searching for an available opponent…",
+    matchFound: (n) => `Opponent found: ${n} ⚔️`,
+    matchWaiting: "You are in the queue — we’ll match you with the next available player.",
+    matchConnecting: "Opponent found, connecting…",
+    matchError: "Could not start matchmaking. Check your internet connection.",
     lblRoomCode: "Room Code",
     lblYou: "You",
     lblOpp: "Opponent",
@@ -10353,6 +10367,8 @@ function updateStaticTexts() {
   if(document.getElementById('roomInput')) document.getElementById('roomInput').placeholder = t.roomPlaceholder;
   if(document.getElementById('btnCreate')) document.getElementById('btnCreate').textContent = t.btnCreate;
   if(document.getElementById('btnJoin')) document.getElementById('btnJoin').textContent = t.btnJoin;
+  if(document.getElementById('btnMatchmakeText')) document.getElementById('btnMatchmakeText').textContent = matchmakingActive ? t.btnMatchmakeStop : t.btnMatchmake;
+  if(document.getElementById('matchStatus') && matchmakingActive && !matchStatusLocked) document.getElementById('matchStatus').textContent = t.matchSearching;
   if(document.getElementById('lblRoomCode')) document.getElementById('lblRoomCode').textContent = t.lblRoomCode;
   if(document.getElementById('startBtn')) document.getElementById('startBtn').textContent = t.startBtn;
   if(document.getElementById('btnCopy')) document.getElementById('btnCopy').textContent = t.btnCopy;
@@ -10378,11 +10394,147 @@ const QUESTIONS_PER_GAME=20;
 const TIME_PER_QUESTION=18;
 let playerName="",room="",score=0,oppScore=0,idx=0,timer=null,time=TIME_PER_QUESTION;
 let peer=null,conn=null,isHost=false,oppName="",myFinished=false,oppFinished=false,oppFinalScore=0;
+let matchmakingChannel=null, matchmakingActive=false, matchStatusLocked=false;
+let matchmakingId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now();
+let matchmakingPeerId="";
 
 function $(id){return document.getElementById(id)}
 function show(id){["home","lobby","game","end"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden")}
 function roomPeerId(code){return "brainbattle-rs-"+code}
 function setLobbyStatus(msg){let el=$("lobbyStatus");if(el)el.textContent=msg}
+
+async function toggleMatchmaking(){
+if(matchmakingActive){await stopMatchmaking();return;}
+await startMatchmaking();
+}
+
+async function startMatchmaking(){
+if(matchmakingActive)return;
+playerName=$("name").value.trim()||"Player";
+matchmakingActive=true;
+matchStatusLocked=false;
+$("btnMatchmake")?.classList.add("searching");
+updateStaticTexts();
+$("matchStatus").textContent=i18n[currentLang].matchSearching;
+
+try{
+  peer=new Peer();
+  peer.on('open',async(id)=>{
+    matchmakingPeerId=id;
+    matchmakingChannel=supabaseClient.channel('brain-battle-matchmaking',{
+      config:{presence:{key:matchmakingId}}
+    });
+
+    matchmakingChannel.on('presence',{event:'sync'},()=>tryMatchmake());
+    matchmakingChannel.on('broadcast',{event:'match'},({payload})=>handleMatchFound(payload));
+
+    matchmakingChannel.subscribe(async(status)=>{
+      if(status!=='SUBSCRIBED'){
+        console.error('matchmaking subscription status:',status);
+        return;
+      }
+      await matchmakingChannel.track({
+        id:matchmakingId,
+        peerId:matchmakingPeerId,
+        name:playerName,
+        lang:currentLang,
+        queuedAt:Date.now(),
+        queued:true
+      });
+      $("matchStatus").textContent=i18n[currentLang].matchWaiting;
+      tryMatchmake();
+    });
+  });
+  peer.on('error',(err)=>{
+    console.error('matchmaking peer error',err);
+    stopMatchmaking(false).then(()=>{
+      $("matchStatus").textContent=i18n[currentLang].matchError;
+      matchStatusLocked=true;
+    });
+  });
+}catch(err){
+  console.error('matchmaking error',err);
+  await stopMatchmaking(false);
+  $("matchStatus").textContent=i18n[currentLang].matchError;
+  matchStatusLocked=true;
+}
+}
+
+function getQueuedPlayers(){
+if(!matchmakingChannel)return [];
+const state=matchmakingChannel.presenceState();
+const players=[];
+Object.values(state||{}).forEach(entries=>(entries||[]).forEach(p=>{
+  if(p&&p.queued&&p.peerId)players.push(p);
+}));
+const unique=new Map();
+players.forEach(p=>unique.set(p.id||p.peerId,p));
+return [...unique.values()].sort((a,b)=>(a.queuedAt||0)-(b.queuedAt||0));
+}
+
+async function tryMatchmake(){
+if(!matchmakingActive||!matchmakingChannel||!matchmakingPeerId)return;
+const players=getQueuedPlayers();
+if(players.length<2)return;
+const me=players.find(p=>p.id===matchmakingId);
+if(!me)return;
+const firstTwo=players.slice(0,2);
+if(!firstTwo.some(p=>p.id===matchmakingId))return;
+const opponent=firstTwo.find(p=>p.id!==matchmakingId);find (p=>p.id!==matchmakingId);
+if(!opponent)return;
+const host=String(me.peerId)<String(opponent.peerId)?me:opponent;
+const guest=host===me?opponent:me;
+if(host.id!==matchmakingId)return;
+
+const matchId='live-'+[host.peerId,guest.peerId].sort().join('-').slice(0,90);
+const payload={matchId,hostPeerId:host.peerId,hostName:host.name,guestId:guest.id,guestName:guest.name};
+await matchmakingChannel.send({type:'broadcast',event:'match',payload});
+await handleMatchFound(payload);
+}
+
+async function handleMatchFound(payload){
+if(!matchmakingActive||!payload)return;
+const isForMe=payload.guestId===matchmakingId||payload.hostPeerId===matchmakingPeerId;
+if(!isForMe)return;
+matchmakingActive=false;
+matchStatusLocked=true;
+$("btnMatchmake")?.classList.remove("searching");
+updateStaticTexts();
+const amHost=payload.hostPeerId===matchmakingPeerId;
+isHost=amHost;
+room=payload.matchId||'LIVE';
+oppName=amHost?payload.guestName:payload.hostName;
+await leaveMatchmakingChannel();
+enterLobby();
+setLobbyStatus(i18n[currentLang].matchFound(oppName));
+$("matchStatus").textContent=i18n[currentLang].matchFound(oppName);
+
+if(amHost){
+  peer.on('connection',(c)=>{conn=c;setupConnHandlers()});
+}else{
+  setLobbyStatus(i18n[currentLang].matchConnecting);
+  conn=peer.connect(payload.hostPeerId,{reliable:true});
+  setupConnHandlers();
+}
+}
+
+async function leaveMatchmakingChannel(){
+if(!matchmakingChannel)return;
+try{await matchmakingChannel.untrack();}catch(e){}
+try{await supabaseClient.removeChannel(matchmakingChannel);}catch(e){}
+matchmakingChannel=null;
+}
+
+async function stopMatchmaking(destroyPeer=true){
+matchmakingActive=false;
+matchStatusLocked=false;
+await leaveMatchmakingChannel();
+if(destroyPeer&&peer){try{peer.destroy()}catch(e){} peer=null;}
+matchmakingPeerId="";
+$("btnMatchmake")?.classList.remove("searching");
+if($("matchStatus"))$("matchStatus").textContent="";
+updateStaticTexts();
+}
 
 function createRoom(){
 playerName=$("name").value.trim()||"Player 1";
@@ -10450,8 +10602,9 @@ conn.send({type:'start'});
 beginGameLocal();
 }
 
-function exitGame(){
+async function exitGame(){
 clearInterval(timer);
+await stopMatchmaking();
 try{if(conn&&conn.open)conn.close()}catch(e){}
 try{if(peer)peer.destroy()}catch(e){}
 location.reload();
