@@ -32,7 +32,7 @@
 .top-header {
     position: absolute;
     top: 20px;
-    right: 20px;
+    inset-inline-end: 20px;
     z-index: 9999;
 }
 
@@ -61,13 +61,13 @@
 }
 .avatar-btn:hover{ filter:brightness(1.1); transform:none; }
 .user-dropdown{
-  position:absolute; top:46px; right:0; min-width:180px;
+  position:absolute; top:46px; inset-inline-end:0; min-width:180px;
   background:#111625; border:1px solid #252d46; border-radius:14px;
   box-shadow:0 18px 40px #0008; overflow:hidden; display:none; z-index:10000;
 }
 .user-dropdown.open{ display:block; }
 .user-dropdown a, .user-dropdown button{
-  display:block; width:100%; text-align:right; background:none; border:0;
+  display:block; width:100%; text-align:start; background:none; border:0;
   color:#dbe2ff; padding:12px 16px; font-size:13.5px; font-weight:600;
   cursor:pointer; border-radius:0; text-decoration:none;
 }
@@ -150,7 +150,7 @@
 .bottom-bar{
   position: fixed;
   bottom: 20px;
-  left: 20px;
+  inset-inline-end: 20px;
   z-index: 9999;
   display: flex;
   gap: 10px;
@@ -10371,8 +10371,6 @@ function toggleGameLanguage() {
 
 
 function updateGameTexts() {
-  document.documentElement.lang = gameLang;
-  document.documentElement.dir = gameLang === "en" ? "ltr" : "rtl";
 
   const t = i18n[gameLang];
 
