@@ -387,6 +387,56 @@ function flashStatus(msg){
   setTimeout(() => saveStatus.classList.remove("show"), 4000);
 }
 
+/*
+  دوال تسجيل نتائج اللعب — تُستدعى من صفحة اللعبة نفسها عند انتهاء كل جولة.
+  مثال استخدام من صفحة اللعبة (بعد ما اللاعب يفوز ويحصل نقاط):
+
+      // لو فاز وحصل 10 نقاط ذكاء
+      await window.recordGameResult({ won: true, scoreDelta: 10 });
+
+      // لو خسر بس حصل نقاط بسيطة
+      await window.recordGameResult({ won: false, scoreDelta: 3 });
+
+  الدالة تحدّث القيم في قاعدة البيانات (Supabase) بشكل دائم، وتحدّث الأرقام
+  الظاهرة في صفحة البروفايل فوراً لو الصفحة مفتوحة.
+*/
+async function recordGameResult({ won = false, scoreDelta = 0 } = {}) {
+  if (!currentUser) {
+    console.warn("recordGameResult: no logged-in user, skipping save.");
+    return { error: "no-user" };
+  }
+
+  const updates = {};
+
+  if (won) {
+    currentGamesWon = (currentGamesWon || 0) + 1;
+    updates.games_won = currentGamesWon;
+  }
+
+  if (scoreDelta) {
+    currentBrainScore = (currentBrainScore || 0) + scoreDelta;
+    updates.brain_score = currentBrainScore;
+  }
+
+  if (Object.keys(updates).length === 0) return { skipped: true };
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update(updates)
+    .eq("id", currentUser.id);
+
+  if (error) {
+    console.error("recordGameResult: failed to save stats:", error);
+    return { error };
+  }
+
+  // حدّث الأرقام الظاهرة على الشاشة فوراً
+  applyTranslations(currentLang);
+  return { success: true, games_won: currentGamesWon, brain_score: currentBrainScore };
+}
+
+window.recordGameResult = recordGameResult;
+
 async function initProfile() {
   const usernameEl = document.getElementById("profileUsername");
 
