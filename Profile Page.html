@@ -102,6 +102,7 @@ main{max-width:1100px;margin:0 auto;padding:clamp(28px,5vw,64px) clamp(20px,5vw,
 }
 .about-box{
   background:#ffffff0a;border:1px solid var(--border);cursor:text;transition:.15s;
+  white-space:pre-wrap;
 }
 .about-box:hover{border-color:#39406b}
 .about-textarea{
@@ -137,6 +138,13 @@ button#saveBtn:active{transform:translateY(0)}
 
 /* bottom bar */
 .bottom-bar{position:fixed;bottom:22px;left:22px;z-index:999}
+#langToggleBtn{
+  background:#12172bdd;color:var(--text);border:1px solid var(--border);
+  border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Cairo',Arial,sans-serif;
+  box-shadow:0 10px 24px #0008;backdrop-filter:blur(8px);
+}
+#langToggleBtn:hover{border-color:var(--accent)}
 
 @media(max-width:720px){
   header{padding:18px 20px}
@@ -156,7 +164,7 @@ button#saveBtn:active{transform:translateY(0)}
   <a href="index.html" id="navBrand" class="brand"><span class="brand-mark">🧠</span><span>Brain Battle</span></a>
   <nav>
     <a href="https://linktr.ee/vliex" id="navContact">Contact Us</a>
-    <a href="" id="navSupport">Support us</a>
+    <a href="https://www.paypal.com/paypalme/LayanM808" id="navSupport">Support us</a>
   </nav>
 </header>
 
@@ -195,6 +203,7 @@ button#saveBtn:active{transform:translateY(0)}
 </main>
 
 <div class="bottom-bar">
+  <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
 <script>
@@ -206,25 +215,19 @@ const i18n = {
     aboutTitle: "نبذة عني:",
     statGamesTitle: "ألعابك", statGamesBox: "لا توجد ألعاب بعد",
     statLevelTitle: "مستوى ذكائك", statLevelBox: "المستوى: 0",
-    saveBtn: "حفظ",
-    profileUsername: "اسمك",
-    saveStatus: "تم الحفظ ✓",
-    aboutPlaceholder: "اكتب نبذة عنك..."
+    saveBtn: "حفظ"
   },
   en: {
     navBrand: "Brain Battle", navContact: "Contact Us", navSupport: "Support us",
     imgOverlayText: "🖼️ Change Image",
     aboutTitle: "About me:",
-    statGamesTitle: "Your Games", statGamesBox: "No games yet",
+    statGamesTitle: "Game Win", statGamesBox: "No games yet",
     statLevelTitle: "Brain Level", statLevelBox: "Brain Level: 0",
-    saveBtn: "Save",
-    profileUsername: "Your Name",
-    saveStatus: "Saved ✓",
-    aboutPlaceholder: "Tell us about yourself..."
+    saveBtn: "Save"
   }
 };
 
-let currentLang = localStorage.getItem('lang') || 'en';
+let currentLang = localStorage.getItem('lang') || 'ar';
 
 function applyTranslations(l){
   document.documentElement.lang = l;
@@ -235,17 +238,26 @@ function applyTranslations(l){
   document.getElementById('imgOverlayText').textContent = t.imgOverlayText;
   document.getElementById('aboutTitle').textContent = t.aboutTitle;
   document.getElementById('statGamesTitle').textContent = t.statGamesTitle;
-  document.getElementById('statGamesBox').textContent = t.statGamesBox;
+  document.getElementById('statGamesBox').textContent = currentGamesWon > 0
+    ? (l === 'ar' ? `${currentGamesWon} فوز` : `${currentGamesWon} ${currentGamesWon === 1 ? 'win' : 'wins'}`)
+    : t.statGamesBox;
   document.getElementById('statLevelTitle').textContent = t.statLevelTitle;
-  document.getElementById('statLevelBox').textContent = t.statLevelBox;
+  document.getElementById('statLevelBox').textContent = l === 'ar'
+    ? `المستوى: ${currentBrainScore}`
+    : `Brain Level: ${currentBrainScore}`;
   document.getElementById('saveBtn').textContent = t.saveBtn;
-  document.getElementById("profileUsername").textContent = t.profileUsername;
-  document.getElementById("saveStatus").textContent = t.saveStatus;
+  document.getElementById('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
 
   if(aboutBox.textContent.trim() === defaultAbout.ar || aboutBox.textContent.trim() === defaultAbout.en){
     currentAboutText = defaultAbout[l];
     aboutBox.textContent = defaultAbout[l];
   }
+}
+
+function toggleLanguage(){
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  localStorage.setItem('lang', currentLang);
+  applyTranslations(currentLang);
 }
 
 const profileImg = document.getElementById("profileImg");
@@ -260,22 +272,11 @@ const defaultAbout = {
   en: "Tell Your Mommy About Everything"
 };
 
-const profileMessages = {
-  ar: {
-    saveFailed: "تعذر حفظ الملف الشخصي.",
-    uploadFailed: "تعذر رفع الصورة.",
-    saved: "تم حفظ الملف الشخصي."
-  },
-  en: {
-    saveFailed: "Could not save your profile.",
-    uploadFailed: "Could not upload the image.",
-    saved: "Profile saved."
-  }
-};
-
 let currentAboutText = aboutBox.textContent;
 let currentImageFile = null;
 let currentUser = null;
+let currentGamesWon = 0;
+let currentBrainScore = 0;
 
 profileImageWrap.addEventListener("click", () => imageInput.click());
 
@@ -296,7 +297,7 @@ aboutBox.addEventListener("click", () => {
   const textarea = document.createElement("textarea");
   textarea.className = "about-textarea";
   textarea.value = (currentAboutText === defaultAbout.ar || currentAboutText === defaultAbout.en) ? "" : currentAboutText;
-  textarea.placeholder = i18n[currentLang].aboutPlaceholder;
+  textarea.placeholder = "Talk Baby Talk...";
 
   aboutBox.replaceWith(textarea);
   textarea.focus();
@@ -334,14 +335,14 @@ async function uploadAvatarIfNeeded(){
 
 saveBtn.addEventListener("click", async () => {
   if(!currentUser){
-    flashStatus(profileMessages[currentLang].saveFailed);
+    flashStatus("تعذّر الحفظ ⚠");
     return;
   }
 
   const { url: newAvatarUrl, error: uploadError } = await uploadAvatarIfNeeded();
   if(uploadError){
     console.error("Upload error:", uploadError);
-    flashStatus(profileMessages[currentLang].uploadFailed);
+    flashStatus("تعذّر رفع الصورة ⚠");
     return;
   }
 
@@ -355,7 +356,7 @@ saveBtn.addEventListener("click", async () => {
 
   if(error){
     console.error("Save error:", error);
-    flashStatus(profileMessages[currentLang].saveFailed);
+    flashStatus("تعذّر الحفظ ⚠");
   }else{
     currentImageFile = null;
     flashStatus(randomSuccessMessage());
@@ -400,7 +401,7 @@ async function initProfile() {
 
   const { data: profileRow, error: profileError } = await supabaseClient
     .from("profiles")
-    .select("fullname, about, avatar_url")
+    .select("fullname, about, avatar_url, games_won, brain_score")
     .eq("id", currentUser.id)
     .maybeSingle();
 
@@ -422,6 +423,10 @@ async function initProfile() {
   if(profileRow?.avatar_url){
     profileImg.src = profileRow.avatar_url;
   }
+
+  currentGamesWon = profileRow?.games_won ?? 0;
+  currentBrainScore = profileRow?.brain_score ?? 0;
+  applyTranslations(currentLang);
 }
 
 initProfile();
