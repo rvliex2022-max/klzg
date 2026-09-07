@@ -7,8 +7,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
     const supabaseClient = window.supabase.createClient(
-        "https://qymwzjcnhhsbkhxshtmo.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5bXd6amNuaGhzYmtoeHNodG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMwNTUsImV4cCI6MjEwNDI0OTA1NX0.tpHlCc_d9VRtFeG0BROS9dAbINFLGL3BPijkoVps3Kg"
+        "https://fhvxlyrdvzimgzfyjdxo.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZodnhseXJkdnppbWd6ZnlqZHhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzE3MjksImV4cCI6MjEwNDM0NzcyOX0.EFi5L9-ahYr4Jv2IdJae5gvJ81Wbhd399RclkwToTbg"
     );
 </script>
 <style>
@@ -24,11 +24,9 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 button:hover{transform:translateY(-1px);filter:brightness(1.08)}
 button.secondary{background:#1b2235;color:#dbe2ff}
 button.small{padding:8px 12px;font-size:13px;border-radius:10px}
-button.danger{background:#d94b67}
 input{width:100%;background:#0a0e19;border:1px solid #303750;color:white;border-radius:13px;padding:12px 14px;font-size:14px;outline:none}
 input:focus{border-color:#7c5cff}
 .mini{font-size:12px;color:#7f8aa7}
-.muted{color:#8490af;font-size:13px}
 
 .msg-card{
   background:#111625cc;border:1px solid #252d46;border-radius:24px;
@@ -36,10 +34,7 @@ input:focus{border-color:#7c5cff}
   display:flex; height:min(72vh,640px); overflow:hidden;
 }
 
-.sidebar{
-  width:300px; min-width:220px; border-inline-start:1px solid #252d46;
-  display:flex; flex-direction:column;
-}
+.sidebar{ width:300px; min-width:220px; border-inline-start:1px solid #252d46; display:flex; flex-direction:column; }
 .sidebar-search{ padding:16px 16px 8px; }
 .sidebar-section-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 16px 6px; }
 .sidebar-section-label{ font-size:11px; color:#7f8aa7; letter-spacing:.3px; }
@@ -47,88 +42,50 @@ input:focus{border-color:#7c5cff}
 
 .conv-list{ overflow-y:auto; flex:1; padding:0 8px 8px; }
 .conv-item{
-  display:flex; align-items:flex-start; gap:12px;
-  padding:12px; border-radius:16px; cursor:pointer;
-  border:1px solid transparent; margin-bottom:6px;
-  transition: background .15s ease, border-color .15s ease;
+  display:flex; align-items:flex-start; gap:12px; padding:12px; border-radius:16px; cursor:pointer;
+  border:1px solid transparent; margin-bottom:6px; transition: background .15s ease, border-color .15s ease;
 }
 .conv-item:hover{ background:#171e31; }
 .conv-item.active{ background:#171e31cc; border-color:#7c5cff55; }
 
 .conv-avatar{
-  width:38px; height:38px; border-radius:50%;
-  background:#0c1120; border:1px solid #28304a;
-  display:flex; align-items:center; justify-content:center;
-  font-size:17px; flex-shrink:0; position:relative;
+  width:38px; height:38px; border-radius:50%; background:#0c1120; border:1px solid #28304a;
+  display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; position:relative;
 }
+.status-dot{ position:absolute; bottom:-1px; inset-inline-end:-1px; width:11px; height:11px; border-radius:50%; background:#5a6280; border:2px solid #171e31; }
+.status-dot.online{ background:#2bd28b; }
+.chat-header-sub.online-text{ color:#2bd28b; }
 
 .conv-meta{ flex:1; min-width:0; }
 .conv-top-row{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
 .conv-name{ font-size:14.5px; font-weight:700; color:#f7f8ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .conv-preview{ font-size:12.5px; color:#8490af; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px; }
 
-.request-item{
-  padding:12px; border-radius:16px; background:#171e31; border:1px solid #303953;
-  margin:0 8px 8px;
-}
+.request-item{ padding:12px; border-radius:16px; background:#171e31; border:1px solid #303953; margin:0 8px 8px; }
 .request-item .req-name{ font-weight:700; font-size:14px; margin-bottom:8px; }
 .request-actions{ display:flex; gap:8px; }
 
 .chat{ flex:1; display:flex; flex-direction:column; min-width:0; }
-
-.chat-header{
-  display:flex; align-items:center; gap:10px; padding:16px 20px;
-  border-bottom:1px solid #252d46;
-}
+.chat-header{ display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid #252d46; }
 .chat-header .conv-avatar{ width:34px; height:34px; font-size:15px; }
 .chat-header-name{ font-size:15.5px; font-weight:800; }
 .chat-header-sub{ font-size:11.5px; color:#7f8aa7; }
 
-.chat-header-actions{
-  margin-inline-start:auto;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.chat-header-actions button{
-  padding:8px 11px;
-  font-size:12px;
-  border-radius:10px;
-}
-.chat-header-actions .block-btn{ background:#d94b67; color:#fff; }
-.chat-header-actions .remove-chat-btn{ background:#1b2235; color:#dbe2ff; }
-.chat-header-actions button:hover{ transform:translateY(-1px); filter:brightness(1.08); }
-
 .chat-body{ flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:4px; }
-
-.date-divider{
-  align-self:center; background:#151a2b; border:1px solid #292f49; color:#aeb8d8;
-  font-size:11.5px; padding:4px 14px; border-radius:999px; margin:12px 0;
-}
+.date-divider{ align-self:center; background:#151a2b; border:1px solid #292f49; color:#aeb8d8; font-size:11.5px; padding:4px 14px; border-radius:999px; margin:12px 0; }
 
 .msg-row{ display:flex; margin-bottom:4px; flex-direction:column; }
 .msg-row.out{ align-items:flex-end; }
 .msg-row.in{ align-items:flex-start; }
 .msg-sender{ font-size:11px; color:#7f8aa7; margin:0 4px 3px; }
 
-.bubble{
-  max-width:62%; background:#171e31; border:1px solid #303953;
-  padding:10px 14px 8px; border-radius:14px;
-  border-start-start-radius:4px; line-height:1.55; font-size:14.5px;
-}
-.msg-row.out .bubble{
-  background:#2a2350; border-color:#4635a3;
-  border-start-start-radius:14px; border-start-end-radius:4px;
-}
+.bubble{ max-width:62%; background:#171e31; border:1px solid #303953; padding:10px 14px 8px; border-radius:14px; border-start-start-radius:4px; line-height:1.55; font-size:14.5px; }
+.msg-row.out .bubble{ background:#2a2350; border-color:#4635a3; border-start-start-radius:14px; border-start-end-radius:4px; }
 .bubble .msg-time{ display:block; text-align:end; font-size:10.5px; color:#7f8aa7; margin-top:4px; }
 
 .chat-input-bar{ display:flex; align-items:center; gap:10px; padding:14px 18px; border-top:1px solid #252d46; }
 .chat-input-bar input{ flex:1; border-radius:999px; }
-.send-btn{
-  background:#7c5cff; color:#fff; border:0; width:42px; height:42px;
-  border-radius:50%; font-size:16px; padding:0; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-}
+.send-btn{ background:#7c5cff; color:#fff; border:0; width:42px; height:42px; border-radius:50%; font-size:16px; padding:0; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .send-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
 
 .empty-state{ margin:auto; text-align:center; color:#7f8aa7; font-size:13.5px; padding:20px; }
@@ -149,32 +106,15 @@ input:focus{border-color:#7c5cff}
 }
 .mobile-back{ display:none; background:none; border:0; color:#7c5cff; font-size:18px; padding:4px; }
 
-.modal-overlay{
-  position:fixed; inset:0; background:#080b14ee; z-index:99999;
-  display:flex; align-items:center; justify-content:center; padding:20px;
-}
-.modal-card{
-  background:#111625; border:1px solid #252d46; border-radius:20px;
-  padding:28px; width:100%; max-width:400px; box-shadow:0 18px 60px #0008;
-}
+.modal-overlay{ position:fixed; inset:0; background:#080b14ee; z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal-card{ background:#111625; border:1px solid #252d46; border-radius:20px; padding:28px; width:100%; max-width:400px; box-shadow:0 18px 60px #0008; }
 .modal-card h2{ margin:0 0 8px; font-size:20px; }
 .modal-card p{ color:#aeb7cf; font-size:13.5px; margin:0 0 18px; }
 .modal-card input{ margin-bottom:14px; }
 .modal-close{ background:none; color:#7f8aa7; padding:6px; width:auto; }
 
-.my-code-box{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  background:#0a0e19; border:1px dashed #465071; border-radius:14px;
-  padding:14px; margin-bottom:18px;
-}
-.my-code-box .code{ font-size:22px; font-weight:900; letter-spacing:4px; }
-
-.setup-banner{
-  background:#3a2412; border:1px solid #6b4a1e; color:#f0cf9a;
-  border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.7;
-  margin-bottom:16px;
-}
-.setup-banner code{ background:#00000055; padding:1px 6px; border-radius:6px; }
+.gate-card{ text-align:center; }
+.gate-card .icon{ font-size:40px; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -184,13 +124,9 @@ input:focus{border-color:#7c5cff}
   <div class="top">
     <div class="logo">💬 <span id="pageTitle">الرسائل</span></div>
     <div style="display:flex;gap:10px;align-items:center">
-      <div class="badge" id="badgeText">تعرّف، تحدث، واصنع ذكرياتك.</div>
-      <button class="small secondary" id="openBlockedBtn">🚫 <span id="openBlockedBtnText">المحظورين</span></button>
-      <button class="small secondary" id="openAddFriendBtn">➕ <span id="openAddFriendBtnText">إضافة صديق</span></button>
+      <div class="badge" id="badgeText">محادثات حقيقية بين مستخدمي الموقع</div>
+      <button class="small secondary" id="openAddFriendBtn">➕ إضافة صديق</button>
     </div>
-  </div>
-
-  <div id="setupBanner" class="setup-banner" style="display:none">
   </div>
 
   <div class="msg-card">
@@ -200,27 +136,22 @@ input:focus{border-color:#7c5cff}
       </div>
 
       <div class="sidebar-section-row">
-        <span class="sidebar-section-label" id="friendRequestsLabel">طلبات الصداقة</span>
+        <span class="sidebar-section-label">طلبات الصداقة</span>
         <span class="req-count" id="reqCount" style="display:none">0</span>
       </div>
       <div id="requestsList"></div>
 
-      <div class="sidebar-section-label" id="channelsLabel" style="padding-top:10px">القنوات وجهات الاتصال</div>
+      <div class="sidebar-section-label" style="padding-top:10px">القنوات وجهات الاتصال</div>
       <div class="conv-list" id="convList"></div>
     </div>
 
     <div class="chat">
       <div class="chat-header">
         <button class="mobile-back" id="mobileBackBtn">←</button>
-        <div class="conv-avatar" id="headerAvatar">💬</div>
+        <div class="conv-avatar"><span id="headerAvatar">💬</span><span class="status-dot" id="headerStatusDot" style="display:none"></span></div>
         <div>
           <div class="chat-header-name" id="headerName">اختر محادثة</div>
           <div class="chat-header-sub" id="headerSub"></div>
-        </div>
-
-        <div class="chat-header-actions" id="chatHeaderActions" style="display:none">
-          <button class="block-btn" id="blockUserBtn">🚫 <span id="blockUserBtnText">بلوك</span></button>
-          <button class="remove-chat-btn" id="removeChatBtn">🗑️ <span id="removeChatBtnText">Remove chat</span></button>
         </div>
       </div>
 
@@ -235,223 +166,170 @@ input:focus{border-color:#7c5cff}
 </div>
 
 <div class="bottom-bar">
-  <button id="backBtn" class="secondary" onclick="location.href='index.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
+  <button id="backBtn" class="secondary" onclick="location.href='For_you.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
   <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
-<div class="modal-overlay" id="nameModal" style="display:none">
-  <div class="modal-card">
-    <h2 id="modalTitle">وش اسمك؟</h2>
-    <p id="modalDesc">هذا الاسم بيظهر لأصدقائك في الشات.</p>
-    <input type="text" id="nameInput" maxlength="20" placeholder="مثلاً Rayan">
-    <button id="nameSubmitBtn" style="width:100%">دخول للشات</button>
+<!-- Not logged in gate -->
+<div class="modal-overlay" id="gateModal" style="display:none">
+  <div class="modal-card gate-card">
+    <div class="icon">🔒</div>
+    <h2>سجّل دخولك للمتابعة</h2>
+    <p>الشات متاح فقط لأعضاء Brain Battle المسجّلين. سجّل دخولك أو أنشئ حساب جديد عشان تقدر تراسل أصدقاءك.</p>
+    <button onclick="location.href='login.html'" style="width:100%;margin-bottom:10px">تسجيل الدخول</button>
+    <button class="secondary" onclick="location.href='signup.html'" style="width:100%">إنشاء حساب جديد</button>
   </div>
 </div>
 
+<!-- Add friend modal -->
 <div class="modal-overlay" id="addFriendModal" style="display:none">
   <div class="modal-card">
-    <h2 id="addFriendTitle">إضافة صديق</h2>
-    <p id="addFriendDesc">شارك كودك مع صديقك، أو أدخل كوده عشان ترسل له طلب صداقة.</p>
-    <div class="my-code-box">
-      <div>
-        <div class="mini" id="myCodeLabel">كودك الشخصي</div>
-        <div class="code" id="myCodeText">------</div>
-      </div>
-      <button class="small secondary" id="copyCodeBtn">نسخ</button>
-    </div>
-    <input type="text" id="friendCodeInput" maxlength="6" placeholder="أدخل كود صديقك" style="text-transform:uppercase">
+    <h2>إضافة صديق</h2>
+    <p>اكتب اسم صديقك بالضبط زي ما هو مسجل بحسابه.</p>
+    <input type="text" id="friendNameInput" maxlength="18" placeholder="اسم المستخدم">
     <button id="sendRequestBtn" style="width:100%">إرسال طلب صداقة</button>
     <div id="addFriendMsg" class="mini" style="margin-top:10px"></div>
     <button class="modal-close" id="closeAddFriendBtn" style="width:100%;margin-top:6px">إغلاق</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="blockedModal" style="display:none">
-  <div class="modal-card">
-    <h2 id="blockedTitle">الأشخاص المحظورين</h2>
-    <p id="blockedDesc">هنا تظهر كل الحسابات التي قمت بحظرها.</p>
-    <div class="blocked-list" id="blockedList">
-      <div class="blocked-empty">جارٍ تحميل القائمة...</div>
-    </div>
-    <button class="modal-close" id="closeBlockedBtn" style="width:100%">إغلاق</button>
-  </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth, signInAnonymously, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore, doc, setDoc, getDoc, getDocs, collection,
-  addDoc, query, orderBy, onSnapshot, serverTimestamp, where,
-  limit, updateDoc, deleteDoc, writeBatch
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB_zkWtAyZ29kPHxoX11AiL5eny7rwGQvk",
-  authDomain: "brain-battle-94e96.firebaseapp.com",
-  projectId: "brain-battle-94e96",
-  storageBucket: "brain-battle-94e96.firebasestorage.app",
-  messagingSenderId: "28651263617",
-  appId: "1:28651263617:web:39759f9a81c02a51e25f80"
-};
-
-const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
-if (!isConfigured){
-  document.getElementById("setupBanner").style.display = "block";
-}
-
+<script>
 const GENERAL_CHAT_ID = "general";
 const GENERAL_CHAT_NAME = "Brain Battle";
-const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const ONLINE_THRESHOLD_MS = 25000;
+const HEARTBEAT_MS = 15000;
 
-let app, auth, db, uid = null, myName = "", myCode = "";
-let activeChatId = null;
-let activeOtherUid = null;
-let activeOtherName = "";
-let unsubscribeMessages = null;
-let unsubscribeFriendships = null;
-let unsubscribeRequests = null;
-let friendships = [];   
-let pendingRequests = []; 
+let uid = null, myName = "";
+let activeChatId = null, activeOtherUid = null;
+let friendships = [];      // [{ otherUid, otherName }]
+let pendingRequests = [];  // [{ id, from_id, from_name }]
+let friendStatus = {};     // { [otherUid]: iso string last_seen }
+let messagesChannel = null;
+let requestsChannel = null;
+let friendshipsChannel = null;
+let profilesChannel = null;
 
 const $ = (id) => document.getElementById(id);
 
-function randomCode(){
-  let c = "";
-  for (let i=0;i<6;i++) c += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
-  return c;
-}
-
-async function getSupabaseUsername() {
-  const { data, error } = await supabaseClient.auth.getUser();
-
-  if (error || !data.user) {
-    window.location.href = "login.html";
-    return null;
-  }
-
-  return (
-    data.user.user_metadata?.fullname ||
-    data.user.user_metadata?.full_name ||
-    data.user.email?.split("@")[0] ||
-    "User"
-  );
-}
-
-function initFirebase(){
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      uid = user.uid;
-
-      const username = await getSupabaseUsername();
-      if (!username) return;
-
-      myName = username;
-      localStorage.setItem("chat_display_name", username);
-
-      await ensureUserDoc();
-      $("nameModal").style.display = "none";
-      boot();
-    } else {
-      signInAnonymously(auth).catch(err => alert(i18n[currentLang].firebaseConnError(err.message)));
-    }
-  });
-}
-
-async function ensureUserDoc(){
-  const userRef = doc(db, "users", uid);
-  const snap = await getDoc(userRef);
-  if (snap.exists() && snap.data().friendCode){
-    myCode = snap.data().friendCode;
-    await setDoc(userRef, { name: myName }, { merge:true });
+async function boot(){
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session){
+    $("gateModal").style.display = "flex";
     return;
   }
+  uid = session.user.id;
 
-  let code = randomCode();
-  let attempts = 0;
-  while (attempts < 5){
-    const codeRef = doc(db, "friendCodes", code);
-    const codeSnap = await getDoc(codeRef);
-    if (!codeSnap.exists()){
-      await setDoc(codeRef, { uid, name: myName });
-      break;
-    }
-    code = randomCode();
-    attempts++;
+  const { data: profile, error } = await supabaseClient
+    .from("profiles").select("fullname").eq("id", uid).maybeSingle();
+  if (error || !profile){
+    $("gateModal").style.display = "flex";
+    return;
   }
-  myCode = code;
-  await setDoc(userRef, { name: myName, friendCode: code }, { merge:true });
-}
+  myName = profile.fullname;
 
-// $("nameSubmitBtn").addEventListener("click", async () => {
-//   const val = $("nameInput").value.trim();
-//   if (!val) return;
-//   myName = val;
-//   localStorage.setItem("chat_display_name", val);
-//   await ensureUserDoc();
-//   $("nameModal").style.display = "none";
-//   boot();
-// });
-// $("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSubmitBtn").click(); });
-
-function boot(){
   $("msgInput").disabled = false;
   $("sendBtn").disabled = false;
-  $("myCodeText").textContent = myCode;
-  listenToFriendships();
-  listenToRequests();
-  openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", i18n[currentLang].generalChatSub);
-}
 
-function directChatId(otherUid){ return [uid, otherUid].sort().join("_"); }
-function friendshipId(otherUid){ return [uid, otherUid].sort().join("_"); }
+  await loadFriendships();
+  await loadPendingRequests();
+  subscribeRealtime();
+  openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة");
 
-function listenToFriendships(){
-  const q = query(collection(db, "friendships"), where("users", "array-contains", uid));
-  unsubscribeFriendships = onSnapshot(q, (snap) => {
-    friendships = [];
-    snap.forEach(d => {
-      const data = d.data();
-      const otherUid = data.users.find(u => u !== uid);
-      friendships.push({ id: d.id, otherUid, otherName: data.names?.[otherUid] || i18n[currentLang].friendFallback });
-    });
+  heartbeat();
+  setInterval(heartbeat, HEARTBEAT_MS);
+  setInterval(() => {
     renderList($("searchBox").value);
-  });
+    if (activeOtherUid) updateHeaderStatus(activeOtherUid);
+  }, 8000);
 }
 
-function listenToRequests(){
-  const q = query(collection(db, "friendRequests"), where("toUid", "==", uid), where("status", "==", "pending"));
-  unsubscribeRequests = onSnapshot(q, (snap) => {
-    pendingRequests = [];
-    snap.forEach(d => pendingRequests.push({ id: d.id, ...d.data() }));
-    renderRequests();
+async function heartbeat(){
+  await supabaseClient.from("profiles").update({ last_seen: new Date().toISOString() }).eq("id", uid);
+}
+
+function isOnline(lastSeenIso){
+  if (!lastSeenIso) return false;
+  return (Date.now() - new Date(lastSeenIso).getTime()) < ONLINE_THRESHOLD_MS;
+}
+
+function pairId(a,b){ return [a,b].sort().join("_"); }
+
+async function loadFriendships(){
+  const { data, error } = await supabaseClient
+    .from("friendships")
+    .select("user_a,user_b,name_a,name_b")
+    .or(`user_a.eq.${uid},user_b.eq.${uid}`);
+  if (error){ console.error(error); return; }
+  friendships = (data||[]).map(row => {
+    const otherUid = row.user_a === uid ? row.user_b : row.user_a;
+    const otherName = row.user_a === uid ? row.name_b : row.name_a;
+    return { otherUid, otherName };
   });
+  await refreshFriendStatuses();
+  renderList($("searchBox").value);
+}
+
+async function refreshFriendStatuses(){
+  const ids = friendships.map(f => f.otherUid);
+  if (ids.length === 0) return;
+  const { data } = await supabaseClient.from("profiles").select("id,last_seen").in("id", ids);
+  (data||[]).forEach(p => friendStatus[p.id] = p.last_seen);
+}
+
+async function loadPendingRequests(){
+  const { data, error } = await supabaseClient
+    .from("friend_requests")
+    .select("id,from_id,from_name")
+    .eq("to_id", uid).eq("status","pending");
+  if (error){ console.error(error); return; }
+  pendingRequests = data || [];
+  renderRequests();
+}
+
+function subscribeRealtime(){
+  requestsChannel = supabaseClient
+    .channel("friend_requests_incoming")
+    .on("postgres_changes", { event: "*", schema: "public", table: "friend_requests", filter: `to_id=eq.${uid}` },
+      () => loadPendingRequests())
+    .subscribe();
+
+  friendshipsChannel = supabaseClient
+    .channel("friendships_updates")
+    .on("postgres_changes", { event: "*", schema: "public", table: "friendships" },
+      (payload) => {
+        const row = payload.new?.id ? payload.new : payload.old;
+        if (row && (row.user_a === uid || row.user_b === uid)) loadFriendships();
+      })
+    .subscribe();
+
+  profilesChannel = supabaseClient
+    .channel("profiles_presence")
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" },
+      (payload) => {
+        const row = payload.new;
+        if (!row) return;
+        friendStatus[row.id] = row.last_seen;
+        renderList($("searchBox").value);
+        if (activeOtherUid === row.id) updateHeaderStatus(row.id);
+      })
+    .subscribe();
 }
 
 function renderRequests(){
   const box = $("requestsList");
   const count = $("reqCount");
   box.innerHTML = "";
-  if (pendingRequests.length === 0){
-    count.style.display = "none";
-    return;
-  }
+  if (pendingRequests.length === 0){ count.style.display = "none"; return; }
   count.style.display = "inline-block";
   count.textContent = pendingRequests.length;
   pendingRequests.forEach(r => {
     const item = document.createElement("div");
     item.className = "request-item";
     item.innerHTML = `
-      <div class="req-name">${r.fromName}</div>
+      <div class="req-name">${r.from_name}</div>
       <div class="request-actions">
-        <button class="small" data-accept="${r.id}" data-from="${r.fromUid}" data-fromname="${r.fromName}">${i18n[currentLang].acceptBtn}</button>
-        <button class="small secondary" data-decline="${r.id}">${i18n[currentLang].declineBtn}</button>
+        <button class="small" data-accept="${r.id}" data-from="${r.from_id}" data-fromname="${r.from_name}">قبول</button>
+        <button class="small secondary" data-decline="${r.id}">رفض</button>
       </div>`;
     box.appendChild(item);
   });
@@ -465,18 +343,21 @@ function renderRequests(){
 
 async function acceptRequest(requestId, fromUid, fromName){
   try{
-    const fsId = friendshipId(fromUid);
-    await setDoc(doc(db, "friendships", fsId), {
-      users: [uid, fromUid],
-      names: { [uid]: myName, [fromUid]: fromName },
-      createdAt: serverTimestamp()
-    });
-    await deleteDoc(doc(db, "friendRequests", requestId));
-  }catch(err){ alert(i18n[currentLang].acceptRequestError(err.message)); }
+    const a = uid < fromUid ? uid : fromUid;
+    const b = uid < fromUid ? fromUid : uid;
+    const nameA = a === uid ? myName : fromName;
+    const nameB = b === uid ? myName : fromName;
+    const { error: insErr } = await supabaseClient.from("friendships")
+      .insert({ user_a: a, user_b: b, name_a: nameA, name_b: nameB });
+    if (insErr) throw insErr;
+    await supabaseClient.from("friend_requests").delete().eq("id", requestId);
+    await loadFriendships();
+    await loadPendingRequests();
+  }catch(err){ alert("تعذر قبول الطلب: " + err.message); }
 }
 async function declineRequest(requestId){
-  try{ await deleteDoc(doc(db, "friendRequests", requestId)); }
-  catch(err){ alert(i18n[currentLang].declineRequestError(err.message)); }
+  try{ await supabaseClient.from("friend_requests").delete().eq("id", requestId); await loadPendingRequests(); }
+  catch(err){ alert("تعذر رفض الطلب: " + err.message); }
 }
 
 function renderList(filter=""){
@@ -489,93 +370,117 @@ function renderList(filter=""){
     <div class="conv-avatar">👥</div>
     <div class="conv-meta">
       <div class="conv-top-row"><span class="conv-name">${GENERAL_CHAT_NAME}</span></div>
-      <div class="conv-preview">${i18n[currentLang].generalChatPreview}</div>
+      <div class="conv-preview">قناة عامة لكل الأعضاء</div>
     </div>`;
-  generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", i18n[currentLang].generalChatSub));
+  generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة"));
   list.appendChild(generalItem);
 
-  const filtered = friendships.filter(f => (f.otherName || "").includes(filter));
+  const filtered = friendships.filter(f => (f.otherName||"").includes(filter));
   if (friendships.length === 0){
     const empty = document.createElement("div");
     empty.className = "mini";
     empty.style.padding = "10px 12px";
-    empty.textContent = i18n[currentLang].noFriendsYet;
+    empty.textContent = "ما عندك أصدقاء بعد. اضغط \"إضافة صديق\" فوق.";
     list.appendChild(empty);
   }
 
   filtered.forEach(f => {
-    const chatId = directChatId(f.otherUid);
+    const chatId = pairId(uid, f.otherUid);
+    const online = isOnline(friendStatus[f.otherUid]);
     const item = document.createElement("div");
     item.className = "conv-item" + (activeChatId === chatId ? " active" : "");
     item.innerHTML = `
-      <div class="conv-avatar">🧑</div>
+      <div class="conv-avatar">🧑<span class="status-dot${online?" online":""}"></span></div>
       <div class="conv-meta">
         <div class="conv-top-row"><span class="conv-name">${f.otherName}</span></div>
-        <div class="conv-preview">${i18n[currentLang].privateChatSub}</div>
+        <div class="conv-preview">${online ? "متصل الآن" : "غير متصل"}</div>
       </div>`;
-    item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", i18n[currentLang].privateChatSub, f.otherUid));
+    item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", "محادثة خاصة", f.otherUid));
     list.appendChild(item);
   });
 }
 
-function dateLabel(ts){ if (!ts) return ""; const d = ts.toDate ? ts.toDate() : new Date(); return d.toLocaleDateString(i18n[currentLang].dateLocale); }
-function timeLabel(ts){ if (!ts) return ""; const d = ts.toDate ? ts.toDate() : new Date(); return d.toTimeString().slice(0,5); }
+function dateLabel(iso){ if(!iso) return ""; return new Date(iso).toLocaleDateString("ar-EG"); }
+function timeLabel(iso){ if(!iso) return ""; return new Date(iso).toTimeString().slice(0,5); }
 
-function openChat(chatId, name, avatar, sub, otherUid = null){
+function updateHeaderStatus(otherUid){
+  const online = isOnline(friendStatus[otherUid]);
+  const dot = $("headerStatusDot");
+  if (dot) dot.classList.toggle("online", online);
+  const sub = $("headerSub");
+  if (sub && sub.dataset.baseLabel){
+    sub.textContent = sub.dataset.baseLabel + (online ? " · متصل الآن" : " · غير متصل");
+    sub.classList.toggle("online-text", online);
+  }
+}
+
+function openChat(chatId, name, avatar, sub, otherUid=null){
   activeChatId = chatId;
   activeOtherUid = otherUid;
-  activeOtherName = name;
-
   $("headerAvatar").textContent = avatar;
   $("headerName").textContent = name;
-  $("headerSub").textContent = sub;
-
-  const isPrivate = !!otherUid && chatId !== GENERAL_CHAT_ID;
-  $("chatHeaderActions").style.display = isPrivate ? "flex" : "none";
-  $("msgInput").disabled = false;
-  $("sendBtn").disabled = false;
-
+  const subEl = $("headerSub");
+  subEl.dataset.baseLabel = sub;
+  subEl.textContent = sub;
+  subEl.classList.remove("online-text");
+  const dot = $("headerStatusDot");
+  dot.style.display = otherUid ? "block" : "none";
+  dot.classList.remove("online");
+  if (otherUid) updateHeaderStatus(otherUid);
   renderList($("searchBox").value);
   listenToMessages(chatId);
   if (window.innerWidth <= 760) $("sidebar").classList.add("hide");
 }
 
-function listenToMessages(chatId){
-  if (unsubscribeMessages) unsubscribeMessages();
+async function listenToMessages(chatId){
+  if (messagesChannel) supabaseClient.removeChannel(messagesChannel);
   const body = $("chatBody");
-  body.innerHTML = `<div class="empty-state">${i18n[currentLang].loadingMessages}</div>`;
+  body.innerHTML = `<div class="empty-state">جارٍ تحميل الرسائل...</div>`;
 
-  const msgsRef = collection(db, "chats", chatId, "messages");
-  const q = query(msgsRef, orderBy("timestamp", "asc"), limit(200));
+  const { data, error } = await supabaseClient
+    .from("messages").select("sender_id,sender_name,text,created_at")
+    .eq("chat_id", chatId).order("created_at", { ascending: true }).limit(200);
 
-  unsubscribeMessages = onSnapshot(q, (snap) => {
-    body.innerHTML = "";
-    if (snap.empty){
-      body.innerHTML = `<div class="empty-state">${i18n[currentLang].noMessagesYet}</div>`;
-      return;
+  if (error){ body.innerHTML = `<div class="empty-state">تعذر تحميل الرسائل: ${error.message}</div>`; return; }
+
+  renderMessages(data || []);
+
+  messagesChannel = supabaseClient
+    .channel("messages_" + chatId)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `chat_id=eq.${chatId}` },
+      (payload) => { if (activeChatId === chatId) appendMessage(payload.new); })
+    .subscribe();
+}
+
+function renderMessages(msgs){
+  const body = $("chatBody");
+  body.innerHTML = "";
+  if (msgs.length === 0){ body.innerHTML = `<div class="empty-state">ما فيه رسائل بعد، ابدأ الحديث 👋</div>`; return; }
+  let lastDate = null;
+  msgs.forEach(m => {
+    const dl = dateLabel(m.created_at);
+    if (dl && dl !== lastDate){
+      const chip = document.createElement("div");
+      chip.className = "date-divider"; chip.textContent = dl;
+      body.appendChild(chip); lastDate = dl;
     }
-    let lastDate = null;
-    snap.forEach(d => {
-      const m = d.data();
-      const dl = dateLabel(m.timestamp);
-      if (dl && dl !== lastDate){
-        const chip = document.createElement("div");
-        chip.className = "date-divider";
-        chip.textContent = dl;
-        body.appendChild(chip);
-        lastDate = dl;
-      }
-      const isMine = m.senderId === uid;
-      const row = document.createElement("div");
-      row.className = "msg-row " + (isMine ? "out" : "in");
-      row.innerHTML = `
-        ${!isMine ? `<div class="msg-sender">${m.senderName || i18n[currentLang].userFallback}</div>` : ""}
-        <div class="bubble"><span class="msg-text"></span><span class="msg-time">${timeLabel(m.timestamp)}</span></div>`;
-      row.querySelector(".msg-text").textContent = m.text || "";
-      body.appendChild(row);
-    });
-    body.scrollTop = body.scrollHeight;
-  }, (err) => { body.innerHTML = `<div class="empty-state">${i18n[currentLang].loadMessagesError(err.message)}</div>`; });
+    appendMessage(m, false);
+  });
+  body.scrollTop = body.scrollHeight;
+}
+
+function appendMessage(m, scroll=true){
+  const body = $("chatBody");
+  if (body.querySelector(".empty-state")) body.innerHTML = "";
+  const isMine = m.sender_id === uid;
+  const row = document.createElement("div");
+  row.className = "msg-row " + (isMine ? "out" : "in");
+  row.innerHTML = `
+    ${!isMine ? `<div class="msg-sender">${m.sender_name||"مستخدم"}</div>` : ""}
+    <div class="bubble"><span class="msg-text"></span><span class="msg-time">${timeLabel(m.created_at)}</span></div>`;
+  row.querySelector(".msg-text").textContent = m.text || "";
+  body.appendChild(row);
+  if (scroll) body.scrollTop = body.scrollHeight;
 }
 
 async function sendMessage(){
@@ -583,11 +488,10 @@ async function sendMessage(){
   const text = input.value.trim();
   if (!text || !activeChatId || !uid) return;
   input.value = "";
-  try{
-    await addDoc(collection(db, "chats", activeChatId, "messages"), {
-      senderId: uid, senderName: myName, text, timestamp: serverTimestamp()
-    });
-  }catch(err){ alert(i18n[currentLang].sendMessageError(err.message)); }
+  const { error } = await supabaseClient.from("messages").insert({
+    chat_id: activeChatId, sender_id: uid, sender_name: myName, text
+  });
+  if (error) alert("تعذر إرسال الرسالة: " + error.message);
 }
 
 $("sendBtn").addEventListener("click", sendMessage);
@@ -595,237 +499,39 @@ $("msgInput").addEventListener("keydown", e => { if (e.key === "Enter") sendMess
 $("searchBox").addEventListener("input", e => renderList(e.target.value));
 $("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.remove("hide"));
 
-/* private chat actions */
-async function blockCurrentUser(){
-  if (!activeOtherUid || !uid || activeChatId === GENERAL_CHAT_ID) return;
-
-  const ok = confirm(i18n[currentLang].confirmBlock(activeOtherName));
-  if (!ok) return;
-
-  try{
-    await setDoc(doc(db, "blocks", friendshipId(activeOtherUid)), {
-      blockerUid: uid,
-      blockedUid: activeOtherUid,
-      blockedName: activeOtherName,
-      createdAt: serverTimestamp()
-    });
-
-    // إزالة الصداقة حتى تختفي المحادثة من القائمة.
-    await deleteDoc(doc(db, "friendships", friendshipId(activeOtherUid)));
-
-    if (unsubscribeMessages) unsubscribeMessages();
-    activeChatId = null;
-    activeOtherUid = null;
-    activeOtherName = "";
-    $("chatHeaderActions").style.display = "none";
-    $("headerAvatar").textContent = "💬";
-    $("headerName").textContent = i18n[currentLang].headerNamePlaceholder;
-    $("headerSub").textContent = "";
-    $("chatBody").innerHTML = `<div class="empty-state">${i18n[currentLang].userBlockedMsg}</div>`;
-    $("msgInput").disabled = true;
-    $("sendBtn").disabled = true;
-  }catch(err){
-    alert(i18n[currentLang].blockUserError(err.message));
-  }
-}
-
-async function removeCurrentChat(){
-  if (!activeChatId || !activeOtherUid || activeChatId === GENERAL_CHAT_ID) return;
-
-  const ok = confirm(i18n[currentLang].confirmRemoveChat(activeOtherName));
-  if (!ok) return;
-
-  try{
-    const msgsRef = collection(db, "chats", activeChatId, "messages");
-    const snap = await getDocs(msgsRef);
-
-    // حذف الرسائل على دفعات لتجنب تجاوز حد Firestore للـ batch.
-    const docs = snap.docs;
-    for (let i = 0; i < docs.length; i += 450){
-      const batch = writeBatch(db);
-      docs.slice(i, i + 450).forEach(d => batch.delete(d.ref));
-      await batch.commit();
-    }
-
-    // إزالة المحادثة من القائمة بحذف علاقة الصداقة.
-    await deleteDoc(doc(db, "friendships", friendshipId(activeOtherUid)));
-
-    if (unsubscribeMessages) unsubscribeMessages();
-    activeChatId = null;
-    activeOtherUid = null;
-    activeOtherName = "";
-    $("chatHeaderActions").style.display = "none";
-    $("headerAvatar").textContent = "💬";
-    $("headerName").textContent = i18n[currentLang].headerNamePlaceholder;
-    $("headerSub").textContent = "";
-    $("chatBody").innerHTML = `<div class="empty-state">${i18n[currentLang].chatDeletedMsg}</div>`;
-    $("msgInput").disabled = true;
-    $("sendBtn").disabled = true;
-  }catch(err){
-    alert(i18n[currentLang].removeChatError(err.message));
-  }
-}
-
-$("blockUserBtn").addEventListener("click", blockCurrentUser);
-$("removeChatBtn").addEventListener("click", removeCurrentChat);
-
-/* blocked users */
-async function loadBlockedUsers(){
-  const list = $("blockedList");
-  list.innerHTML = `<div class="blocked-empty">${i18n[currentLang].loadingBlockedList}</div>`;
-
-  try{
-    const q = query(
-      collection(db, "blocks"),
-      where("blockerUid", "==", uid)
-    );
-
-    const snap = await getDocs(q);
-    list.innerHTML = "";
-
-    if (snap.empty){
-      list.innerHTML = `<div class="blocked-empty">${i18n[currentLang].noBlockedUsers}</div>`;
-      return;
-    }
-
-    snap.forEach(d => {
-      const b = d.data();
-      const item = document.createElement("div");
-      item.className = "blocked-item";
-      item.innerHTML = `
-        <div class="blocked-avatar">🚫</div>
-        <div class="blocked-meta">
-          <div class="blocked-name"></div>
-          <div class="blocked-code">${i18n[currentLang].blockedLabel}</div>
-        </div>`;
-      item.querySelector(".blocked-name").textContent = b.blockedName || i18n[currentLang].userFallback;
-      list.appendChild(item);
-    });
-  }catch(err){
-    list.innerHTML = `<div class="blocked-empty">${i18n[currentLang].loadBlockedError(err.message)}</div>`;
-  }
-}
-
-$("openBlockedBtn").addEventListener("click", async () => {
-  $("blockedModal").style.display = "flex";
-  await loadBlockedUsers();
-});
-
-$("closeBlockedBtn").addEventListener("click", () => {
-  $("blockedModal").style.display = "none";
-});
-
-/* add friend modal */
 $("openAddFriendBtn").addEventListener("click", () => {
   $("addFriendMsg").textContent = "";
-  $("friendCodeInput").value = "";
+  $("friendNameInput").value = "";
   $("addFriendModal").style.display = "flex";
 });
 $("closeAddFriendBtn").addEventListener("click", () => $("addFriendModal").style.display = "none");
-$("copyCodeBtn").addEventListener("click", () => {
-  navigator.clipboard?.writeText(myCode);
-  $("addFriendMsg").textContent = i18n[currentLang].copyCodeSuccess;
-});
 
 $("sendRequestBtn").addEventListener("click", async () => {
-  const code = $("friendCodeInput").value.trim().toUpperCase();
+  const name = $("friendNameInput").value.trim();
   const msgEl = $("addFriendMsg");
-  if (!code){ msgEl.textContent = i18n[currentLang].enterFriendCodeFirst; return; }
-  if (code === myCode){ msgEl.textContent = i18n[currentLang].ownCodeMsg; return; }
-  msgEl.textContent = i18n[currentLang].searchingMsg;
+  if (!name){ msgEl.textContent = "اكتب اسم صديقك أول."; return; }
+  if (name.toLowerCase() === myName.toLowerCase()){ msgEl.textContent = "هذا اسمك أنت 🙂"; return; }
+  msgEl.textContent = "جارٍ البحث...";
   try{
-    const codeRef = doc(db, "friendCodes", code);
-    const codeSnap = await getDoc(codeRef);
-    if (!codeSnap.exists()){ msgEl.textContent = i18n[currentLang].noUserWithCode; return; }
-    const targetUid = codeSnap.data().uid;
-    const targetName = codeSnap.data().name || i18n[currentLang].userFallback;
+    const { data: target, error } = await supabaseClient
+      .from("profiles").select("id,fullname").ilike("fullname", name).maybeSingle();
+    if (error) throw error;
+    if (!target){ msgEl.textContent = "ما فيه مستخدم بهذا الاسم."; return; }
+    if (friendships.some(f => f.otherUid === target.id)){ msgEl.textContent = "هذا الشخص صديقك أصلاً."; return; }
 
-    const alreadyFriend = friendships.some(f => f.otherUid === targetUid);
-    if (alreadyFriend){ msgEl.textContent = i18n[currentLang].alreadyFriendMsg; return; }
-
-    await addDoc(collection(db, "friendRequests"), {
-      fromUid: uid, fromName: myName,
-      toUid: targetUid, toName: targetName,
-      status: "pending", timestamp: serverTimestamp()
+    const { error: reqErr } = await supabaseClient.from("friend_requests").insert({
+      from_id: uid, from_name: myName, to_id: target.id, to_name: target.fullname, status: "pending"
     });
-    msgEl.textContent = i18n[currentLang].requestSentMsg;
-    $("friendCodeInput").value = "";
-  }catch(err){ msgEl.textContent = i18n[currentLang].genericErrorPrefix + err.message; }
+    if (reqErr) throw reqErr;
+    msgEl.textContent = "تم إرسال طلب الصداقة ✅";
+    $("friendNameInput").value = "";
+  }catch(err){ msgEl.textContent = "خطأ: " + err.message; }
 });
 
+/* language toggle (visual only) */
 const i18n = {
-  ar: {
-    pageTitle:"الرسائل", badge:"تعرّف، تحدث، واصنع ذكرياتك.", backBtn:"رجوع للعبة",
-    modalTitle:"وش اسمك؟", modalDesc:"هذا الاسم بيظهر لأصدقائك في الشات.", namePlaceholder:"مثلاً Rayan", nameSubmit:"دخول للشات",
-    openBlockedBtnText:"المحظورين", openAddFriendBtnText:"إضافة صديق",
-    searchPlaceholder:"بحث في جهات الاتصال...",
-    friendRequestsLabel:"طلبات الصداقة", channelsLabel:"القنوات وجهات الاتصال",
-    headerNamePlaceholder:"اختر محادثة",
-    blockUserBtnText:"بلوك", removeChatBtnText:"إزالة المحادثة",
-    msgInputPlaceholder:"اكتب رسالة...",
-    addFriendTitle:"إضافة صديق", addFriendDesc:"شارك كودك مع صديقك، أو أدخل كوده عشان ترسل له طلب صداقة.",
-    myCodeLabel:"كودك الشخصي", copyCodeBtnText:"نسخ", friendCodePlaceholder:"أدخل كود صديقك",
-    sendRequestBtnText:"إرسال طلب صداقة", closeBtnText:"إغلاق",
-    blockedTitle:"الأشخاص المحظورين", blockedDesc:"هنا تظهر كل الحسابات التي قمت بحظرها.",
-    generalChatSub:"قناة عامة", generalChatPreview:"قناة عامة لكل الأعضاء",
-    friendFallback:"صديق", userFallback:"مستخدم",
-    acceptBtn:"قبول", declineBtn:"رفض",
-    privateChatSub:"محادثة خاصة",
-    noFriendsYet:'ما عندك أصدقاء بعد. اضغط "إضافة صديق" فوق وشارك كودك.',
-    loadingMessages:"جارٍ تحميل الرسائل...", noMessagesYet:"ما فيه رسائل بعد، ابدأ الحديث 👋",
-    loadMessagesError:(m)=>`تعذر تحميل الرسائل: ${m}`,
-    sendMessageError:(m)=>`تعذر إرسال الرسالة: ${m}`,
-    confirmBlock:(n)=>`هل أنت متأكد أنك تريد بلوك ${n}؟`,
-    confirmRemoveChat:(n)=>`حذف المحادثة مع ${n}؟ سيتم حذف رسائل هذه المحادثة وإزالتها من جهات الاتصال.`,
-    blockUserError:(m)=>`تعذر حظر المستخدم: ${m}`,
-    removeChatError:(m)=>`تعذر حذف المحادثة: ${m}`,
-    userBlockedMsg:"تم حظر المستخدم 🚫", chatDeletedMsg:"تم حذف المحادثة 🗑️",
-    loadingBlockedList:"جارٍ تحميل القائمة...", noBlockedUsers:"ما حظرت أي شخص إلى الآن.",
-    loadBlockedError:(m)=>`تعذر تحميل المحظورين: ${m}`, blockedLabel:"محظور",
-    acceptRequestError:(m)=>`تعذر قبول الطلب: ${m}`, declineRequestError:(m)=>`تعذر رفض الطلب: ${m}`,
-    firebaseConnError:(m)=>`تعذر الاتصال بـ Firebase: ${m}`,
-    copyCodeSuccess:"تم نسخ الكود ✅", enterFriendCodeFirst:"أدخل كود صديقك أول.",
-    ownCodeMsg:"هذا كودك أنت 🙂", searchingMsg:"جارٍ البحث...",
-    noUserWithCode:"ما فيه أحد بهذا الكود.", alreadyFriendMsg:"هذا الشخص صديقك أصلاً.",
-    requestSentMsg:"تم إرسال طلب الصداقة ✅", genericErrorPrefix:"خطأ: ",
-    dateLocale:"ar-EG"
-  },
-  en: {
-    pageTitle:"Messages", badge:"Real chat between site users", backBtn:"Back to game",
-    modalTitle:"What's your name?", modalDesc:"This name will be shown to your friends in chat.", namePlaceholder:"e.g. Rayan", nameSubmit:"Join chat",
-    openBlockedBtnText:"Blocked", openAddFriendBtnText:"Add friend",
-    searchPlaceholder:"Search contacts...",
-    friendRequestsLabel:"Friend requests", channelsLabel:"Channels & contacts",
-    headerNamePlaceholder:"Select a conversation",
-    blockUserBtnText:"Block", removeChatBtnText:"Remove chat",
-    msgInputPlaceholder:"Type a message...",
-    addFriendTitle:"Add friend", addFriendDesc:"Share your code with a friend, or enter theirs to send a friend request.",
-    myCodeLabel:"Your personal code", copyCodeBtnText:"Copy", friendCodePlaceholder:"Enter friend's code",
-    sendRequestBtnText:"Send friend request", closeBtnText:"Close",
-    blockedTitle:"Blocked users", blockedDesc:"All accounts you've blocked show up here.",
-    generalChatSub:"General channel", generalChatPreview:"Public channel for all members",
-    friendFallback:"Friend", userFallback:"User",
-    acceptBtn:"Accept", declineBtn:"Decline",
-    privateChatSub:"Private chat",
-    noFriendsYet:'You have no friends yet. Press "Add friend" above and share your code.',
-    loadingMessages:"Loading messages...", noMessagesYet:"No messages yet, start the conversation 👋",
-    loadMessagesError:(m)=>`Failed to load messages: ${m}`,
-    sendMessageError:(m)=>`Failed to send message: ${m}`,
-    confirmBlock:(n)=>`Are you sure you want to block ${n}?`,
-    confirmRemoveChat:(n)=>`Delete the chat with ${n}? This chat's messages will be deleted and it will be removed from your contacts.`,
-    blockUserError:(m)=>`Failed to block user: ${m}`,
-    removeChatError:(m)=>`Failed to delete chat: ${m}`,
-    userBlockedMsg:"User blocked 🚫", chatDeletedMsg:"Chat deleted 🗑️",
-    loadingBlockedList:"Loading list...", noBlockedUsers:"You haven't blocked anyone yet.",
-    loadBlockedError:(m)=>`Failed to load blocked users: ${m}`, blockedLabel:"Blocked",
-    acceptRequestError:(m)=>`Failed to accept request: ${m}`, declineRequestError:(m)=>`Failed to decline request: ${m}`,
-    firebaseConnError:(m)=>`Could not connect to Firebase: ${m}`,
-    copyCodeSuccess:"Code copied ✅", enterFriendCodeFirst:"Enter your friend's code first.",
-    ownCodeMsg:"That's your own code 🙂", searchingMsg:"Searching...",
-    noUserWithCode:"No one found with that code.", alreadyFriendMsg:"You're already friends with this person.",
-    requestSentMsg:"Friend request sent ✅", genericErrorPrefix:"Error: ",
-    dateLocale:"en-US"
-  }
+  ar: { pageTitle:"الرسائل", badge:"محادثات حقيقية بين مستخدمي الموقع", backBtn:"رجوع للعبة" },
+  en: { pageTitle:"Messages", badge:"Real chat between site users", backBtn:"Back to game" }
 };
 let currentLang = localStorage.getItem('lang') || 'ar';
 function setLanguage(l){
@@ -838,43 +544,11 @@ function setLanguage(l){
   $('pageTitle').textContent = t.pageTitle;
   $('badgeText').textContent = t.badge;
   $('backBtnText').textContent = t.backBtn;
-  $('modalTitle').textContent = t.modalTitle;
-  $('modalDesc').textContent = t.modalDesc;
-  $('nameInput').placeholder = t.namePlaceholder;
-  $('nameSubmitBtn').textContent = t.nameSubmit;
-  $('openBlockedBtnText').textContent = t.openBlockedBtnText;
-  $('openAddFriendBtnText').textContent = t.openAddFriendBtnText;
-  $('searchBox').placeholder = t.searchPlaceholder;
-  $('friendRequestsLabel').textContent = t.friendRequestsLabel;
-  $('channelsLabel').textContent = t.channelsLabel;
-  if (!activeChatId) $('headerName').textContent = t.headerNamePlaceholder;
-  $('blockUserBtnText').textContent = t.blockUserBtnText;
-  $('removeChatBtnText').textContent = t.removeChatBtnText;
-  $('msgInput').placeholder = t.msgInputPlaceholder;
-  $('addFriendTitle').textContent = t.addFriendTitle;
-  $('addFriendDesc').textContent = t.addFriendDesc;
-  $('myCodeLabel').textContent = t.myCodeLabel;
-  $('copyCodeBtn').textContent = t.copyCodeBtnText;
-  $('friendCodeInput').placeholder = t.friendCodePlaceholder;
-  $('sendRequestBtn').textContent = t.sendRequestBtnText;
-  $('closeAddFriendBtn').textContent = t.closeBtnText;
-  $('blockedTitle').textContent = t.blockedTitle;
-  $('blockedDesc').textContent = t.blockedDesc;
-  $('closeBlockedBtn').textContent = t.closeBtnText;
-
-  if (uid){
-    renderList($('searchBox').value);
-    if (activeChatId){
-      $('headerSub').textContent = (activeChatId === GENERAL_CHAT_ID) ? t.generalChatSub : t.privateChatSub;
-      listenToMessages(activeChatId);
-    }
-  }
 }
-window.toggleLanguage = () => setLanguage(currentLang === 'ar' ? 'en' : 'ar');
+function toggleLanguage(){ setLanguage(currentLang === 'ar' ? 'en' : 'ar'); }
 setLanguage(currentLang);
 
-if (isConfigured){ initFirebase(); }
-else { $("nameModal").style.display = "none"; }
+boot();
 </script>
 </body>
 </html>

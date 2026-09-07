@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الإعدادات — Brain Battle</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+    const supabaseClient = window.supabase.createClient(
+        "https://fhvxlyrdvzimgzfyjdxo.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZodnhseXJkdnppbWd6ZnlqZHhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzE3MjksImV4cCI6MjEwNDM0NzcyOX0.EFi5L9-ahYr4Jv2IdJae5gvJ81Wbhd399RclkwToTbg"
+    );
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Tahoma,sans-serif;background:#080b14;color:#f7f8ff;min-height:100vh}
+.bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none}
+.wrap{max-width:600px;margin:0 auto;padding:70px 18px 28px;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.logo{font-weight:900;font-size:22px;letter-spacing:.5px}
+
+button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:15px;cursor:pointer;background:#7c5cff;color:white;transition:.15s}
+button:hover{transform:translateY(-1px);filter:brightness(1.08)}
+button.secondary{background:#1b2235;color:#dbe2ff}
+button.danger{background:#d94b67}
+input,select{width:100%;background:#0a0e19;border:1px solid #303750;color:white;border-radius:13px;padding:12px 14px;font-size:14px;outline:none}
+input:focus,select:focus{border-color:#7c5cff}
+
+.card{background:#111625cc;border:1px solid #252d46;border-radius:24px;padding:24px;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);margin-bottom:18px}
+.card h3{margin:0 0 4px;font-size:16px}
+.card .desc{color:#8490af;font-size:12.5px;margin-bottom:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;color:#aeb7cf;margin-bottom:6px}
+.row{display:flex;gap:10px}
+.msg{font-size:13px;margin-top:10px;min-height:16px}
+.msg.ok{color:#2bd28b}
+.msg.err{color:#ff6686}
+
+.bottom-bar{ position:fixed; bottom:20px; left:20px; z-index:9999; display:flex; gap:10px; }
+#backBtn{ box-shadow:0 4px 14px rgba(0,0,0,0.5); display:flex; align-items:center; gap:6px; }
+
+.gate-card{ text-align:center; }
+.gate-card .icon{ font-size:40px; margin-bottom:10px; }
+.modal-overlay{ position:fixed; inset:0; background:#080b14ee; z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">⚙️ الإعدادات</div>
+  </div>
+
+  <div id="content" style="display:none">
+    <div class="card">
+      <h3>الاسم المعروض</h3>
+      <div class="desc">هذا الاسم يظهر لأصدقائك في الشات وبقية أعضاء الموقع.</div>
+      <div class="field">
+        <label>الاسم الحالي</label>
+        <input type="text" id="nameInput" maxlength="18">
+      </div>
+      <button id="saveNameBtn">حفظ الاسم</button>
+      <div class="msg" id="nameMsg"></div>
+    </div>
+
+    <div class="card">
+      <h3>اللغة</h3>
+      <div class="desc">تحكم بلغة الواجهة عبر كل صفحات الموقع.</div>
+      <div class="field">
+        <select id="langSelect">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>الحساب</h3>
+      <div class="desc" id="emailDisplay">—</div>
+      <div class="row">
+        <button class="secondary" onclick="location.href='profile.html'" style="flex:1">الملف الشخصي</button>
+        <button class="danger" id="signOutBtn" style="flex:1">تسجيل الخروج</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button id="backBtn" class="secondary" onclick="location.href='For_you.html'">🧠 رجوع للعبة</button>
+</div>
+
+<!-- Not logged in gate -->
+<div class="modal-overlay" id="gateModal" style="display:none">
+  <div class="card gate-card" style="max-width:380px">
+    <div class="icon">🔒</div>
+    <h3>سجّل دخولك للمتابعة</h3>
+    <p class="desc">الإعدادات متاحة فقط للأعضاء المسجلين.</p>
+    <button onclick="location.href='login.html'" style="width:100%;margin-bottom:10px">تسجيل الدخول</button>
+    <button class="secondary" onclick="location.href='signup.html'" style="width:100%">إنشاء حساب جديد</button>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let uid = null;
+
+async function boot(){
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session){ $("gateModal").style.display = "flex"; return; }
+  uid = session.user.id;
+
+  const { data: profile, error } = await supabaseClient
+    .from("profiles").select("fullname").eq("id", uid).maybeSingle();
+  if (error || !profile){ $("gateModal").style.display = "flex"; return; }
+
+  $("nameInput").value = profile.fullname || "";
+  $("emailDisplay").textContent = session.user.email || "";
+  $("langSelect").value = localStorage.getItem("lang") || "ar";
+  $("content").style.display = "block";
+}
+
+$("saveNameBtn").addEventListener("click", async () => {
+  const newName = $("nameInput").value.trim();
+  const msg = $("nameMsg");
+  msg.className = "msg";
+  if (!newName){ msg.textContent = "اكتب اسم صحيح."; msg.className = "msg err"; return; }
+  msg.textContent = "جارٍ الحفظ...";
+  const { error } = await supabaseClient.from("profiles").update({ fullname: newName }).eq("id", uid);
+  if (error){
+    msg.textContent = error.message.includes("duplicate") ? "هذا الاسم مستخدم فعلاً." : "خطأ: " + error.message;
+    msg.className = "msg err";
+  } else {
+    msg.textContent = "تم حفظ الاسم ✅";
+    msg.className = "msg ok";
+  }
+});
+
+$("langSelect").addEventListener("change", (e) => {
+  localStorage.setItem("lang", e.target.value);
+});
+
+$("signOutBtn").addEventListener("click", async () => {
+  await supabaseClient.auth.signOut();
+  location.href = "login.html";
+});
+
+boot();
+</script>
+</body>
+</html>
