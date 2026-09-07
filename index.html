@@ -53,10 +53,11 @@
 
 .user-menu{ position:relative; display:none; }
 .avatar-btn{
-  width:38px; height:38px; border-radius:50%;
+  width:46px; height:46px; border-radius:50%;
   background:#2563eb; color:#fff; border:0; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  font-weight:800; font-size:15px; padding:0;
+  font-weight:800; font-size:17px; padding:0;
+  background-size:cover; background-position:center;
 }
 .avatar-btn:hover{ filter:brightness(1.1); transform:none; }
 .user-dropdown{
@@ -183,8 +184,8 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
     <div class="user-menu" id="userMenu">
       <button class="avatar-btn" id="avatarBtn">؟</button>
       <div class="user-dropdown" id="userDropdown">
-        <a href="profile.html">👤 الملف الشخصي</a>
-        <a href="messages.html">👥 الأصدقاء</a>
+        <a href="Profile Page.html">👤 الملف الشخصي</a>
+        <a href="Message.html">👥 الأصدقاء</a>
         <a href="settings.html">⚙️ الإعدادات</a>
         <hr>
         <button class="signout" id="signOutBtn">🚪 تسجيل الخروج</button>
@@ -224,7 +225,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 </div>
 
 <div class="bottom-bar">
-  <button id="messagesBtn" class="secondary" onclick="location.href='messages.html'">💬 <span id="messagesBtnText">الرسائل</span></button>
+  <button id="messagesBtn" class="secondary" onclick="location.href='Message.html'">💬 <span id="messagesBtnText">الرسائل</span></button>
   <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
@@ -10511,11 +10512,16 @@ setLanguage(localStorage.getItem('lang') || 'ar');
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session){
       const { data: profile } = await supabaseClient
-        .from("profiles").select("fullname").eq("id", session.user.id).maybeSingle();
+        .from("profiles").select("fullname, avatar_url").eq("id", session.user.id).maybeSingle();
       const name = profile?.fullname || session.user.email || "؟";
       loginLink.style.display = "none";
       userMenu.style.display = "block";
-      avatarBtn.textContent = name.trim().charAt(0).toUpperCase();
+      if(profile?.avatar_url){
+        avatarBtn.style.backgroundImage = `url("${profile.avatar_url}")`;
+        avatarBtn.textContent = "";
+      }else{
+        avatarBtn.textContent = name.trim().charAt(0).toUpperCase();
+      }
     }
   }catch(err){ console.error("auth check failed", err); }
 

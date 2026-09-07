@@ -166,11 +166,10 @@ input:focus{border-color:#7c5cff}
 </div>
 
 <div class="bottom-bar">
-  <button id="backBtn" class="secondary" onclick="location.href='For_you.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
+  <button id="backBtn" class="secondary" onclick="location.href='index.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
   <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
-<!-- Not logged in gate -->
 <div class="modal-overlay" id="gateModal" style="display:none">
   <div class="modal-card gate-card">
     <div class="icon">🔒</div>
@@ -181,7 +180,6 @@ input:focus{border-color:#7c5cff}
   </div>
 </div>
 
-<!-- Add friend modal -->
 <div class="modal-overlay" id="addFriendModal" style="display:none">
   <div class="modal-card">
     <h2>إضافة صديق</h2>
@@ -201,9 +199,9 @@ const HEARTBEAT_MS = 15000;
 
 let uid = null, myName = "";
 let activeChatId = null, activeOtherUid = null;
-let friendships = [];      // [{ otherUid, otherName }]
-let pendingRequests = [];  // [{ id, from_id, from_name }]
-let friendStatus = {};     // { [otherUid]: iso string last_seen }
+let friendships = [];      
+let pendingRequests = [];  
+let friendStatus = {};     
 let messagesChannel = null;
 let requestsChannel = null;
 let friendshipsChannel = null;
@@ -528,7 +526,6 @@ $("sendRequestBtn").addEventListener("click", async () => {
   }catch(err){ msgEl.textContent = "خطأ: " + err.message; }
 });
 
-/* language toggle (visual only) */
 const i18n = {
   ar: { pageTitle:"الرسائل", badge:"محادثات حقيقية بين مستخدمي الموقع", backBtn:"رجوع للعبة" },
   en: { pageTitle:"Messages", badge:"Real chat between site users", backBtn:"Back to game" }

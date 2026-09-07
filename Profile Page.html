@@ -1,80 +1,209 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile</title>
+<title>Profile — Brain Battle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
     const supabaseClient = window.supabase.createClient(
-        "https://qymwzjcnhhsbkhxshtmo.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5bXd6amNuaGhzYmtoeHNodG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMwNTUsImV4cCI6MjEwNDI0OTA1NX0.tpHlCc_d9VRtFeG0BROS9dAbINFLGL3BPijkoVps3Kg"
+        "https://fhvxlyrdvzimgzfyjdxo.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZodnhseXJkdnppbWd6ZnlqZHhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzE3MjksImV4cCI6MjEwNDM0NzcyOX0.EFi5L9-ahYr4Jv2IdJae5gvJ81Wbhd399RclkwToTbg"
     );
 </script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-#pageScale{zoom:0.6}
-body{background:#080b14;color:#e1e3ee;min-height:100vh}
-body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none;z-index:-1}
-header{width:100%;height:130px;display:flex;justify-content:flex-end;align-items:center;padding:0 100px;gap:70px}
-header a{text-decoration:none;color:#f7f8ff;font-size:26px;font-weight:700;transition:.2s}
-header a:hover{color:#7c5cff;transform:translateY(-2px)}
-.profile-section{width:85%;max-width:1450px;margin:50px auto 0;display:flex;align-items:center;gap:100px}
-.profile-image{width:560px;height:560px;border-radius:80px;overflow:hidden;background:#111625cc;flex-shrink:0;position:relative;cursor:pointer}
+:root{
+  --bg:#080b14;
+  --panel:#ffffff0f;
+  --panel-strong:#12172bcc;
+  --border:#242b47;
+  --accent:#7c5cff;
+  --accent-soft:#7c5cff26;
+  --teal:#2fd4c8;
+  --text:#f5f6ff;
+  --muted:#8b93b5;
+  --success:#3fe0a5;
+  --danger:#ff6686;
+  --radius-lg:28px;
+  --radius-md:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'Cairo',Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.5;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:
+    radial-gradient(circle at 15% 8%,#35206a4d,transparent 38%),
+    radial-gradient(circle at 85% 92%,#005c7a4d,transparent 38%);
+}
+
+/* header */
+header{
+  position:sticky;top:0;z-index:50;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:22px clamp(20px,5vw,80px);
+  border-bottom:1px solid var(--border);
+  background:#080b14cc;backdrop-filter:blur(10px);
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:800;font-size:clamp(18px,2.2vw,22px)}
+.brand-mark{font-size:1.3em;line-height:1}
+nav{display:flex;gap:clamp(20px,4vw,44px)}
+nav a{text-decoration:none;color:var(--muted);font-weight:600;font-size:15px;position:relative;transition:.2s}
+nav a::after{content:"";position:absolute;right:0;left:0;bottom:-6px;height:2px;background:var(--accent);transform:scaleX(0);transition:transform .2s}
+nav a:hover{color:var(--text)}
+nav a:hover::after{transform:scaleX(1)}
+
+/* layout */
+main{max-width:1100px;margin:0 auto;padding:clamp(28px,5vw,64px) clamp(20px,5vw,40px) 100px}
+
+.profile-card{
+  display:grid;
+  grid-template-columns:clamp(180px,24vw,280px) 1fr;
+  gap:clamp(28px,5vw,64px);
+  align-items:start;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:clamp(24px,4vw,44px);
+  box-shadow:0 24px 70px #0009;
+  backdrop-filter:blur(14px);
+}
+
+.profile-image{
+  aspect-ratio:1/1;width:100%;border-radius:var(--radius-md);
+  overflow:hidden;background:#161c33;position:relative;cursor:pointer;
+  border:1px solid var(--border);
+}
 .profile-image img{width:100%;height:100%;object-fit:cover;display:block}
-.profile-image .img-overlay{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;background:#000000aa;color:#fff;font-size:24px;font-weight:600;opacity:0;transition:.2s;text-align:center;padding:20px}
+.profile-image .img-overlay{
+  position:absolute;inset:0;display:flex;justify-content:center;align-items:center;
+  background:linear-gradient(180deg,#00000000,#000000c9);
+  color:#fff;font-size:14px;font-weight:700;opacity:0;transition:.2s;
+  text-align:center;padding:16px;
+}
 .profile-image:hover .img-overlay{opacity:1}
-.profile-info{flex:1}
-.username{font-size:34px;font-weight:700;margin-bottom:45px}
-.about-title{font-size:30px;font-weight:500;margin-bottom:28px}
-.about-box{width:100%;min-height:260px;background:#ffffff14;border-radius:30px;padding:30px;font-size:22px;line-height:1.6;border:1px solid #252d46;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);color:#f7f8ff;cursor:text}
-.about-box[data-editing="true"]{outline:3px solid #7c5cff;background:#ffffff1f}
-.about-textarea{width:100%;min-height:260px;background:#ffffff1f;border-radius:30px;padding:30px;font-size:22px;line-height:1.6;border:3px solid #7c5cff;color:#f7f8ff;font-family:Arial,sans-serif;resize:vertical;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px)}
-.stats-section{width:75%;max-width:1250px;margin:120px auto 40px;display:grid;grid-template-columns:1fr 2fr;gap:80px}
-.stat{text-align:center}.stat h2{font-size:32px;margin-bottom:30px}
-.stat-box{height:410px;background:#ffffff14;border-radius:0;border:1px solid #252d46;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:center;font-size:25px;font-weight:600;color:#f7f8ff}
-.save-bar{width:75%;max-width:1250px;margin:0 auto 80px;display:flex;justify-content:flex-start;align-items:center;gap:20px}
-button{background:#7c5cff;color:#fff;border:none;padding:18px 45px;font-size:22px;font-weight:700;border-radius:16px;cursor:pointer;box-shadow:0 10px 30px #7c5cff55;transition:.2s}
-button:hover{background:#6a4be0;transform:translateY(-2px)}
-button:active{transform:translateY(0)}
-#saveStatus{font-size:18px;color:#9be89b;opacity:0;transition:opacity .3s}
+
+.profile-info{min-width:0}
+.username{font-size:clamp(24px,3.4vw,34px);font-weight:800;margin-bottom:26px;word-break:break-word}
+.about-title{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:12px}
+.about-box,.about-textarea{
+  width:100%;min-height:150px;border-radius:var(--radius-md);
+  padding:20px 22px;font-size:16px;line-height:1.7;color:var(--text);
+  font-family:'Cairo',Arial,sans-serif;
+}
+.about-box{
+  background:#ffffff0a;border:1px solid var(--border);cursor:text;transition:.15s;
+}
+.about-box:hover{border-color:#39406b}
+.about-textarea{
+  background:#ffffff12;border:2px solid var(--accent);resize:vertical;outline:none;
+}
+
+.save-row{display:flex;align-items:center;gap:16px;margin-top:22px;flex-wrap:wrap}
+button#saveBtn{
+  background:var(--accent);color:#fff;border:0;border-radius:14px;
+  padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;
+  font-family:'Cairo',Arial,sans-serif;
+  box-shadow:0 12px 28px var(--accent-soft);transition:.15s;
+}
+button#saveBtn:hover{background:#6a4be0;transform:translateY(-1px)}
+button#saveBtn:active{transform:translateY(0)}
+#saveStatus{
+  font-size:14px;font-weight:700;color:var(--success);
+  opacity:0;transition:opacity .3s;
+}
 #saveStatus.show{opacity:1}
-.bottom-bar{position:fixed;bottom:20px;left:20px;z-index:9999}
-@media(max-width:1000px){header{padding:0 30px;gap:25px}header a{font-size:20px}.profile-section{width:90%;flex-direction:column;gap:40px}.profile-image{width:400px;height:400px}.profile-info{width:100%}.stats-section{width:90%;grid-template-columns:1fr;gap:50px}.save-bar{width:90%}}
-@media(max-width:550px){header{height:100px;padding:0 20px;gap:15px}header a{font-size:15px}.profile-image{width:300px;height:300px;border-radius:50px}.username{font-size:28px}.about-title{font-size:24px}.about-box,.about-textarea{min-height:200px;font-size:18px}.stat h2{font-size:26px}.stat-box{height:250px}#saveBtn{padding:14px 30px;font-size:18px}}
+
+/* stats */
+.stats-section{
+  display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:36px;
+}
+.stat{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:28px;text-align:center;backdrop-filter:blur(14px);
+}
+.stat-icon{font-size:26px;margin-bottom:10px}
+.stat h2{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:18px}
+.stat-box{font-size:20px;font-weight:800;color:var(--text)}
+
+/* bottom bar */
+.bottom-bar{position:fixed;bottom:22px;left:22px;z-index:999}
+#langToggleBtn{
+  background:#12172bdd;color:var(--text);border:1px solid var(--border);
+  border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Cairo',Arial,sans-serif;
+  box-shadow:0 10px 24px #0008;backdrop-filter:blur(8px);
+}
+#langToggleBtn:hover{border-color:var(--accent)}
+
+@media(max-width:720px){
+  header{padding:18px 20px}
+  nav{gap:18px}
+  nav a{font-size:13px}
+  .profile-card{grid-template-columns:1fr;text-align:center}
+  .profile-image{width:min(220px,60vw);margin:0 auto}
+  .about-title{margin-top:4px}
+  .save-row{justify-content:center}
+  .stats-section{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div id="pageScale">
+
 <header>
-<a href="index.html" id="navBrand">Brain Battle</a><a href="https://linktr.ee/vliex" id="navContact">Contact Us</a><a href="" id="navSupport">Support us</a>
+  <a href="index.html" id="navBrand" class="brand"><span class="brand-mark">🧠</span><span>Brain Battle</span></a>
+  <nav>
+    <a href="https://linktr.ee/vliex" id="navContact">Contact Us</a>
+    <a href="" id="navSupport">Support us</a>
+  </nav>
 </header>
-<section class="profile-section">
-<div class="profile-image" id="profileImageWrap" title="Press To Change Image">
-<img id="profileImg" src="profile.jpg" alt="Profile Picture">
-<div class="img-overlay" id="imgOverlayText">🖼️ Change Image</div>
-</div>
-<input type="file" id="imageInput" accept="image/*" style="display:none">
-<div class="profile-info">
-<div class="username" id="profileUsername">Your Name </div>
-<div class="about-title" id="aboutTitle">About me:</div>
-<div class="about-box" id="aboutBox" title="Press To Talk">Tell Your Mommy About Everything  </div>
-</div>
-</section>
-<section class="stats-section">
-<div class="stat"><h2 id="statGamesTitle">Your Game Honey</h2><div class="stat-box" id="statGamesBox">No games yet</div></div>
-<div class="stat"><h2 id="statLevelTitle">My little Good Boy Brain Level</h2><div class="stat-box" id="statLevelBox">Brain Level: 0</div></div>
-</section>
-<div class="save-bar">
-<button id="saveBtn">Save Profile</button>
-<span id="saveStatus">تم الحفظ ✓</span>
-</div>
+
+<main>
+  <section class="profile-card">
+    <div class="profile-image" id="profileImageWrap" title="Press To Change Image">
+      <img id="profileImg" src="profile.jpg" alt="Profile Picture">
+      <div class="img-overlay" id="imgOverlayText">🖼️ Change Image</div>
+    </div>
+    <input type="file" id="imageInput" accept="image/*" style="display:none">
+
+    <div class="profile-info">
+      <div class="username" id="profileUsername">Your Name</div>
+      <div class="about-title" id="aboutTitle">About me:</div>
+      <div class="about-box" id="aboutBox" title="Press To Talk">Tell Your Mommy About Everything</div>
+
+      <div class="save-row">
+        <button id="saveBtn">Save Profile</button>
+        <span id="saveStatus">تم الحفظ ✓</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="stat">
+      <div class="stat-icon">🎮</div>
+      <h2 id="statGamesTitle">Your Game Honey</h2>
+      <div class="stat-box" id="statGamesBox">No games yet</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">🧠</div>
+      <h2 id="statLevelTitle">My little Good Boy Brain Level</h2>
+      <div class="stat-box" id="statLevelBox">Brain Level: 0</div>
+    </div>
+  </section>
+</main>
 
 <div class="bottom-bar">
   <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
-</div>
-
 
 <script>
 
@@ -103,7 +232,6 @@ function applyTranslations(l){
   document.documentElement.lang = l;
   document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
   const t = i18n[l];
-  document.getElementById('navBrand').textContent = t.navBrand;
   document.getElementById('navContact').textContent = t.navContact;
   document.getElementById('navSupport').textContent = t.navSupport;
   document.getElementById('imgOverlayText').textContent = t.imgOverlayText;
@@ -127,7 +255,6 @@ function toggleLanguage(){
   applyTranslations(currentLang);
 }
 
-const STORAGE_KEY = "profile-data";
 const profileImg = document.getElementById("profileImg");
 const profileImageWrap = document.getElementById("profileImageWrap");
 const imageInput = document.getElementById("imageInput");
@@ -135,57 +262,41 @@ const aboutBox = document.getElementById("aboutBox");
 const saveBtn = document.getElementById("saveBtn");
 const saveStatus = document.getElementById("saveStatus");
 
-let currentAboutText = aboutBox.textContent;
-let currentImageData = null;
-let storageAvailable = !!(window.storage && window.storage.get && window.storage.set);
+const defaultAbout = {
+  ar: "احكيلي عن نفسك",
+  en: "Tell Your Mommy About Everything"
+};
 
-async function loadProfile(){
-  if(!storageAvailable) return;
-  try{
-    const result = await window.storage.get(STORAGE_KEY, false);
-    if(result && result.value){
-      const data = JSON.parse(result.value);
-      if(data.about){
-        currentAboutText = data.about;
-        aboutBox.textContent = data.about;
-      }
-      if(data.image){
-        currentImageData = data.image;
-        profileImg.src = data.image;
-      }
-    }
-  }catch(e){
-    console.log("لا توجد بيانات محفوظة بعد:", e);
-  }
-}
-loadProfile();
+let currentAboutText = aboutBox.textContent;
+let currentImageFile = null;
+let currentUser = null;
 
 profileImageWrap.addEventListener("click", () => imageInput.click());
 
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
   if(!file) return;
+  currentImageFile = file;
   const reader = new FileReader();
   reader.onload = (e) => {
-    currentImageData = e.target.result;
-    profileImg.src = currentImageData;
+    profileImg.src = e.target.result;
   };
   reader.readAsDataURL(file);
 });
 
 aboutBox.addEventListener("click", () => {
-  if(aboutBox.dataset.editing === "true") return; 
+  if(aboutBox.dataset.editing === "true") return;
 
   const textarea = document.createElement("textarea");
   textarea.className = "about-textarea";
-  textarea.value = currentAboutText === "Tell Your Mommy About Everything  " ? "" : currentAboutText;
+  textarea.value = (currentAboutText === defaultAbout.ar || currentAboutText === defaultAbout.en) ? "" : currentAboutText;
   textarea.placeholder = "Talk Baby Talk...";
 
   aboutBox.replaceWith(textarea);
   textarea.focus();
 
   function finishEditing(){
-    currentAboutText = textarea.value.trim() || "Tell Your Mommy About Everything  ";
+    currentAboutText = textarea.value.trim() || defaultAbout[currentLang];
     aboutBox.textContent = currentAboutText;
     aboutBox.dataset.editing = "false";
     textarea.replaceWith(aboutBox);
@@ -200,22 +311,48 @@ aboutBox.addEventListener("click", () => {
   });
 });
 
+async function uploadAvatarIfNeeded(){
+  if(!currentImageFile || !currentUser) return {};
+  const ext = (currentImageFile.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${currentUser.id}/avatar.${ext}`;
+
+  const { error: uploadError } = await supabaseClient
+    .storage.from('avatars')
+    .upload(path, currentImageFile, { upsert: true });
+
+  if(uploadError) return { error: uploadError };
+
+  const { data } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+  return { url: data.publicUrl + '?t=' + Date.now() };
+}
+
 saveBtn.addEventListener("click", async () => {
-  const data = { about: currentAboutText, image: currentImageData };
-  if(storageAvailable){
-    try{
-      const result = await window.storage.set(STORAGE_KEY, JSON.stringify(data), false);
-      if(result){
-        flashStatus(randomSuccessMessage());
-      }else{
-        flashStatus("تعذّر الحفظ ⚠");
-      }
-    }catch(e){
-      console.error("Storage error:", e);
-      flashStatus("تعذّر الحفظ ⚠");
-    }
+  if(!currentUser){
+    flashStatus("تعذّر الحفظ ⚠");
+    return;
+  }
+
+  const { url: newAvatarUrl, error: uploadError } = await uploadAvatarIfNeeded();
+  if(uploadError){
+    console.error("Upload error:", uploadError);
+    flashStatus("تعذّر رفع الصورة ⚠");
+    return;
+  }
+
+  const updates = { about: currentAboutText };
+  if(newAvatarUrl) updates.avatar_url = newAvatarUrl;
+
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update(updates)
+    .eq('id', currentUser.id);
+
+  if(error){
+    console.error("Save error:", error);
+    flashStatus("تعذّر الحفظ ⚠");
   }else{
-    flashStatus(randomSuccessMessage()) ;
+    currentImageFile = null;
+    flashStatus(randomSuccessMessage());
   }
 });
 
@@ -243,7 +380,7 @@ function flashStatus(msg){
   setTimeout(() => saveStatus.classList.remove("show"), 4000);
 }
 
-async function loadLoggedInUsername() {
+async function initProfile() {
   const usernameEl = document.getElementById("profileUsername");
 
   const { data, error } = await supabaseClient.auth.getUser();
@@ -253,18 +390,35 @@ async function loadLoggedInUsername() {
     return;
   }
 
-  const user = data.user;
+  currentUser = data.user;
+
+  const { data: profileRow, error: profileError } = await supabaseClient
+    .from("profiles")
+    .select("fullname, about, avatar_url")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  if(profileError) console.error("Load profile error:", profileError);
 
   const username =
-    user.user_metadata?.fullname ||
-    user.user_metadata?.full_name ||
-    user.email?.split("@")[0] ||
+    profileRow?.fullname ||
+    currentUser.user_metadata?.fullname ||
+    currentUser.user_metadata?.full_name ||
+    currentUser.email?.split("@")[0] ||
     "User";
 
   usernameEl.textContent = username;
+
+  if(profileRow?.about){
+    currentAboutText = profileRow.about;
+    aboutBox.textContent = profileRow.about;
+  }
+  if(profileRow?.avatar_url){
+    profileImg.src = profileRow.avatar_url;
+  }
 }
 
-loadLoggedInUsername();
+initProfile();
 applyTranslations(currentLang);
 </script>
 </body>
