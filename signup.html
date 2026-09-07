@@ -239,7 +239,8 @@ const i18n = {
     passwordMismatch: "كلمتا المرور غير متطابقتين",
     emailExists: "هذا الإيميل مسجل بحساب موجود بالفعل",
     sendError: "تعذّر إرسال كود التحقق. تأكد من إعداد EmailJS ثم حاول مرة أخرى",
-    usernameExists: "اسم المستخدم موجود بالفعل، جرّب اسمًا آخر"
+    usernameExists: "اسم المستخدم موجود بالفعل، جرّب اسمًا آخر",
+    sendingCode: "جارٍ إرسال الكود",
   },
   en: {
     backBtn: "Back",
@@ -261,7 +262,8 @@ const i18n = {
     passwordMismatch: "Passwords do not match",
     emailExists: "This email is already registered",
     sendError: "Failed to send verification code. Make sure EmailJS is set up and try again",
-    usernameExists: "Username already exists, try another one"
+    usernameExists: "Username already exists, try another one",
+    sendingCode: "Sending code",
   }
 };
 
@@ -283,11 +285,7 @@ function applyTranslations(l) {
   document.getElementById('successMsg').textContent = t.successMsg;
   document.getElementById('submitBtn').textContent = t.submitBtn;
   document.getElementById('FooterLink').innerHTML = t.FooterLink;
-  document.getElementById('errorMsg').textContent = t.fillAllFields;
-  document.getElementById('errorMsg').textContent = t.passwordLength;
-  document.getElementById('errorMsg').textContent = t.passwordMismatch;
-  document.getElementById('errorMsg').textContent = t.emailExists;
-  document.getElementById('errorMsg').textContent = t.sendError;
+  document.getElementById("errorMsg").textContent = "";
 }
 
 const EMAILJS_PUBLIC_KEY  = "l4A_cZFEUEwyCzUn1";
@@ -314,24 +312,24 @@ async function handleSignup(e) {
     successMsg.style.display = 'none';
 
     if (!fullname || !email || !password || !confirmPassword) {
-        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].fillAllFields;
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].fillAllFields;
         errorMsg.style.display = 'block';
         return false;
     }
 
     if (password.length < 6) {
-        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].passwordLength;
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].passwordLength;
         errorMsg.style.display = 'block';
         return false;
     }
 
     if (password !== confirmPassword) {
-    errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].passwordMismatch;
+    errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].passwordMismatch;
     errorMsg.style.display = 'block';
     return false;
 }
 
-const lang = localStorage.getItem('lang') || 'ar';
+const lang = localStorage.getItem('lang') || 'en';
 
 const { data: existingProfile, error: usernameCheckError } = await supabaseClient
     .from('profiles')
@@ -380,7 +378,7 @@ const { data: existingProfile, error: usernameCheckError } = await supabaseClien
     };
 
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'جارٍ إرسال الكود<span class="spinner"></span>';
+    submitBtn.innerHTML = `${i18n[lang].sendingCode}<span class="spinner"></span>`;
 
     try {
         if (!window.emailjs || EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
@@ -393,20 +391,20 @@ const { data: existingProfile, error: usernameCheckError } = await supabaseClien
         });
 
         sessionStorage.setItem('bb_pending_user', JSON.stringify(pendingUser));
-        successMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].successMsg;
+        successMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].successMsg;
         successMsg.style.display = 'block';
         setTimeout(() => { window.location.href = 'verify.html'; }, 900);
     } catch (err) {
         submitBtn.disabled = false;
-        submitBtn.textContent = i18n[localStorage.getItem('lang') || 'ar'].submitBtn;
-        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'ar'].sendError;
+        submitBtn.textContent = i18n[localStorage.getItem('lang') || 'en'].submitBtn;
+        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].sendError;
         errorMsg.style.display = 'block';
         console.error(err);
     }
 
     return false;
 }
-applyTranslations(localStorage.getItem('lang') || 'ar');
+applyTranslations(localStorage.getItem('lang') || 'en');
 </script>
 
 </body>

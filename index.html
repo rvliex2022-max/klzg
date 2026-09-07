@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="style.css">
@@ -155,7 +155,7 @@
   display: flex;
   gap: 10px;
 }
-#langToggleBtn, #messagesBtn {
+#messagesBtn {
   box-shadow: 0 4px 14px rgba(0,0,0,0.5);
   margin: 0;
 }
@@ -174,7 +174,7 @@ input,select{width:100%;background:#0a0e19;border:1px solid #303750;color:white;
 button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:15px;cursor:pointer;background:#7c5cff;color:white;transition:.15s}button:hover{transform:translateY(-1px);filter:brightness(1.08)}button.secondary{background:#1b2235;color:#dbe2ff}button.danger{background:#d94b67}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.matchmaking-btn{background:linear-gradient(135deg,#8b5cf6,#6d4aff);position:relative;overflow:hidden}.matchmaking-btn.searching{background:#252d46}.match-status{width:100%;font-size:13px;color:#9eabd0;min-height:18px}.match-status strong{color:#dbe2ff}.room{font-size:34px;font-weight:900;letter-spacing:8px;text-align:center;padding:15px;border:1px dashed #465071;border-radius:16px;margin:15px 0}
 .players{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}.player{padding:18px;border-radius:18px;background:#0c1120;border:1px solid #28304a;display:flex;justify-content:space-between}.score{font-size:30px;font-weight:900}.muted{color:#8490af;font-size:13px}
-.center{text-align:center}.hidden{display:none!important}.q{font-size:30px;font-weight:850;line-height:1.3;margin:20px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{background:#171e31;border:1px solid #303953;text-align:right}.choice.correct{background:#155c43;border-color:#2bd28b}.choice.wrong{background:#63253a;border-color:#ff6686}.timer{height:9px;background:#242b40;border-radius:99px;overflow:hidden}.bar{height:100%;width:100%;background:#7c5cff;transition:width .1s linear}.status{margin:12px 0;color:#aeb7cf;min-height:22px}.result{font-size:54px;font-weight:950}.mini{font-size:12px;color:#7f8aa7}
+.center{text-align:center}.hidden{display:none!important}.q{font-size:30px;font-weight:850;line-height:1.3;margin:20px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{background:#171e31;border:1px solid #303953;text-align:start}.choice.correct{background:#155c43;border-color:#2bd28b}.choice.wrong{background:#63253a;border-color:#ff6686}.timer{height:9px;background:#242b40;border-radius:99px;overflow:hidden}.bar{height:100%;width:100%;background:#7c5cff;transition:width .1s linear}.status{margin:12px 0;color:#aeb7cf;min-height:22px}.result{font-size:54px;font-weight:950}.mini{font-size:12px;color:#7f8aa7}
 @media(max-width:700px){h1{font-size:32px}.grid,.players,.choices{grid-template-columns:1fr}.q{font-size:24px}.wrap{padding:18px 12px}}
 </style>
 </head>
@@ -184,16 +184,20 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
     <div class="user-menu" id="userMenu">
       <button class="avatar-btn" id="avatarBtn">؟</button>
       <div class="user-dropdown" id="userDropdown">
-        <a href="Profile Page.html">👤 الملف الشخصي</a>
-        <a href="Message.html">👥 الأصدقاء</a>
-        <a href="settings.html">⚙️ الإعدادات</a>
+        <a href="Profile Page.html" id="profileLink">👤 الملف الشخصي</a>
+        <a href="Message.html" id="friendsLink">👥 الأصدقاء</a>
+        <a href="settings.html" id="settingsLink">⚙️ الإعدادات</a>
         <hr>
         <button class="signout" id="signOutBtn">🚪 تسجيل الخروج</button>
       </div>
     </div>
 </header>
     <div class="bg"></div><div class="wrap">
-<div class="top"><div class="logo">🧠 BRAIN BATTLE</div><div class="badge" id="badgeText">1v1 • سرعة + دقة</div></div>
+<div class="top">
+    <div class="logo">🧠 BRAIN BATTLE</div>
+    <div class="badge" id="badgeText">1v1 • سرعة + دقة</div>
+    <button id="gameLangBtn" class="secondary" onclick="toggleGameLanguage()">English</button>
+</div>
 
 <section id="home" class="card">
 <h1 id="homeTitle">مين أذكى؟</h1><p id="homeDesc">لعبة أسئلة مباشرة لشخصين. افتحوا نفس الرابط، ادخلوا نفس الغرفة، وابدؤوا المنافسة.</p>
@@ -226,7 +230,6 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 
 <div class="bottom-bar">
   <button id="messagesBtn" class="secondary" onclick="location.href='Message.html'">💬 <span id="messagesBtnText">الرسائل</span></button>
-  <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -10237,11 +10240,16 @@ const EN_QUESTION_BANK=[
  ["Trivia challenge: What do bees collect from flowers to make honey?", ["Milk", "Sand", "Salt", "Nectar"], 3]
 ]
 
-let currentLang = 'ar';
+let currentLang = 'en';
+let gameLang = currentLang;
 
 
 const i18n = {
   ar: {
+    profileLink: "👤 الملف الشخصي",
+    friendsLink: "👥 الأصدقاء",
+    settingsLink: "⚙️ الإعدادات",
+    signOutBtn: "تسجيل الخروج",
     badge: "1v1 • سرعة + دقة",
     homeTitle: "مين أذكى؟",
     homeDesc: "لعبة أسئلة مباشرة لشخصين. افتحوا نفس الرابط، ادخلوا نفس الغرفة، وابدؤوا المنافسة.",
@@ -10291,6 +10299,10 @@ const i18n = {
     messagesBtn: "الرسائل"
   },
   en: {
+    profileLink: "👤 Profile",
+    friendsLink: "👥 Friends",
+    settingsLink: "⚙️ Settings",
+    signOutBtn: "Sign Out",
     badge: "1v1 • Speed + Accuracy",
     homeTitle: "Who is Smarter?",
     homeDesc: "A live 2-player trivia game. Open the same link, enter the same room, and start competing.",
@@ -10342,22 +10354,65 @@ const i18n = {
 };
 
 function setLanguage(l){
-    currentLang = l
-    localStorage.setItem('lang', l);
+    currentLang = l;
     document.documentElement.lang = l;
-    document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
-    document.getElementById('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
+    document.documentElement.dir = (l === 'en') ? 'ltr' : 'rtl';
     updateStaticTexts();
 }
 
+function toggleGameLanguage() {
+  gameLang = gameLang === "ar" ? "en" : "ar";
 
-function toggleLanguage() {
-  setLanguage(currentLang === 'en' ? 'ar' : 'en');
+  document.getElementById("gameLangBtn").textContent =
+    gameLang === "ar" ? "English" : "العربية";
+
+  updateGameTexts();
 }
 
 
+function updateGameTexts() {
+  document.documentElement.lang = gameLang;
+  document.documentElement.dir = gameLang === "en" ? "ltr" : "rtl";
+
+  const t = i18n[gameLang];
+
+  $("badgeText").textContent = t.badge;
+  $("homeTitle").textContent = t.homeTitle;
+  $("homeDesc").textContent = t.homeDesc;
+  $("lblName").textContent = t.lblName;
+  $("lblRoom").textContent = t.lblRoom;
+  $("name").placeholder = t.namePlaceholder;
+  $("roomInput").placeholder = t.roomPlaceholder;
+  $("btnCreate").textContent = t.btnCreate;
+  $("btnJoin").textContent = t.btnJoin;
+  $("btnMatchmakeText").textContent =
+    matchmakingActive ? t.btnMatchmakeStop : t.btnMatchmake;
+  $("lblRoomCode").textContent = t.lblRoomCode;
+  $("startBtn").textContent = t.startBtn;
+  $("btnCopy").textContent = t.btnCopy;
+  $("btnExit1").textContent = t.btnExit;
+  $("btnExit2").textContent = t.btnExit;
+  $("btnExit3").textContent = t.btnExit;
+  $("btnPlayAgain").textContent = t.btnPlayAgain;
+  $("lblFinalResult").textContent = t.lblFinalResult;
+  $("lblYou1").textContent = t.lblYou;
+  $("lblOpp1").textContent = t.lblOpp;
+
+  if (!oppName) {
+    $("p2").textContent = t.waitingOpp;
+  }
+
+  if (questions.length > 0) {
+    $("counter").textContent = t.qCounter(idx + 1, questions.length);
+  }
+}
+
 function updateStaticTexts() {
   const t = i18n[currentLang];
+  if(document.getElementById('profileLink')) document.getElementById('profileLink').textContent = t.profileLink;
+  if(document.getElementById('friendsLink')) document.getElementById('friendsLink').textContent = t.friendsLink;
+  if(document.getElementById('settingsLink')) document.getElementById('settingsLink').textContent = t.settingsLink;
+  if(document.getElementById('signOutBtn')) document.getElementById('signOutBtn').textContent = t.signOutBtn;
   if(document.getElementById('badgeText')) document.getElementById('badgeText').textContent = t.badge;
   if(document.getElementById('homeTitle')) document.getElementById('homeTitle').textContent = t.homeTitle;
   if(document.getElementById('homeDesc')) document.getElementById('homeDesc').textContent = t.homeDesc;
@@ -10414,8 +10469,8 @@ playerName=$("name").value.trim()||"Player";
 matchmakingActive=true;
 matchStatusLocked=false;
 $("btnMatchmake")?.classList.add("searching");
-updateStaticTexts();
-$("matchStatus").textContent=i18n[currentLang].matchSearching;
+updateGameTexts();
+$("matchStatus").textContent=i18n[gameLang].matchSearching;
 
 try{
   peer=new Peer();
@@ -10437,25 +10492,25 @@ try{
         id:matchmakingId,
         peerId:matchmakingPeerId,
         name:playerName,
-        lang:currentLang,
+        lang:gameLang,
         queuedAt:Date.now(),
         queued:true
       });
-      $("matchStatus").textContent=i18n[currentLang].matchWaiting;
+      $("matchStatus").textContent=i18n[gameLang].matchWaiting;
       tryMatchmake();
     });
   });
   peer.on('error',(err)=>{
     console.error('matchmaking peer error',err);
     stopMatchmaking(false).then(()=>{
-      $("matchStatus").textContent=i18n[currentLang].matchError;
+      $("matchStatus").textContent=i18n[gameLang].matchError;
       matchStatusLocked=true;
     });
   });
 }catch(err){
   console.error('matchmaking error',err);
   await stopMatchmaking(false);
-  $("matchStatus").textContent=i18n[currentLang].matchError;
+  $("matchStatus").textContent=i18n[gameLang].matchError;
   matchStatusLocked=true;
 }
 }
@@ -10499,20 +10554,20 @@ if(!isForMe)return;
 matchmakingActive=false;
 matchStatusLocked=true;
 $("btnMatchmake")?.classList.remove("searching");
-updateStaticTexts();
+updateGameTexts();
 const amHost=payload.hostPeerId===matchmakingPeerId;
 isHost=amHost;
 room=payload.matchId||'LIVE';
 oppName=amHost?payload.guestName:payload.hostName;
 await leaveMatchmakingChannel();
 enterLobby();
-setLobbyStatus(i18n[currentLang].matchFound(oppName));
-$("matchStatus").textContent=i18n[currentLang].matchFound(oppName);
+setLobbyStatus(i18n[gameLang].matchFound(oppName));
+$("matchStatus").textContent=i18n[gameLang].matchFound(oppName);
 
 if(amHost){
   peer.on('connection',(c)=>{conn=c;setupConnHandlers()});
 }else{
-  setLobbyStatus(i18n[currentLang].matchConnecting);
+  setLobbyStatus(i18n[gameLang].matchConnecting);
   conn=peer.connect(payload.hostPeerId,{reliable:true});
   setupConnHandlers();
 }
@@ -10533,7 +10588,7 @@ if(destroyPeer&&peer){try{peer.destroy()}catch(e){} peer=null;}
 matchmakingPeerId="";
 $("btnMatchmake")?.classList.remove("searching");
 if($("matchStatus"))$("matchStatus").textContent="";
-updateStaticTexts();
+updateGameTexts();
 }
 
 function createRoom(){
@@ -10541,26 +10596,26 @@ playerName=$("name").value.trim()||"Player 1";
 room=Math.floor(100000+Math.random()*900000)+"";
 isHost=true;
 enterLobby();
-setLobbyStatus(i18n[currentLang].creatingRoom);
+setLobbyStatus(i18n[gameLang].creatingRoom);
 peer=new Peer(roomPeerId(room));
-peer.on('open',()=>{setLobbyStatus(i18n[currentLang].roomReady)});
+peer.on('open',()=>{setLobbyStatus(i18n[gameLang].roomReady)});
 peer.on('connection',(c)=>{conn=c;setupConnHandlers()});
 peer.on('error',(err)=>{
-if(err.type==='unavailable-id'){setLobbyStatus(i18n[currentLang].idTaken);}
-else{setLobbyStatus(i18n[currentLang].connError+"("+err.type+")");}
+if(err.type==='unavailable-id'){setLobbyStatus(i18n[gameLang].idTaken);}
+else{setLobbyStatus(i18n[gameLang].connError+"("+err.type+")");}
 });
 }
 
 function joinRoom(){
 playerName=$("name").value.trim()||"Player 2";
 room=$("roomInput").value.trim();
-if(!room){alert(i18n[currentLang].enterRoomFirst);return}
+if(!room){alert(i18n[gameLang].enterRoomFirst);return}
 isHost=false;
 enterLobby();
-setLobbyStatus(i18n[currentLang].connecting+room+"...");
+setLobbyStatus(i18n[gameLang].connecting+room+"...");
 peer=new Peer();
 peer.on('open',()=>{conn=peer.connect(roomPeerId(room));setupConnHandlers()});
-peer.on('error',(err)=>{setLobbyStatus(i18n[currentLang].joinFailed)});
+peer.on('error',(err)=>{setLobbyStatus(i18n[gameLang].joinFailed)});
 }
 
 function setupConnHandlers(){
@@ -10568,38 +10623,91 @@ conn.on('open',()=>{
 if(!isHost)conn.send({type:'hello',name:playerName});
 });
 conn.on('data',handleData);
-conn.on('close',()=>{setLobbyStatus(i18n[currentLang].disconnected);$("startBtn").disabled=true});
+conn.on('close',()=>{setLobbyStatus(i18n[gameLang].disconnected);$("startBtn").disabled=true});
 }
 
-function handleData(msg){
-if(msg.type==='hello'){
-oppName=msg.name;$("p2").textContent=oppName;
-const bank = bankForLang(currentLang);
-let picked=shuffle(bank).slice(0,Math.min(QUESTIONS_PER_GAME,bank.length));
-questions=picked.map(([q,opts,ans])=>{
-let correctText=opts[ans];let newOpts=shuffle(opts);let newAns=newOpts.indexOf(correctText);
-return [q,newOpts,newAns];
-});
-conn.send({type:'welcome',name:playerName,questions,lang:currentLang});
-setLobbyStatus(i18n[currentLang].oppJoined);
-$("startBtn").disabled=false;
-}
-else if(msg.type==='welcome'){
-oppName=msg.name;$("p2").textContent=oppName;questions=msg.questions;
-setLobbyStatus(i18n[currentLang].waitingHost);
-}
-else if(msg.type==='start'){beginGameLocal()}
-else if(msg.type==='score'){oppScore=msg.total;$("gs2").textContent=oppScore}
-else if(msg.type==='finished'){oppFinished=true;oppFinalScore=msg.total;maybeShowFinal()}
+function handleData(msg) {
+  if (msg.type === "hello") {
+    oppName = msg.name;
+    $("p2").textContent = oppName;
+
+    conn.send({
+      type: "welcome",
+      name: playerName
+    });
+
+    setLobbyStatus(i18n[gameLang].oppJoined);
+    $("startBtn").disabled = false;
+  }
+
+  else if (msg.type === "welcome") {
+    oppName = msg.name;
+    $("p2").textContent = oppName;
+    setLobbyStatus(i18n[gameLang].waitingHost);
+  }
+
+  else if (msg.type === "start") {
+    gameLang = msg.lang || gameLang;
+    questions = msg.questions || [];
+
+    $("gameLangBtn").textContent =
+      gameLang === "ar" ? "English" : "العربية";
+
+    updateGameTexts();
+    beginGameLocal();
+  }
+
+  else if (msg.type === "score") {
+    oppScore = msg.total;
+    $("gs2").textContent = oppScore;
+  }
+
+  else if (msg.type === "finished") {
+    oppFinished = true;
+    oppFinalScore = msg.total;
+    maybeShowFinal();
+  }
 }
 
-function enterLobby(){$("roomCode").textContent=room;$("p1").textContent=playerName;$("p2").textContent=i18n[currentLang].waitingOpp;show("lobby")}
-function copyRoom(){navigator.clipboard?.writeText(room);alert(i18n[currentLang].copied+room)}
+function enterLobby(){
+    $("roomCode").textContent=room;
+    $("p1").textContent=playerName;
+    $("p2").textContent=i18n[gameLang].waitingOpp;
+    show("lobby");
+}
 
-function startGame(){
-if(!conn||!conn.open){alert(i18n[currentLang].noConn);return}
-conn.send({type:'start'});
-beginGameLocal();
+function copyRoom(){navigator.clipboard?.writeText(room);alert(i18n[gameLang].copied+room)}
+
+function startGame() {
+  if (!conn || !conn.open) {
+    alert(i18n[gameLang].noConn);
+    return;
+  }
+
+  const bank = bankForLang(gameLang);
+  const picked = shuffle(bank).slice(
+    0,
+    Math.min(QUESTIONS_PER_GAME, bank.length)
+  );
+
+  questions = picked.map(([question, options, correctAnswer]) => {
+    const correctText = options[correctAnswer];
+    const shuffledOptions = shuffle(options);
+
+    return [
+      question,
+      shuffledOptions,
+      shuffledOptions.indexOf(correctText)
+    ];
+  });
+
+  conn.send({
+    type: "start",
+    lang: gameLang,
+    questions
+  });
+
+  beginGameLocal();
 }
 
 async function exitGame(){
@@ -10618,7 +10726,7 @@ show("game");render();
 }
 
 function render(){
-let [q,opts,ans]=questions[idx];$("counter").textContent=i18n[currentLang].qCounter(idx+1, questions.length);$("question").textContent=q;$("status").textContent="";
+let [q,opts,ans]=questions[idx];$("counter").textContent=i18n[gameLang].qCounter(idx+1, questions.length);$("question").textContent=q;$("status").textContent="";
 let box=$("choices");box.innerHTML="";
 opts.forEach((o,i)=>{let b=document.createElement("button");b.className="choice";b.textContent=o;b.onclick=()=>answer(i,ans,b);box.appendChild(b)});
 time=TIME_PER_QUESTION;clearInterval(timer);$("bar").style.width="100%";timer=setInterval(()=>{time-=.1;$("bar").style.width=Math.max(0,time/TIME_PER_QUESTION*100)+"%";if(time<=0){clearInterval(timer);answer(-1,ans,null)}},100)
@@ -10626,8 +10734,8 @@ time=TIME_PER_QUESTION;clearInterval(timer);$("bar").style.width="100%";timer=se
 function answer(chosen,ans,btn){
 clearInterval(timer);document.querySelectorAll(".choice").forEach(b=>b.disabled=true);
 if(btn)btn.classList.add(chosen===ans?"correct":"wrong");
-if(chosen===ans){let pts=Math.max(1,Math.ceil(time));score+=pts;$("gs1").textContent=score;$("status").textContent=i18n[currentLang].correct(pts)}
-else{$("status").textContent=chosen===-1?i18n[currentLang].timeUp:i18n[currentLang].wrong;}
+if(chosen===ans){let pts=Math.max(1,Math.ceil(time));score+=pts;$("gs1").textContent=score;$("status").textContent=i18n[gameLang].correct(pts)}
+else{$("status").textContent=chosen===-1?i18n[gameLang].timeUp:i18n[gameLang].wrong;}
 if(conn&&conn.open)conn.send({type:'score',total:score});
 setTimeout(()=>{idx++;if(idx>=questions.length)finish();else render()},900)
 }
@@ -10640,17 +10748,17 @@ function maybeShowFinal(){
 if(!myFinished)return;
 show("end");
 let maxScore=questions.length*TIME_PER_QUESTION;
-let oppLine=oppFinished?i18n[currentLang].oppScoreLine(oppName, oppFinalScore):i18n[currentLang].oppNotDone(oppName);
+let oppLine=oppFinished?i18n[gameLang].oppScoreLine(oppName, oppFinalScore):i18n[gameLang].oppNotDone(oppName);
 let resultText;
 if(oppFinished){
-if(score>oppFinalScore)resultText=i18n[currentLang].won;
-else if(score<oppFinalScore)resultText=i18n[currentLang].lost;
-else resultText=i18n[currentLang].tie;
-}else{resultText=i18n[currentLang].doneSolo}
+if(score>oppFinalScore)resultText=i18n[gameLang].won;
+else if(score<oppFinalScore)resultText=i18n[gameLang].lost;
+else resultText=i18n[gameLang].tie;
+}else{resultText=i18n[gameLang].doneSolo}
 $("winner").textContent=resultText;
-$("finalScore").innerHTML='${i18n[currentLang].yourScore(score,maxScore)}<br>${oppLine}';
+$("finalScore").innerHTML=`${i18n[gameLang].yourScore(score,maxScore)}<br>${oppLine}`;
 }
-setLanguage(localStorage.getItem('lang') || 'ar');
+setLanguage(localStorage.getItem('lang') || 'en');
 </script>
 
 <script>
@@ -10667,6 +10775,10 @@ setLanguage(localStorage.getItem('lang') || 'ar');
       const { data: profile } = await supabaseClient
         .from("profiles").select("fullname, avatar_url").eq("id", session.user.id).maybeSingle();
       const name = profile?.fullname || session.user.email || "؟";
+      const nameInput = document.getElementById("name");
+      if(nameInput && !nameInput.value){
+        nameInput.value = name;
+      }
       loginLink.style.display = "none";
       userMenu.style.display = "block";
       if(profile?.avatar_url){

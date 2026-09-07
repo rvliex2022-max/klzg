@@ -233,7 +233,13 @@ const i18n = {
     successMsg: 'تم تأكيد حسابك بنجاح! جارٍ تحويلك...',
     verifyBtn: "تأكيد",
     resendLink: "لم يصلك الكود؟",
-    resendBtn: "إعادة الإرسال"
+    resendBtn: "إعادة الإرسال",
+    resendAvailable: "إعادة الإرسال",
+    resendFailed: "تعذّر إعادة إرسال الكود، حاول لاحقًا",
+    enterFullCode: "أدخل الكود كاملًا (6 أرقام)",
+    requestNewCode: "انتهت صلاحية الكود، اطلب كود جديد",
+    wrongCode: "الكود غير صحيح، حاول مرة أخرى",
+    verifying: "جارٍ التفعيل"
   },
   en:{
     TtlVerify: "📩 Verify Account",
@@ -243,9 +249,19 @@ const i18n = {
     successMsg: 'Your account has been successfully verified! Redirecting...',
     verifyBtn: "Verify",
     resendLink: "Didn't receive the code?",
-    resendBtn: "Resend"
+    resendBtn: "Resend",
+    resendAvailable: "Resend",
+    resendFailed: "Could not resend the code. Try again later.",
+    enterFullCode: "Enter the complete 6-digit code",
+    requestNewCode: "The code has expired. Request a new code.",
+    wrongCode: "Incorrect code. Try again.",
+    verifying: "Verifying"
   }
 };
+
+function t() {
+  return i18n[localStorage.getItem("lang") || "en"];
+}
 
 function applyTranslations(l) {
   document.documentElement.lang = l;
@@ -311,7 +327,7 @@ function startExpiryCountdown() {
         document.getElementById('timeLeft').textContent = `${m}:${s}`;
         if (remaining <= 0) {
             clearInterval(countdownInterval);
-            document.getElementById('errorMsg').textContent = 'انتهت صلاحية الكود، اضغط "إعادة الإرسال" لطلب كود جديد';
+            document.getElementById('errorMsg').textContent = t().errorMsgExpired;
             document.getElementById('verifyBtn').disabled = true;
         }
     }, 250);
@@ -330,7 +346,7 @@ function startResendCooldown(seconds) {
         if (left <= 0) {
             clearInterval(resendInterval);
             btn.disabled = false;
-            btn.textContent = 'إعادة الإرسال';
+            btn.textContent = t().resendAvailable;
         }
     }, 1000);
 }
@@ -361,7 +377,7 @@ async function resendCode() {
         inputs[0].focus();
         startExpiryCountdown();
     } catch (err) {
-        document.getElementById('errorMsg').textContent = 'تعذّر إعادة إرسال الكود، حاول لاحقًا';
+        document.getElementById('errorMsg').textContent = t().resendFailed;
         console.error(err);
     }
     startResendCooldown(30);
@@ -376,24 +392,24 @@ async function verifyCode() {
     errorMsg.textContent = '';
 
     if (entered.length < 6) {
-        errorMsg.textContent = 'أدخل الكود كاملًا (6 أرقام)';
+        errorMsg.textContent = t().enterFullCode;
         return;
     }
 
     if (Date.now() > pendingUser.expiresAt) {
-        errorMsg.textContent = 'انتهت صلاحية الكود، اطلب كود جديد';
+        errorMsg.textContent = t().requestNewCode;
         return;
     }
 
     if (entered !== pendingUser.code) {
-        errorMsg.textContent = 'الكود غير صحيح، حاول مرة أخرى';
+        errorMsg.textContent = t().wrongCode;
         inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
         inputs[0].focus();
         return;
     }
 
     verifyBtn.disabled = true;
-    verifyBtn.innerHTML = 'جارٍ التفعيل<span class="spinner"></span>';
+    verifyBtn.innerHTML = `${t().verifying}<span class="spinner"></span>`;
 
     sessionStorage.removeItem('bb_pending_user');
 
@@ -401,7 +417,7 @@ async function verifyCode() {
     setTimeout(() => { window.location.href = 'login.html'; }, 900);
 }
 
-applyTranslations(localStorage.getItem('lang') || 'ar');
+applyTranslations(localStorage.getItem('lang') || 'en');
 startExpiryCountdown();
 startResendCooldown(30);
 inputs[0].focus();

@@ -94,7 +94,7 @@ input:focus{border-color:#7c5cff}
 .conv-list::-webkit-scrollbar-thumb, .chat-body::-webkit-scrollbar-thumb{ background:#252d46; border-radius:4px; }
 
 .bottom-bar{ position:fixed; bottom:20px; left:20px; z-index:9999; display:flex; gap:10px; }
-#langToggleBtn, #backBtn{ box-shadow:0 4px 14px rgba(0,0,0,0.5); margin:0; }
+#backBtn{ box-shadow:0 4px 14px rgba(0,0,0,0.5); margin:0; }
 #backBtn{ display:flex; align-items:center; gap:6px; }
 
 @media (max-width:760px){
@@ -136,12 +136,12 @@ input:focus{border-color:#7c5cff}
       </div>
 
       <div class="sidebar-section-row">
-        <span class="sidebar-section-label">طلبات الصداقة</span>
+        <span class="sidebar-section-label" id="requestsLabel">طلبات الصداقة</span>
         <span class="req-count" id="reqCount" style="display:none">0</span>
       </div>
       <div id="requestsList"></div>
 
-      <div class="sidebar-section-label" style="padding-top:10px">القنوات وجهات الاتصال</div>
+      <div class="sidebar-section-label" style="padding-top:10px" id="contactsLabel">القنوات وجهات الاتصال</div>
       <div class="conv-list" id="convList"></div>
     </div>
 
@@ -167,23 +167,22 @@ input:focus{border-color:#7c5cff}
 
 <div class="bottom-bar">
   <button id="backBtn" class="secondary" onclick="location.href='index.html'">🧠 <span id="backBtnText">رجوع للعبة</span></button>
-  <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
 <div class="modal-overlay" id="gateModal" style="display:none">
   <div class="modal-card gate-card">
     <div class="icon">🔒</div>
-    <h2>سجّل دخولك للمتابعة</h2>
-    <p>الشات متاح فقط لأعضاء Brain Battle المسجّلين. سجّل دخولك أو أنشئ حساب جديد عشان تقدر تراسل أصدقاءك.</p>
-    <button onclick="location.href='login.html'" style="width:100%;margin-bottom:10px">تسجيل الدخول</button>
-    <button class="secondary" onclick="location.href='signup.html'" style="width:100%">إنشاء حساب جديد</button>
+    <h2 id="gateTitle">سجّل دخولك للمتابعة</h2>
+    <p id="gateText">الشات متاح فقط لأعضاء Brain Battle المسجّلين. سجّل دخولك أو أنشئ حساب جديد عشان تقدر تراسل أصدقاءك.</p>
+    <button onclick="location.href='login.html'" style="width:100%;margin-bottom:10px" id="gateLoginBtn">تسجيل الدخول</button>
+    <button class="secondary" onclick="location.href='signup.html'" style="width:100%" id="gateSignupBtn">إنشاء حساب جديد</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="addFriendModal" style="display:none">
   <div class="modal-card">
-    <h2>إضافة صديق</h2>
-    <p>اكتب اسم صديقك بالضبط زي ما هو مسجل بحسابه.</p>
+    <h2 id="addFriendTitle">إضافة صديق</h2>
+    <p id="addFriendText">اكتب اسم صديقك بالضبط زي ما هو مسجل بحسابه.</p>
     <input type="text" id="friendNameInput" maxlength="18" placeholder="اسم المستخدم">
     <button id="sendRequestBtn" style="width:100%">إرسال طلب صداقة</button>
     <div id="addFriendMsg" class="mini" style="margin-top:10px"></div>
@@ -231,7 +230,7 @@ async function boot(){
   await loadFriendships();
   await loadPendingRequests();
   subscribeRealtime();
-  openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة");
+  openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", i18n[currentLang].generalChannel);
 
   heartbeat();
   setInterval(heartbeat, HEARTBEAT_MS);
@@ -326,8 +325,8 @@ function renderRequests(){
     item.innerHTML = `
       <div class="req-name">${r.from_name}</div>
       <div class="request-actions">
-        <button class="small" data-accept="${r.id}" data-from="${r.from_id}" data-fromname="${r.from_name}">قبول</button>
-        <button class="small secondary" data-decline="${r.id}">رفض</button>
+        <button class="small" data-accept="${r.id}" data-from="${r.from_id}" data-fromname="${r.from_name}">${i18n[currentLang].accept}</button>
+        <button class="small secondary" data-decline="${r.id}">${i18n[currentLang].decline}</button>
       </div>`;
     box.appendChild(item);
   });
@@ -351,11 +350,11 @@ async function acceptRequest(requestId, fromUid, fromName){
     await supabaseClient.from("friend_requests").delete().eq("id", requestId);
     await loadFriendships();
     await loadPendingRequests();
-  }catch(err){ alert("تعذر قبول الطلب: " + err.message); }
+  }catch(err){ alert(i18n[currentLang].acceptRequestFailed + err.message); }
 }
 async function declineRequest(requestId){
   try{ await supabaseClient.from("friend_requests").delete().eq("id", requestId); await loadPendingRequests(); }
-  catch(err){ alert("تعذر رفض الطلب: " + err.message); }
+  catch(err){ alert(i18n[currentLang].declineRequestFailed + err.message); }
 }
 
 function renderList(filter=""){
@@ -368,7 +367,7 @@ function renderList(filter=""){
     <div class="conv-avatar">👥</div>
     <div class="conv-meta">
       <div class="conv-top-row"><span class="conv-name">${GENERAL_CHAT_NAME}</span></div>
-      <div class="conv-preview">قناة عامة لكل الأعضاء</div>
+      <div class="conv-preview">${i18n[currentLang].generalChannelDesc}</div>
     </div>`;
   generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة"));
   list.appendChild(generalItem);
@@ -378,7 +377,7 @@ function renderList(filter=""){
     const empty = document.createElement("div");
     empty.className = "mini";
     empty.style.padding = "10px 12px";
-    empty.textContent = "ما عندك أصدقاء بعد. اضغط \"إضافة صديق\" فوق.";
+    empty.textContent = i18n[currentLang].noFriends;
     list.appendChild(empty);
   }
 
@@ -391,14 +390,14 @@ function renderList(filter=""){
       <div class="conv-avatar">🧑<span class="status-dot${online?" online":""}"></span></div>
       <div class="conv-meta">
         <div class="conv-top-row"><span class="conv-name">${f.otherName}</span></div>
-        <div class="conv-preview">${online ? "متصل الآن" : "غير متصل"}</div>
+        <div class="conv-preview">${online ? i18n[currentLang].online : i18n[currentLang].offline}</div>
       </div>`;
     item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", "محادثة خاصة", f.otherUid));
     list.appendChild(item);
   });
 }
 
-function dateLabel(iso){ if(!iso) return ""; return new Date(iso).toLocaleDateString("ar-EG"); }
+function dateLabel(iso){ if(!iso) return ""; return new Date(iso).toLocaleDateString(currentLang === "ar" ? "ar-EG" : "en-US"); }
 function timeLabel(iso){ if(!iso) return ""; return new Date(iso).toTimeString().slice(0,5); }
 
 function updateHeaderStatus(otherUid){
@@ -407,7 +406,7 @@ function updateHeaderStatus(otherUid){
   if (dot) dot.classList.toggle("online", online);
   const sub = $("headerSub");
   if (sub && sub.dataset.baseLabel){
-    sub.textContent = sub.dataset.baseLabel + (online ? " · متصل الآن" : " · غير متصل");
+    sub.textContent = sub.dataset.baseLabel + (online ? ` · ${i18n[currentLang].online}` : ` · ${i18n[currentLang].offline}`);
     sub.classList.toggle("online-text", online);
   }
 }
@@ -433,13 +432,13 @@ function openChat(chatId, name, avatar, sub, otherUid=null){
 async function listenToMessages(chatId){
   if (messagesChannel) supabaseClient.removeChannel(messagesChannel);
   const body = $("chatBody");
-  body.innerHTML = `<div class="empty-state">جارٍ تحميل الرسائل...</div>`;
+  body.innerHTML = `<div class="empty-state">${i18n[currentLang].loadingMessages}</div>`;
 
   const { data, error } = await supabaseClient
     .from("messages").select("sender_id,sender_name,text,created_at")
     .eq("chat_id", chatId).order("created_at", { ascending: true }).limit(200);
 
-  if (error){ body.innerHTML = `<div class="empty-state">تعذر تحميل الرسائل: ${error.message}</div>`; return; }
+  if (error){ body.innerHTML = `<div class="empty-state">${i18n[currentLang].loadMessagesFailed}${error.message}</div>`; return; }
 
   renderMessages(data || []);
 
@@ -453,7 +452,7 @@ async function listenToMessages(chatId){
 function renderMessages(msgs){
   const body = $("chatBody");
   body.innerHTML = "";
-  if (msgs.length === 0){ body.innerHTML = `<div class="empty-state">ما فيه رسائل بعد، ابدأ الحديث 👋</div>`; return; }
+  if (msgs.length === 0){ body.innerHTML = `<div class="empty-state">${i18n[currentLang].noMessages}</div>`; return; }
   let lastDate = null;
   msgs.forEach(m => {
     const dl = dateLabel(m.created_at);
@@ -474,7 +473,7 @@ function appendMessage(m, scroll=true){
   const row = document.createElement("div");
   row.className = "msg-row " + (isMine ? "out" : "in");
   row.innerHTML = `
-    ${!isMine ? `<div class="msg-sender">${m.sender_name||"مستخدم"}</div>` : ""}
+    ${!isMine ? `<div class="msg-sender">${m.sender_name|| i18n[currentLang].user}</div>` : ""}
     <div class="bubble"><span class="msg-text"></span><span class="msg-time">${timeLabel(m.created_at)}</span></div>`;
   row.querySelector(".msg-text").textContent = m.text || "";
   body.appendChild(row);
@@ -489,7 +488,7 @@ async function sendMessage(){
   const { error } = await supabaseClient.from("messages").insert({
     chat_id: activeChatId, sender_id: uid, sender_name: myName, text
   });
-  if (error) alert("تعذر إرسال الرسالة: " + error.message);
+  if (error) alert(i18n[currentLang].sendMessageFailed + error.message);
 }
 
 $("sendBtn").addEventListener("click", sendMessage);
@@ -507,42 +506,135 @@ $("closeAddFriendBtn").addEventListener("click", () => $("addFriendModal").style
 $("sendRequestBtn").addEventListener("click", async () => {
   const name = $("friendNameInput").value.trim();
   const msgEl = $("addFriendMsg");
-  if (!name){ msgEl.textContent = "اكتب اسم صديقك أول."; return; }
-  if (name.toLowerCase() === myName.toLowerCase()){ msgEl.textContent = "هذا اسمك أنت 🙂"; return; }
-  msgEl.textContent = "جارٍ البحث...";
+  if (!name){ msgEl.textContent = i18n[currentLang].enterFriendName; return; }
+  if (name.toLowerCase() === myName.toLowerCase()){ msgEl.textContent = i18n[currentLang].ownName; return; }
+  msgEl.textContent = i18n[currentLang].searching;
   try{
     const { data: target, error } = await supabaseClient
       .from("profiles").select("id,fullname").ilike("fullname", name).maybeSingle();
     if (error) throw error;
-    if (!target){ msgEl.textContent = "ما فيه مستخدم بهذا الاسم."; return; }
-    if (friendships.some(f => f.otherUid === target.id)){ msgEl.textContent = "هذا الشخص صديقك أصلاً."; return; }
+    if (!target){ msgEl.textContent = i18n[currentLang].userNotFound; return; }
+    if (friendships.some(f => f.otherUid === target.id)){ msgEl.textContent = i18n[currentLang].alreadyFriend; return; }
 
     const { error: reqErr } = await supabaseClient.from("friend_requests").insert({
       from_id: uid, from_name: myName, to_id: target.id, to_name: target.fullname, status: "pending"
     });
     if (reqErr) throw reqErr;
-    msgEl.textContent = "تم إرسال طلب الصداقة ✅";
+    msgEl.textContent = i18n[currentLang].requestSent;
     $("friendNameInput").value = "";
-  }catch(err){ msgEl.textContent = "خطأ: " + err.message; }
+  }catch(err){ msgEl.textContent = i18n[currentLang].requestError + err.message; }
 });
 
 const i18n = {
-  ar: { pageTitle:"الرسائل", badge:"محادثات حقيقية بين مستخدمي الموقع", backBtn:"رجوع للعبة" },
-  en: { pageTitle:"Messages", badge:"Real chat between site users", backBtn:"Back to game" }
+  ar: {
+    pageTitle: "الرسائل",
+    badge: "محادثات حقيقية بين مستخدمي الموقع",
+    backBtn: "رجوع للعبة",
+    addFriend: "إضافة صديق",
+    search: "ابحث عن أصدقائك...",
+    requests: "طلبات الصداقة",
+    contacts: "القنوات وجهات الاتصال",
+    selectChat: "اختر محادثة",
+    message: "اكتب رسالة...",
+    loginTitle: "سجّل دخولك للمتابعة",
+    loginText: "الشات متاح فقط لأعضاء Brain Battle المسجّلين.",
+    login: "تسجيل الدخول",
+    signup: "إنشاء حساب جديد",
+    addFriendTitle: "إضافة صديق",
+    addFriendText: "اكتب اسم صديقك بالضبط زي ما هو مسجل بحسابه.",
+    friendName: "اسم المستخدم",
+    sendRequest: "إرسال طلب صداقة",
+    close: "إغلاق",
+    accept: "قبول",
+    decline: "رفض",
+    acceptRequestFailed: "تعذر قبول الطلب: ",
+    declineRequestFailed: "تعذر رفض الطلب: ",
+    generalChannel: "قناة عامة",
+    generalChannelDesc: "قناة عامة لكل الأعضاء",
+    privateChat: "محادثة خاصة",
+    noFriends: 'ما عندك أصدقاء بعد. اضغط "إضافة صديق" فوق.',
+    online: "متصل الآن",
+    offline: "غير متصل",
+    loadingMessages: "جارٍ تحميل الرسائل...",
+    loadMessagesFailed: "تعذر تحميل الرسائل: ",
+    noMessages: "ما فيه رسائل بعد، ابدأ الحديث.",
+    user: "مستخدم",
+    sendMessageFailed: "تعذر إرسال الرسالة: ",
+    enterFriendName: "اكتب اسم صديقك أولًا.",
+    ownName: "هذا اسمك أنت.",
+    searching: "جارٍ البحث...",
+    userNotFound: "ما فيه مستخدم بهذا الاسم.",
+    alreadyFriend: "هذا الشخص صديقك أصلًا.",
+    requestSent: "تم إرسال طلب الصداقة.",
+    requestError: "خطأ: ",
+  },
+  en: {
+    pageTitle: "Messages",
+    badge: "Real chat between site users",
+    backBtn: "Back to Game",
+    addFriend: "Add Friend",
+    search: "Search your friends...",
+    requests: "Friend Requests",
+    contacts: "Channels and Contacts",
+    selectChat: "Choose a conversation",
+    message: "Write a message...",
+    loginTitle: "Log in to continue",
+    loginText: "Chat is available only to registered Brain Battle members.",
+    login: "Log In",
+    signup: "Create Account",
+    addFriendTitle: "Add Friend",
+    addFriendText: "Enter your friend's username exactly as registered.",
+    friendName: "Username",
+    sendRequest: "Send Friend Request",
+    close: "Close",
+    accept: "Accept",
+    decline: "Decline",
+    acceptRequestFailed: "Could not accept the request: ",
+    declineRequestFailed: "Could not decline the request: ",
+    generalChannel: "General Channel",
+    generalChannelDesc: "A public channel for all members",
+    privateChat: "Private Chat",
+    noFriends: 'You have no friends yet. Click "Add Friend" above.',
+    online: "Online",
+    offline: "Offline",
+    loadingMessages: "Loading messages...",
+    loadMessagesFailed: "Could not load messages: ",
+    noMessages: "No messages yet. Start the conversation.",
+    user: "User",
+    sendMessageFailed: "Could not send the message: ",
+    enterFriendName: "Enter your friend's name first.",
+    ownName: "That is your own name.",
+    searching: "Searching...",
+    userNotFound: "No user was found with that name.",
+    alreadyFriend: "This person is already your friend.",
+    requestSent: "Friend request sent.",
+    requestError: "Error: ",
+  }
 };
-let currentLang = localStorage.getItem('lang') || 'ar';
+let currentLang = localStorage.getItem('lang') || 'en';
 function setLanguage(l){
   currentLang = l;
-  localStorage.setItem('lang', l);
   document.documentElement.lang = (l === 'ar') ? 'ar' : 'en';
   document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
-  $('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
   const t = i18n[l];
   $('pageTitle').textContent = t.pageTitle;
   $('badgeText').textContent = t.badge;
   $('backBtnText').textContent = t.backBtn;
+  $('openAddFriendBtn').textContent = `➕ ${t.addFriend}`;
+  $('searchBox').placeholder = t.search;
+  $('requestsLabel').textContent = t.requests;
+  $('contactsLabel').textContent = t.contacts;
+  $('msgInput').placeholder = t.message;
+  $('gateTitle').textContent = t.loginTitle;
+  $('gateText').textContent = t.loginText;
+  $('gateLoginBtn').textContent = t.login;
+  $('gateSignupBtn').textContent = t.signup;
+  $('addFriendTitle').textContent = t.addFriendTitle;
+  $('addFriendText').textContent = t.addFriendText;
+  $('friendNameInput').placeholder = t.friendName;
+  $('sendRequestBtn').textContent = t.sendRequest;
+  $('closeAddFriendBtn').textContent = t.close;
 }
-function toggleLanguage(){ setLanguage(currentLang === 'ar' ? 'en' : 'ar'); }
 setLanguage(currentLang);
 
 boot();

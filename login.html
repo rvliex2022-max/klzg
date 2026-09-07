@@ -227,7 +227,7 @@ async function handleLogin(e) {
     const usernameOrEmail = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
     const errorMsg = document.getElementById('errorMsg');
-    const lang = localStorage.getItem('lang') || 'ar';
+    const lang = localStorage.getItem('lang') || 'en';
 
     errorMsg.style.display = 'none';
 
@@ -275,7 +275,7 @@ async function handleLogin(e) {
     window.location.href = 'index.html';
     return false;
 }
-applyTranslations(localStorage.getItem('lang') || 'ar');
+applyTranslations(localStorage.getItem('lang') || 'en');
 </script>
 
 </body>

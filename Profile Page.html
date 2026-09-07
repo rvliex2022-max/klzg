@@ -137,13 +137,6 @@ button#saveBtn:active{transform:translateY(0)}
 
 /* bottom bar */
 .bottom-bar{position:fixed;bottom:22px;left:22px;z-index:999}
-#langToggleBtn{
-  background:#12172bdd;color:var(--text);border:1px solid var(--border);
-  border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;
-  cursor:pointer;font-family:'Cairo',Arial,sans-serif;
-  box-shadow:0 10px 24px #0008;backdrop-filter:blur(8px);
-}
-#langToggleBtn:hover{border-color:var(--accent)}
 
 @media(max-width:720px){
   header{padding:18px 20px}
@@ -202,7 +195,6 @@ button#saveBtn:active{transform:translateY(0)}
 </main>
 
 <div class="bottom-bar">
-  <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
 </div>
 
 <script>
@@ -214,7 +206,10 @@ const i18n = {
     aboutTitle: "نبذة عني:",
     statGamesTitle: "ألعابك", statGamesBox: "لا توجد ألعاب بعد",
     statLevelTitle: "مستوى ذكائك", statLevelBox: "المستوى: 0",
-    saveBtn: "حفظ"
+    saveBtn: "حفظ",
+    profileUsername: "اسمك",
+    saveStatus: "تم الحفظ ✓",
+    aboutPlaceholder: "اكتب نبذة عنك..."
   },
   en: {
     navBrand: "Brain Battle", navContact: "Contact Us", navSupport: "Support us",
@@ -222,11 +217,14 @@ const i18n = {
     aboutTitle: "About me:",
     statGamesTitle: "Your Games", statGamesBox: "No games yet",
     statLevelTitle: "Brain Level", statLevelBox: "Brain Level: 0",
-    saveBtn: "Save"
+    saveBtn: "Save",
+    profileUsername: "Your Name",
+    saveStatus: "Saved ✓",
+    aboutPlaceholder: "Tell us about yourself..."
   }
 };
 
-let currentLang = localStorage.getItem('lang') || 'ar';
+let currentLang = localStorage.getItem('lang') || 'en';
 
 function applyTranslations(l){
   document.documentElement.lang = l;
@@ -241,18 +239,13 @@ function applyTranslations(l){
   document.getElementById('statLevelTitle').textContent = t.statLevelTitle;
   document.getElementById('statLevelBox').textContent = t.statLevelBox;
   document.getElementById('saveBtn').textContent = t.saveBtn;
-  document.getElementById('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
+  document.getElementById("profileUsername").textContent = t.profileUsername;
+  document.getElementById("saveStatus").textContent = t.saveStatus;
 
   if(aboutBox.textContent.trim() === defaultAbout.ar || aboutBox.textContent.trim() === defaultAbout.en){
     currentAboutText = defaultAbout[l];
     aboutBox.textContent = defaultAbout[l];
   }
-}
-
-function toggleLanguage(){
-  currentLang = currentLang === 'ar' ? 'en' : 'ar';
-  localStorage.setItem('lang', currentLang);
-  applyTranslations(currentLang);
 }
 
 const profileImg = document.getElementById("profileImg");
@@ -265,6 +258,19 @@ const saveStatus = document.getElementById("saveStatus");
 const defaultAbout = {
   ar: "احكيلي عن نفسك",
   en: "Tell Your Mommy About Everything"
+};
+
+const profileMessages = {
+  ar: {
+    saveFailed: "تعذر حفظ الملف الشخصي.",
+    uploadFailed: "تعذر رفع الصورة.",
+    saved: "تم حفظ الملف الشخصي."
+  },
+  en: {
+    saveFailed: "Could not save your profile.",
+    uploadFailed: "Could not upload the image.",
+    saved: "Profile saved."
+  }
 };
 
 let currentAboutText = aboutBox.textContent;
@@ -290,7 +296,7 @@ aboutBox.addEventListener("click", () => {
   const textarea = document.createElement("textarea");
   textarea.className = "about-textarea";
   textarea.value = (currentAboutText === defaultAbout.ar || currentAboutText === defaultAbout.en) ? "" : currentAboutText;
-  textarea.placeholder = "Talk Baby Talk...";
+  textarea.placeholder = i18n[currentLang].aboutPlaceholder;
 
   aboutBox.replaceWith(textarea);
   textarea.focus();
@@ -328,14 +334,14 @@ async function uploadAvatarIfNeeded(){
 
 saveBtn.addEventListener("click", async () => {
   if(!currentUser){
-    flashStatus("تعذّر الحفظ ⚠");
+    flashStatus(profileMessages[currentLang].saveFailed);
     return;
   }
 
   const { url: newAvatarUrl, error: uploadError } = await uploadAvatarIfNeeded();
   if(uploadError){
     console.error("Upload error:", uploadError);
-    flashStatus("تعذّر رفع الصورة ⚠");
+    flashStatus(profileMessages[currentLang].uploadFailed);
     return;
   }
 
@@ -349,7 +355,7 @@ saveBtn.addEventListener("click", async () => {
 
   if(error){
     console.error("Save error:", error);
-    flashStatus("تعذّر الحفظ ⚠");
+    flashStatus(profileMessages[currentLang].saveFailed);
   }else{
     currentImageFile = null;
     flashStatus(randomSuccessMessage());

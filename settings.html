@@ -48,15 +48,15 @@ input:focus,select:focus{border-color:#7c5cff}
 <div class="bg"></div>
 <div class="wrap">
   <div class="top">
-    <div class="logo">⚙️ الإعدادات</div>
+    <div class="logo" id="pageTitle">⚙️ الإعدادات</div>
   </div>
 
   <div id="content" style="display:none">
     <div class="card">
-      <h3>الاسم المعروض</h3>
-      <div class="desc">هذا الاسم يظهر لأصدقائك في الشات وبقية أعضاء الموقع.</div>
+      <h3 id="displayNameTitle">الاسم المعروض</h3>
+      <div class="desc" id="displayNameDesc">هذا الاسم يظهر لأصدقائك في الشات وبقية أعضاء الموقع.</div>
       <div class="field">
-        <label>الاسم الحالي</label>
+        <label id="currentNameLabel">الاسم الحالي</label>
         <input type="text" id="nameInput" maxlength="18">
       </div>
       <button id="saveNameBtn">حفظ الاسم</button>
@@ -64,8 +64,8 @@ input:focus,select:focus{border-color:#7c5cff}
     </div>
 
     <div class="card">
-      <h3>اللغة</h3>
-      <div class="desc">تحكم بلغة الواجهة عبر كل صفحات الموقع.</div>
+      <h3 id="languageTitle">اللغة</h3>
+      <div class="desc" id="languageDesc">تحكم بلغة الواجهة عبر كل صفحات الموقع.</div>
       <div class="field">
         <select id="langSelect">
           <option value="ar">العربية</option>
@@ -75,11 +75,11 @@ input:focus,select:focus{border-color:#7c5cff}
     </div>
 
     <div class="card">
-      <h3>الحساب</h3>
+      <h3 id="accountTitle">الحساب</h3>
       <div class="desc" id="emailDisplay">—</div>
       <div class="row">
-        <button class="secondary" onclick="location.href='profile.html'" style="flex:1">الملف الشخصي</button>
-        <button class="danger" id="signOutBtn" style="flex:1">تسجيل الخروج</button>
+        <button id="profileBtn" class="secondary" onclick="location.href='Profile Page.html'" style="flex:1">الملف الشخصي</button>
+        <button id="signOutBtn" class="danger" style="flex:1">تسجيل الخروج</button>
       </div>
     </div>
   </div>
@@ -92,16 +92,89 @@ input:focus,select:focus{border-color:#7c5cff}
 <div class="modal-overlay" id="gateModal" style="display:none">
   <div class="card gate-card" style="max-width:380px">
     <div class="icon">🔒</div>
-    <h3>سجّل دخولك للمتابعة</h3>
-    <p class="desc">الإعدادات متاحة فقط للأعضاء المسجلين.</p>
-    <button onclick="location.href='login.html'" style="width:100%;margin-bottom:10px">تسجيل الدخول</button>
-    <button class="secondary" onclick="location.href='signup.html'" style="width:100%">إنشاء حساب جديد</button>
+    <h3 id="gateTitle">سجّل دخولك للمتابعة</h3>
+    <p class="desc" id="gateDesc">الإعدادات متاحة فقط للأعضاء المسجلين.</p>
+    <button id="gateLoginBtn" onclick="location.href='login.html'" style="width:100%;margin-bottom:10px">تسجيل الدخول</button>
+    <button id="gateSignupBtn" class="secondary" onclick="location.href='signup.html'" style="width:100%">إنشاء حساب جديد</button>
   </div>
 </div>
 
 <script>
 const $ = (id) => document.getElementById(id);
 let uid = null;
+
+let currentLang = localStorage.getItem("lang") || "en";
+
+const i18n = {
+  ar: {
+    pageTitle: "⚙️ الإعدادات",
+    displayNameTitle: "الاسم المعروض",
+    displayNameDesc: "هذا الاسم يظهر لأصدقائك في الشات وبقية أعضاء الموقع.",
+    currentNameLabel: "الاسم الحالي",
+    saveName: "حفظ الاسم",
+    languageTitle: "اللغة",
+    languageDesc: "تحكم بلغة الواجهة عبر كل صفحات الموقع.",
+    accountTitle: "الحساب",
+    profile: "الملف الشخصي",
+    signOut: "تسجيل الخروج",
+    back: "🧠 رجوع للعبة",
+    gateTitle: "سجّل دخولك للمتابعة",
+    gateDesc: "الإعدادات متاحة فقط للأعضاء المسجلين.",
+    login: "تسجيل الدخول",
+    signup: "إنشاء حساب جديد",
+    invalidName: "اكتب اسمًا صحيحًا.",
+    savingName: "جارٍ الحفظ...",
+    duplicateName: "هذا الاسم مستخدم بالفعل.",
+    saveError: "خطأ: ",
+    savedName: "تم حفظ الاسم بنجاح."
+  },
+  en: {
+    pageTitle: "⚙️ Settings",
+    displayNameTitle: "Display Name",
+    displayNameDesc: "This name is shown to your friends in chat and to other site members.",
+    currentNameLabel: "Current Name",
+    saveName: "Save Name",
+    languageTitle: "Language",
+    languageDesc: "Choose the interface language for every page in the app.",
+    accountTitle: "Account",
+    profile: "Profile",
+    signOut: "Sign Out",
+    back: "🧠 Back to Game",
+    gateTitle: "Log in to continue",
+    gateDesc: "Settings are available only to signed-in members.",
+    login: "Log In",
+    signup: "Create Account",
+    invalidName: "Enter a valid name.",
+    savingName: "Saving...",
+    duplicateName: "This name is already in use.",
+    saveError: "Error: ",
+    savedName: "Name saved successfully."
+  }
+};
+
+function applyTranslations(lang) {
+  currentLang = lang;
+  const t = i18n[lang];
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "en" ? "ltr" : "rtl";
+
+  $("pageTitle").textContent = t.pageTitle;
+  $("displayNameTitle").textContent = t.displayNameTitle;
+  $("displayNameDesc").textContent = t.displayNameDesc;
+  $("currentNameLabel").textContent = t.currentNameLabel;
+  $("saveNameBtn").textContent = t.saveName;
+  $("languageTitle").textContent = t.languageTitle;
+  $("languageDesc").textContent = t.languageDesc;
+  $("accountTitle").textContent = t.accountTitle;
+  $("profileBtn").textContent = t.profile;
+  $("signOutBtn").textContent = t.signOut;
+  $("backBtn").textContent = t.back;
+  $("gateTitle").textContent = t.gateTitle;
+  $("gateDesc").textContent = t.gateDesc;
+  $("gateLoginBtn").textContent = t.login;
+  $("gateSignupBtn").textContent = t.signup;
+}
 
 async function boot(){
   const { data: { session } } = await supabaseClient.auth.getSession();
@@ -114,28 +187,38 @@ async function boot(){
 
   $("nameInput").value = profile.fullname || "";
   $("emailDisplay").textContent = session.user.email || "";
-  $("langSelect").value = localStorage.getItem("lang") || "ar";
+  $("langSelect").value = localStorage.getItem("lang") || "en";
   $("content").style.display = "block";
+
+  const lang = localStorage.getItem("lang") || "en";
+  $("langSelect").value = lang;
+  applyTranslations(lang);
 }
 
 $("saveNameBtn").addEventListener("click", async () => {
   const newName = $("nameInput").value.trim();
   const msg = $("nameMsg");
   msg.className = "msg";
-  if (!newName){ msg.textContent = "اكتب اسم صحيح."; msg.className = "msg err"; return; }
-  msg.textContent = "جارٍ الحفظ...";
+  if (!newName){ 
+    msg.textContent = i18n[currentLang].invalidName;
+    msg.className = "msg err";
+    return;
+  }
+  msg.textContent = i18n[currentLang].savingName;
   const { error } = await supabaseClient.from("profiles").update({ fullname: newName }).eq("id", uid);
   if (error){
-    msg.textContent = error.message.includes("duplicate") ? "هذا الاسم مستخدم فعلاً." : "خطأ: " + error.message;
+    msg.textContent = error.message.includes("duplicate") ? i18n[currentLang].duplicateName : i18n[currentLang].saveError + error.message;
     msg.className = "msg err";
   } else {
-    msg.textContent = "تم حفظ الاسم ✅";
+    msg.textContent = i18n[currentLang].savedName;
     msg.className = "msg ok";
   }
 });
 
-$("langSelect").addEventListener("change", (e) => {
-  localStorage.setItem("lang", e.target.value);
+$("langSelect").addEventListener("change", (event) => {
+  const lang = event.target.value;
+  localStorage.setItem("lang", lang);
+  applyTranslations(lang);
 });
 
 $("signOutBtn").addEventListener("click", async () => {
@@ -143,6 +226,7 @@ $("signOutBtn").addEventListener("click", async () => {
   location.href = "login.html";
 });
 
+applyTranslations(currentLang);
 boot();
 </script>
 </body>
