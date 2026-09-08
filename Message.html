@@ -51,7 +51,12 @@ input:focus{border-color:#7c5cff}
 .conv-avatar{
   width:38px; height:38px; border-radius:50%; background:#0c1120; border:1px solid #28304a;
   display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; position:relative;
+  overflow:hidden;
 }
+.conv-avatar img{ width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.go-profile{ cursor:pointer; }
+.go-profile:hover{ text-decoration:underline; }
+.conv-avatar.go-profile:hover{ text-decoration:none; filter:brightness(1.15); }
 .status-dot{ position:absolute; bottom:-1px; inset-inline-end:-1px; width:11px; height:11px; border-radius:50%; background:#5a6280; border:2px solid #171e31; }
 .status-dot.online{ background:#2bd28b; }
 .chat-header-sub.online-text{ color:#2bd28b; }
@@ -193,6 +198,7 @@ input:focus{border-color:#7c5cff}
 <script>
 const GENERAL_CHAT_ID = "general";
 const GENERAL_CHAT_NAME = "Brain Battle";
+const PROFILE_PAGE_URL = "Profile%20Page.html";
 const ONLINE_THRESHOLD_MS = 25000;
 const HEARTBEAT_MS = 15000;
 
@@ -201,6 +207,7 @@ let activeChatId = null, activeOtherUid = null;
 let friendships = [];      
 let pendingRequests = [];  
 let friendStatus = {};     
+let friendAvatars = {};    
 let messagesChannel = null;
 let requestsChannel = null;
 let friendshipsChannel = null;
@@ -269,8 +276,13 @@ async function loadFriendships(){
 async function refreshFriendStatuses(){
   const ids = friendships.map(f => f.otherUid);
   if (ids.length === 0) return;
-  const { data } = await supabaseClient.from("profiles").select("id,last_seen").in("id", ids);
-  (data||[]).forEach(p => friendStatus[p.id] = p.last_seen);
+  const { data } = await supabaseClient.from("profiles").select("id,last_seen,avatar_url").in("id", ids);
+  (data||[]).forEach(p => { friendStatus[p.id] = p.last_seen; friendAvatars[p.id] = p.avatar_url; });
+}
+
+function avatarHtml(uidKey, fallbackEmoji){
+  const url = friendAvatars[uidKey];
+  return url ? `<img src="${url}" alt="">` : fallbackEmoji;
 }
 
 async function loadPendingRequests(){
@@ -306,7 +318,9 @@ function subscribeRealtime(){
         const row = payload.new;
         if (!row) return;
         friendStatus[row.id] = row.last_seen;
+        friendAvatars[row.id] = row.avatar_url;
         renderList($("searchBox").value);
+        if (activeOtherUid === row.id) updateHeaderAvatar(row.id);
         if (activeOtherUid === row.id) updateHeaderStatus(row.id);
       })
     .subscribe();
@@ -387,11 +401,17 @@ function renderList(filter=""){
     const item = document.createElement("div");
     item.className = "conv-item" + (activeChatId === chatId ? " active" : "");
     item.innerHTML = `
-      <div class="conv-avatar">🧑<span class="status-dot${online?" online":""}"></span></div>
+      <div class="conv-avatar go-profile" data-uid="${f.otherUid}">${avatarHtml(f.otherUid, "🧑")}<span class="status-dot${online?" online":""}"></span></div>
       <div class="conv-meta">
-        <div class="conv-top-row"><span class="conv-name">${f.otherName}</span></div>
+        <div class="conv-top-row"><span class="conv-name go-profile" data-uid="${f.otherUid}">${f.otherName}</span></div>
         <div class="conv-preview">${online ? i18n[currentLang].online : i18n[currentLang].offline}</div>
       </div>`;
+    item.querySelectorAll(".go-profile").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.location.href = `${PROFILE_PAGE_URL}?id=${f.otherUid}`;
+      });
+    });
     item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", "محادثة خاصة", f.otherUid));
     list.appendChild(item);
   });
@@ -399,6 +419,11 @@ function renderList(filter=""){
 
 function dateLabel(iso){ if(!iso) return ""; return new Date(iso).toLocaleDateString(currentLang === "ar" ? "ar-EG" : "en-US"); }
 function timeLabel(iso){ if(!iso) return ""; return new Date(iso).toTimeString().slice(0,5); }
+
+function updateHeaderAvatar(otherUid){
+  const url = friendAvatars[otherUid];
+  $("headerAvatar").innerHTML = url ? `<img src="${url}" alt="">` : "🧑";
+}
 
 function updateHeaderStatus(otherUid){
   const online = isOnline(friendStatus[otherUid]);
@@ -414,8 +439,15 @@ function updateHeaderStatus(otherUid){
 function openChat(chatId, name, avatar, sub, otherUid=null){
   activeChatId = chatId;
   activeOtherUid = otherUid;
-  $("headerAvatar").textContent = avatar;
+  if (otherUid){ updateHeaderAvatar(otherUid); }
+  else { $("headerAvatar").textContent = avatar; }
   $("headerName").textContent = name;
+  const avatarBox = $("headerAvatar").parentElement;
+  const nameEl = $("headerName");
+  avatarBox.classList.toggle("go-profile", !!otherUid);
+  nameEl.classList.toggle("go-profile", !!otherUid);
+  avatarBox.onclick = otherUid ? () => { window.location.href = `${PROFILE_PAGE_URL}?id=${otherUid}`; } : null;
+  nameEl.onclick = avatarBox.onclick;
   const subEl = $("headerSub");
   subEl.dataset.baseLabel = sub;
   subEl.textContent = sub;

@@ -91,6 +91,8 @@ main{max-width:1100px;margin:0 auto;padding:clamp(28px,5vw,64px) clamp(20px,5vw,
   text-align:center;padding:16px;
 }
 .profile-image:hover .img-overlay{opacity:1}
+.profile-image.readonly{cursor:default}
+.profile-image.readonly .img-overlay{display:none}
 
 .profile-info{min-width:0}
 .username{font-size:clamp(24px,3.4vw,34px);font-weight:800;margin-bottom:26px;word-break:break-word}
@@ -275,10 +277,12 @@ const defaultAbout = {
 let currentAboutText = aboutBox.textContent;
 let currentImageFile = null;
 let currentUser = null;
+let viewedUserId = null;
+let isOwnProfile = true;
 let currentGamesWon = 0;
 let currentBrainScore = 0;
 
-profileImageWrap.addEventListener("click", () => imageInput.click());
+profileImageWrap.addEventListener("click", () => { if (isOwnProfile) imageInput.click(); });
 
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
@@ -292,6 +296,7 @@ imageInput.addEventListener("change", () => {
 });
 
 aboutBox.addEventListener("click", () => {
+  if (!isOwnProfile) return;
   if(aboutBox.dataset.editing === "true") return;
 
   const textarea = document.createElement("textarea");
@@ -384,22 +389,11 @@ function randomSuccessMessage(){
 function flashStatus(msg){
   saveStatus.textContent = msg;
   saveStatus.classList.add("show");
-  setTimeout(() => saveStatus.classList.remove("show"), 4000);
+  setTimeout(() => saveStatus.classList.remove("show"), 6000);
 }
 
-/*
-  دوال تسجيل نتائج اللعب — تُستدعى من صفحة اللعبة نفسها عند انتهاء كل جولة.
-  مثال استخدام من صفحة اللعبة (بعد ما اللاعب يفوز ويحصل نقاط):
 
-      // لو فاز وحصل 10 نقاط ذكاء
-      await window.recordGameResult({ won: true, scoreDelta: 10 });
 
-      // لو خسر بس حصل نقاط بسيطة
-      await window.recordGameResult({ won: false, scoreDelta: 3 });
-
-  الدالة تحدّث القيم في قاعدة البيانات (Supabase) بشكل دائم، وتحدّث الأرقام
-  الظاهرة في صفحة البروفايل فوراً لو الصفحة مفتوحة.
-*/
 async function recordGameResult({ won = false, scoreDelta = 0 } = {}) {
   if (!currentUser) {
     console.warn("recordGameResult: no logged-in user, skipping save.");
@@ -430,7 +424,6 @@ async function recordGameResult({ won = false, scoreDelta = 0 } = {}) {
     return { error };
   }
 
-  // حدّث الأرقام الظاهرة على الشاشة فوراً
   applyTranslations(currentLang);
   return { success: true, games_won: currentGamesWon, brain_score: currentBrainScore };
 }
@@ -449,19 +442,30 @@ async function initProfile() {
 
   currentUser = data.user;
 
+  const params = new URLSearchParams(window.location.search);
+  viewedUserId = params.get("id") || currentUser.id;
+  isOwnProfile = viewedUserId === currentUser.id;
+
+  if (!isOwnProfile){
+    profileImageWrap.classList.add("readonly");
+    profileImageWrap.title = "";
+    aboutBox.title = "";
+    document.querySelector(".save-row").style.display = "none";
+  }
+
   const { data: profileRow, error: profileError } = await supabaseClient
     .from("profiles")
     .select("fullname, about, avatar_url, games_won, brain_score")
-    .eq("id", currentUser.id)
+    .eq("id", viewedUserId)
     .maybeSingle();
 
   if(profileError) console.error("Load profile error:", profileError);
 
   const username =
     profileRow?.fullname ||
-    currentUser.user_metadata?.fullname ||
-    currentUser.user_metadata?.full_name ||
-    currentUser.email?.split("@")[0] ||
+    (isOwnProfile ? (currentUser.user_metadata?.fullname ||
+      currentUser.user_metadata?.full_name ||
+      currentUser.email?.split("@")[0]) : null) ||
     "User";
 
   usernameEl.textContent = username;
@@ -469,6 +473,8 @@ async function initProfile() {
   if(profileRow?.about){
     currentAboutText = profileRow.about;
     aboutBox.textContent = profileRow.about;
+  } else if (!isOwnProfile){
+    aboutBox.textContent = "";
   }
   if(profileRow?.avatar_url){
     profileImg.src = profileRow.avatar_url;
