@@ -195,7 +195,7 @@
 .wrap{max-width:1050px;margin:0 auto;padding:70px 18px 28px;position:relative}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .logo{font-weight:900;font-size:22px;letter-spacing:.5px}.badge{font-size:12px;background:#151a2b;border:1px solid #292f49;padding:8px 12px;border-radius:999px;color:#aeb8d8}
 .card{background:#111625cc;border:1px solid #252d46;border-radius:24px;padding:24px;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);width:700px;height:auto}
-.lb-card{margin-top:15px}
+.lb-card{margin-top:100px}
 .lb-card h2{font-size:22px;margin-bottom:4px;line-height:1.2}
 .lb-card p.lb-sub{color:#aeb7cf;font-size:13px;margin-bottom:18px}
 .lb-tabs{display:flex;gap:10px;margin-bottom:18px}
@@ -55571,12 +55571,25 @@ function setLanguage(l){
     updateStaticTexts();
 }
 
+function setGameCardsDirection(lang) {
+  const dir = lang === "ar" ? "rtl" : "ltr";
+
+  ["home", "lobby", "game", "end"].forEach((id) => {
+    const card = document.getElementById(id);
+    if (card) {
+      card.lang = lang;
+      card.dir = dir;
+    }
+  });
+}
+
 function toggleGameLanguage() {
   gameLang = gameLang === "ar" ? "en" : "ar";
 
   document.getElementById("gameLangBtn").textContent =
     gameLang === "ar" ? "English" : "العربية";
 
+  setGameCardsDirection(gameLang);
   updateGameTexts();
 }
 
@@ -55584,6 +55597,8 @@ function toggleGameLanguage() {
 function updateGameTexts() {
 
   const t = i18n[gameLang];
+
+  setGameCardsDirection(gameLang);
 
   $("badgeText").textContent = t.badge;
   $("homeTitle").textContent = t.homeTitle;
