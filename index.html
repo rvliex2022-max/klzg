@@ -33,14 +33,14 @@
       
 .top-header {
     position: absolute;
-    top: 20px;
+    top: 10px;
     inset-inline-end: 20px;
     z-index: 9999;
 }
 
 .top-links {
     position: absolute;
-    top: 20px;
+    top: 10px;
     inset-inline-start: 20px;
     z-index: 9999;
     display: flex;
@@ -175,8 +175,8 @@
   
 .bottom-bar{
   position: fixed;
-  bottom: 20px;
-  inset-inline-end: 20px;
+  bottom: 10px;
+  inset-inline-end: 10px;
   z-index: 9999;
   display: flex;
   gap: 10px;
@@ -192,9 +192,13 @@
 }
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Tahoma,sans-serif;background:#080b14;color:#f7f8ff;min-height:100vh}
 .bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none}
-.wrap{max-width:1050px;margin:0 auto;padding:70px 18px 28px;position:relative}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.wrap{max-width:1050px;margin:0 auto;padding:70px 18px 28px;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.top .logo{order:1}
+.top .badge{order:2}
+.top #gameLangBtn{order:3}
 .logo{font-weight:900;font-size:22px;letter-spacing:.5px}.badge{font-size:12px;background:#151a2b;border:1px solid #292f49;padding:8px 12px;border-radius:999px;color:#aeb8d8}
-.card{background:#111625cc;border:1px solid #252d46;border-radius:24px;padding:24px;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);width:700px;height:auto}
+.card{background:#111625cc;border:1px solid #252d46;border-radius:24px;padding:24px;box-shadow:0 18px 60px #0008;backdrop-filter:blur(12px);max-width:700px; width:100%; height:auto}
 .lb-card{margin-top:100px}
 .lb-card h2{font-size:22px;margin-bottom:4px;line-height:1.2}
 .lb-card p.lb-sub{color:#aeb7cf;font-size:13px;margin-bottom:18px}
@@ -225,7 +229,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.matchmaking-btn{background:linear-gradient(135deg,#8b5cf6,#6d4aff);position:relative;overflow:hidden}.matchmaking-btn.searching{background:#252d46}.match-status{width:100%;font-size:13px;color:#9eabd0;min-height:18px}.match-status strong{color:#dbe2ff}.room{font-size:34px;font-weight:900;letter-spacing:8px;text-align:center;padding:15px;border:1px dashed #465071;border-radius:16px;margin:15px 0}
 .players{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}.player{padding:18px;border-radius:18px;background:#0c1120;border:1px solid #28304a;display:flex;justify-content:space-between}.score{font-size:30px;font-weight:900}.muted{color:#8490af;font-size:13px}
 .center{text-align:center}.hidden{display:none!important}.q{font-size:30px;font-weight:850;line-height:1.3;margin:20px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{background:#171e31;border:1px solid #303953;text-align:start}.choice.correct{background:#155c43;border-color:#2bd28b}.choice.wrong{background:#63253a;border-color:#ff6686}.timer{height:9px;background:#242b40;border-radius:99px;overflow:hidden}.bar{height:100%;width:100%;background:#7c5cff;transition:width .1s linear}.status{margin:12px 0;color:#aeb7cf;min-height:22px}.result{font-size:54px;font-weight:950}.mini{font-size:12px;color:#7f8aa7}
-@media(max-width:700px){h1{font-size:32px}.grid,.players,.choices{grid-template-columns:1fr}.q{font-size:24px}.wrap{padding:18px 12px}}
+@media(max-width:700px){h1{font-size:32px}.grid,.players,.choices{grid-template-columns:1fr}.q{font-size:24px}.wrap{padding:64px 12px 90px}.lb-card{margin-top:60px}.room{font-size:26px;letter-spacing:4px}.top-header,.top-links{top:8px}.avatar-btn{width:40px;height:40px;font-size:15px}.bottom-bar{bottom:8px;inset-inline-end:8px}}
 
 .pixel-field{
   position:absolute;

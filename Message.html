@@ -98,16 +98,26 @@ input:focus{border-color:#7c5cff}
 .conv-list::-webkit-scrollbar, .chat-body::-webkit-scrollbar{ width:8px; }
 .conv-list::-webkit-scrollbar-thumb, .chat-body::-webkit-scrollbar-thumb{ background:#252d46; border-radius:4px; }
 
-.bottom-bar{ position:fixed; bottom:20px; left:20px; z-index:9999; display:flex; gap:10px; }
+.bottom-bar{ position:fixed; bottom:70px; inset-inline-start:20px; z-index:9999; display:flex; gap:10px; }
 #backBtn{ box-shadow:0 4px 14px rgba(0,0,0,0.5); margin:0; }
 #backBtn{ display:flex; align-items:center; gap:6px; }
 
 @media (max-width:760px){
   .msg-card{ height:78vh; }
-  .sidebar{ position:absolute; inset:0; z-index:2; background:#0d1120; border-radius:24px; transition: transform .2s ease; }
-  .sidebar.hide{ transform: translateX(100%); }
+  .sidebar{ width:72px; min-width:72px; overflow:hidden; transition: width .2s ease; }
+  .sidebar.expanded{
+    position:absolute; inset:0; z-index:5; width:82vw; max-width:300px;
+    background:#0d1120; border-radius:24px; box-shadow:0 18px 50px #000a;
+  }
+  .sidebar:not(.expanded) .sidebar-search,
+  .sidebar:not(.expanded) .sidebar-section-row,
+  .sidebar:not(.expanded) .sidebar-section-label,
+  .sidebar:not(.expanded) .conv-meta,
+  .sidebar:not(.expanded) .request-item{ display:none; }
+  .sidebar:not(.expanded) .conv-item{ justify-content:center; padding:8px 2px; }
   .mobile-back{ display:inline-flex !important; }
-  .wrap{ padding:60px 12px 20px; }
+  .wrap{ padding:60px 12px 90px; }
+  .bottom-bar{ bottom:8px; inset-inline-start:8px; }
 }
 .mobile-back{ display:none; background:none; border:0; color:#7c5cff; font-size:18px; padding:4px; }
 
@@ -458,7 +468,7 @@ function openChat(chatId, name, avatar, sub, otherUid=null){
   if (otherUid) updateHeaderStatus(otherUid);
   renderList($("searchBox").value);
   listenToMessages(chatId);
-  if (window.innerWidth <= 760) $("sidebar").classList.add("hide");
+  if (window.innerWidth <= 760) $("sidebar").classList.remove("expanded");
 }
 
 async function listenToMessages(chatId){
@@ -526,7 +536,7 @@ async function sendMessage(){
 $("sendBtn").addEventListener("click", sendMessage);
 $("msgInput").addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
 $("searchBox").addEventListener("input", e => renderList(e.target.value));
-$("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.remove("hide"));
+$("mobileBackBtn").addEventListener("click", () => $("sidebar").classList.toggle("expanded"));
 
 $("openAddFriendBtn").addEventListener("click", () => {
   $("addFriendMsg").textContent = "";
