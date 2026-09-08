@@ -212,6 +212,9 @@
 .lb-row.r3 .lb-rank{background:linear-gradient(135deg,#e0a672,#9a5a25);color:#241300}
 .lb-avatar{width:38px;height:38px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;background-size:cover;background-position:center}
 .lb-name{flex:1;font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-clickable{cursor:pointer}
+.lb-name.lb-clickable:hover{text-decoration:underline;color:#c9b8ff}
+.lb-avatar.lb-clickable:hover{filter:brightness(1.15)}
 .lb-value{font-weight:900;font-size:17px;color:#c9b8ff;white-space:nowrap}
 .lb-value small{color:#8490af;font-weight:600;font-size:11px;margin-inline-start:4px}
 .lb-state{text-align:center;color:#8490af;font-size:14px;padding:20px 0}
@@ -287,7 +290,6 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 @keyframes moveBottomTop{0%{transform:translate3d(16vw,125vh,0) rotate(0deg) scale(var(--shape-scale));opacity:0}17%{opacity:.16}39%{transform:translate3d(-12vw,38vh,0) rotate(-110deg) scale(var(--shape-scale));opacity:.3}64%{transform:translate3d(10vw,-25vh,0) rotate(-220deg) scale(var(--shape-scale));opacity:.2}84%{opacity:.1}100%{transform:translate3d(-16vw,-125vh,0) rotate(-350deg) scale(var(--shape-scale));opacity:0}}
 <style id="space-motion-randomness">
 .pixel-shape:nth-child(1){animation-duration:23s;animation-delay:-7s}.pixel-shape:nth-child(2){animation-duration:31s;animation-delay:-19s}.pixel-shape:nth-child(3){animation-duration:27s;animation-delay:-13s}.pixel-shape:nth-child(4){animation-duration:35s;animation-delay:-22s}.pixel-shape:nth-child(5){animation-duration:29s;animation-delay:-4s}.pixel-shape:nth-child(6){animation-duration:38s;animation-delay:-27s}.pixel-shape:nth-child(7){animation-duration:25s;animation-delay:-15s}.pixel-shape:nth-child(8){animation-duration:33s;animation-delay:-9s}.pixel-shape:nth-child(9){animation-duration:41s;animation-delay:-31s}.pixel-shape:nth-child(10){animation-duration:28s;animation-delay:-17s}.pixel-shape:nth-child(11){animation-duration:36s;animation-delay:-25s}.pixel-shape:nth-child(12){animation-duration:30s;animation-delay:-12s}
-</style>
 </style>
 
 <style id="space-slow-tuning">
@@ -55700,7 +55702,7 @@ async function loadBoard(which){
   try {
     const { data, error } = await supabaseClient
       .from('profiles')
-      .select('fullname, avatar_url, games_won, brain_score')
+      .select('id, fullname, avatar_url, games_won, brain_score')
       .order(column, { ascending: false, nullsFirst: false })
       .limit(5);
 
@@ -55712,11 +55714,12 @@ async function loadBoard(which){
       const name = row.fullname || t.lbUnnamed;
       const value = (which === 'wins' ? row.games_won : row.brain_score) || 0;
       const avatarStyle = row.avatar_url ? ` style="background-image:url('${row.avatar_url}')"` : '';
+      const goToProfile = row.id ? ` onclick="location.href='Profile Page.html?id=${row.id}'"` : '';
       return `
         <div class="lb-row r${rank}">
           <div class="lb-rank">${rank}</div>
-          <div class="lb-avatar"${avatarStyle}>${row.avatar_url ? '' : lbInitials(name)}</div>
-          <div class="lb-name">${name}</div>
+          <div class="lb-avatar${row.id ? ' lb-clickable' : ''}"${avatarStyle}${goToProfile}>${row.avatar_url ? '' : lbInitials(name)}</div>
+          <div class="lb-name${row.id ? ' lb-clickable' : ''}"${goToProfile}>${name}</div>
           <div class="lb-value">${value}<small>${unit}</small></div>
         </div>`;
     }).join('');
@@ -55739,7 +55742,7 @@ let matchmakingId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Math.ra
 let matchmakingPeerId="";
 
 function $(id){return document.getElementById(id)}
-function show(id){["home","lobby","game","end"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden")}
+function show(id){["home","leaderboardSection","lobby","game","end"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden");if(id==="home")$("leaderboardSection").classList.remove("hidden")}
 function roomPeerId(code){return "brainbattle-rs-"+code}
 function setLobbyStatus(msg){let el=$("lobbyStatus");if(el)el.textContent=msg}
 
