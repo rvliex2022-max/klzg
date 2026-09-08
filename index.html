@@ -55829,7 +55829,7 @@ const host=String(me.peerId)<String(opponent.peerId)?me:opponent;
 const guest=host===me?opponent:me;
 if(host.id!==matchmakingId)return;
 
-const matchId='live-'+[host.peerId,guest.peerId].sort().join('-').slice(0,90);
+const matchId=Math.floor(100000+Math.random()*900000)+"";
 const payload={matchId,hostPeerId:host.peerId,hostName:host.name,guestId:guest.id,guestName:guest.name};
 await matchmakingChannel.send({type:'broadcast',event:'match',payload});
 await handleMatchFound(payload);
