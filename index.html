@@ -55571,12 +55571,25 @@ function setLanguage(l){
     updateStaticTexts();
 }
 
+function setGameCardsDirection(lang) {
+  const dir = lang === "ar" ? "rtl" : "ltr";
+
+  ["home", "lobby", "game", "end"].forEach((id) => {
+    const card = document.getElementById(id);
+    if (card) {
+      card.lang = lang;
+      card.dir = dir;
+    }
+  });
+}
+
 function toggleGameLanguage() {
   gameLang = gameLang === "ar" ? "en" : "ar";
 
   document.getElementById("gameLangBtn").textContent =
     gameLang === "ar" ? "English" : "العربية";
 
+  setGameCardsDirection(gameLang);
   updateGameTexts();
 }
 
@@ -55584,6 +55597,8 @@ function toggleGameLanguage() {
 function updateGameTexts() {
 
   const t = i18n[gameLang];
+
+  setGameCardsDirection(gameLang);
 
   $("badgeText").textContent = t.badge;
   $("homeTitle").textContent = t.homeTitle;
