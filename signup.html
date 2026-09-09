@@ -295,7 +295,7 @@ const EMAILJS_TEMPLATE_ID = "template_d4m9id9";
 if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
 function generateCode() {
-    return String(Math.floor(100000 + Math.random() * 900000)); // كود من 6 أرقام
+    return String(Math.floor(100000 + Math.random() * 900000)); 
 }
 
 async function handleSignup(e) {

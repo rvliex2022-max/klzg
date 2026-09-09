@@ -55740,7 +55740,7 @@ let playerName="",room="",score=0,oppScore=0,idx=0,timer=null,time=TIME_PER_QUES
 let conn=null,isHost=false,oppName="",myFinished=false,oppFinished=false,oppFinalScore=0;
 let statsSaved=false; 
 let loggedInUserId=null; 
-let matchmakingChannel=null, matchmakingActive=false, matchStatusLocked=false;
+let matchmakingChannel=null, matchmakingActive=false, matchStatusLocked=false, isMatchmadeSession=false;
 let matchmakingId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now();
 
 function $(id){return document.getElementById(id)}
@@ -55867,10 +55867,36 @@ await matchmakingChannel.send({type:'broadcast',event:'match',payload});
 await handleMatchFound(payload);
 }
 
+function playMatchFoundSound(){
+try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx)return;
+  const ctx=new Ctx();
+  const notes=[880,1174.66];
+  notes.forEach((freq,i)=>{
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.type="sine";
+    osc.frequency.value=freq;
+    const start=ctx.currentTime+i*0.15;
+    gain.gain.setValueAtTime(0,start);
+    gain.gain.linearRampToValueAtTime(0.35,start+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001,start+0.32);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start+0.35);
+  });
+  setTimeout(()=>{try{ctx.close();}catch(e){}},900);
+}catch(e){console.error("playMatchFoundSound error",e);}
+}
+
 async function handleMatchFound(payload){
 if(!matchmakingActive||!payload)return;
 const isForMe=payload.guestId===matchmakingId||payload.hostId===matchmakingId;
 if(!isForMe)return;
+playMatchFoundSound();
+isMatchmadeSession=true;
 matchmakingActive=false;
 matchStatusLocked=true;
 $("btnMatchmake")?.classList.remove("searching");
@@ -55908,6 +55934,7 @@ function createRoom(){
 playerName=$("name").value.trim()||"Player 1";
 room=Math.floor(100000+Math.random()*900000)+"";
 isHost=true;
+isMatchmadeSession=false;
 enterLobby();
 setLobbyStatus(i18n[gameLang].creatingRoom);
 connectGameChannel(room);
@@ -55919,6 +55946,7 @@ playerName=$("name").value.trim()||"Player 2";
 room=$("roomInput").value.trim();
 if(!room){alert(i18n[gameLang].enterRoomFirst);return}
 isHost=false;
+isMatchmadeSession=false;
 enterLobby();
 setLobbyStatus(i18n[gameLang].connecting+room+"...");
 connectGameChannel(room);
@@ -55936,6 +55964,10 @@ function handleData(msg) {
 
     setLobbyStatus(i18n[gameLang].oppJoined);
     $("startBtn").disabled = false;
+
+    if (isHost && isMatchmadeSession) {
+      startGame();
+    }
   }
 
   else if (msg.type === "welcome") {
