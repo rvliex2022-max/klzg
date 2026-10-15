@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="style.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brain Battle</title>
+<script src="spotify-player.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
     const supabaseClient = window.supabase.createClient(
@@ -31,34 +35,103 @@
         
 
       
-.top-header {
-    position: absolute;
-    top: 10px;
-    inset-inline-end: 20px;
-    z-index: 9999;
-}
-
-.top-links {
-    position: absolute;
-    top: 10px;
-    inset-inline-start: 20px;
+.site-header {
+    position: sticky;
+    top: 0;
     z-index: 9999;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 16px;
+    padding: 22px clamp(20px, 5vw, 80px);
+    border-bottom: 1px solid #242b47;
+    background: #080b14cc;
+    backdrop-filter: blur(10px);
 }
 
-.top-links a {
-    color: #cbd5e1;
-    font-size: 13.5px;
-    font-weight: 600;
+.site-header, .site-header * {
+    font-family: 'Cairo', Arial, sans-serif;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     text-decoration: none;
+    color: #f5f6ff;
+    font-weight: 800;
+    font-size: clamp(18px, 2.2vw, 22px);
     white-space: nowrap;
 }
 
-.top-links a:hover {
-    color: #fff;
-    text-decoration: underline;
+.brand-mark {
+    font-size: 1.3em;
+    line-height: 1;
+}
+
+.header-end {
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 4vw, 44px);
+}
+
+.site-nav {
+    display: flex;
+    gap: clamp(20px, 4vw, 44px);
+}
+
+.site-nav a {
+    text-decoration: none;
+    color: #8b93b5;
+    font-weight: 600;
+    font-size: 15px;
+    position: relative;
+    transition: .2s;
+    white-space: nowrap;
+}
+
+.site-nav a::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: -6px;
+    height: 2px;
+    background: #7c5cff;
+    transform: scaleX(0);
+    transition: transform .2s;
+}
+
+.site-nav a:hover {
+    color: #f5f6ff;
+}
+
+.site-nav a:hover::after {
+    transform: scaleX(1);
+}
+
+.site-header .avatar-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    box-shadow: 0 0 0 2px #242b47;
+}
+
+.site-header .user-dropdown {
+    top: 58px;
+}
+
+@media (max-width: 720px) {
+    .site-header { padding: 18px 20px; }
+    .header-end, .site-nav { gap: 18px; }
+    .site-nav a { font-size: 13px; }
+    .site-header .avatar-btn { width: 42px; height: 42px; font-size: 17px; }
+    .site-header .user-dropdown { top: 50px; }
+}
+
+@media (max-width: 440px) {
+    .site-header { padding: 14px 16px; }
+    .brand-text { display: none; }
 }
 
 .login-btn {
@@ -192,7 +265,7 @@
 }
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Tahoma,sans-serif;background:#080b14;color:#f7f8ff;min-height:100vh}
 .bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#35206a55,transparent 35%),radial-gradient(circle at 80% 90%,#005c7a55,transparent 35%);pointer-events:none}
-.wrap{max-width:1050px;margin:0 auto;padding:70px 18px 28px;position:relative}
+.wrap{max-width:1050px;margin:0 auto;padding:32px 18px 28px;position:relative}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
 .top .logo{order:1}
 .top .badge{order:2}
@@ -228,8 +301,12 @@ input,select{width:100%;background:#0a0e19;border:1px solid #303750;color:white;
 button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:15px;cursor:pointer;background:#7c5cff;color:white;transition:.15s}button:hover{transform:translateY(-1px);filter:brightness(1.08)}button.secondary{background:#1b2235;color:#dbe2ff}button.danger{background:#d94b67}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.matchmaking-btn{background:linear-gradient(135deg,#8b5cf6,#6d4aff);position:relative;overflow:hidden}.matchmaking-btn.searching{background:#252d46}.match-status{width:100%;font-size:13px;color:#9eabd0;min-height:18px}.match-status strong{color:#dbe2ff}.room{font-size:34px;font-weight:900;letter-spacing:8px;text-align:center;padding:15px;border:1px dashed #465071;border-radius:16px;margin:15px 0}
 .players{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}.player{padding:18px;border-radius:18px;background:#0c1120;border:1px solid #28304a;display:flex;justify-content:space-between}.score{font-size:30px;font-weight:900}.muted{color:#8490af;font-size:13px}
+.players.compact{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0}.players.compact .player{padding:10px 14px;align-items:center}.players.compact .score{font-size:22px}
+.player.me{border-color:#7c5cff}.player.empty{border-style:dashed;opacity:.55}.player.left{opacity:.45}
+.player-count{display:inline-block;font-size:12px;background:#151a2b;border:1px solid #292f49;padding:5px 14px;border-radius:999px;color:#aeb8d8}
+.final-list{list-style:none;padding:0;margin:14px auto 0;max-width:380px;display:flex;flex-direction:column;gap:8px;text-align:start}.final-list li{display:flex;justify-content:space-between;gap:10px;background:#0c1120;border:1px solid #28304a;border-radius:12px;padding:10px 14px;color:#dbe2ff}.final-list li.me{border-color:#7c5cff}.final-list li .muted{font-size:13px}
 .center{text-align:center}.hidden{display:none!important}.q{font-size:30px;font-weight:850;line-height:1.3;margin:20px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{background:#171e31;border:1px solid #303953;text-align:start}.choice.correct{background:#155c43;border-color:#2bd28b}.choice.wrong{background:#63253a;border-color:#ff6686}.timer{height:9px;background:#242b40;border-radius:99px;overflow:hidden}.bar{height:100%;width:100%;background:#7c5cff;transition:width .1s linear}.status{margin:12px 0;color:#aeb7cf;min-height:22px}.result{font-size:54px;font-weight:950}.mini{font-size:12px;color:#7f8aa7}
-@media(max-width:700px){h1{font-size:32px}.grid,.players,.choices{grid-template-columns:1fr}.q{font-size:24px}.wrap{padding:64px 12px 90px}.lb-card{margin-top:60px}.room{font-size:26px;letter-spacing:4px}.top-header,.top-links{top:8px}.avatar-btn{width:40px;height:40px;font-size:15px}.bottom-bar{bottom:8px;inset-inline-end:8px}}
+@media(max-width:700px){h1{font-size:32px}.grid,.players,.choices{grid-template-columns:1fr}.q{font-size:24px}.wrap{padding:24px 12px 90px}.lb-card{margin-top:60px}.room{font-size:26px;letter-spacing:4px}.bottom-bar{bottom:8px;inset-inline-end:8px}}
 
 .pixel-field{
   position:absolute;
@@ -307,8 +384,13 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 
 </head>
 <body>
-   <header class="top-header">
-
+<header class="site-header">
+  <a href="index.html" class="brand"><span class="brand-mark">🧠</span><span class="brand-text">Brain Battle</span></a>
+  <div class="header-end">
+    <nav class="site-nav">
+      <a href="https://linktr.ee/vliex" id="contactUsLink">Contact Us</a>
+      <a href="https://www.paypal.com/paypalme/LayanM808" id="supportUsLink">Support us</a>
+    </nav>
     <a href="login.html" class="login-btn" id="loginBtnText">تسجيل الدخول</a>
     <div class="user-menu" id="userMenu">
       <button class="avatar-btn" id="avatarBtn">؟</button>
@@ -320,9 +402,8 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
         <button class="signout" id="signOutBtn">🚪 تسجيل الخروج</button>
       </div>
     </div>
+  </div>
 </header>
-<div class="top-links" id="topLinks">
-</div>
     <div class="bg"></div>
 <div class="pixel-field" aria-hidden="true">
   <span class="pixel-shape pixel-star dir-right-left s3" style="left:7%;top:22%;animation-delay:-1s"></span>
@@ -386,6 +467,8 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 <div class="grid">
 <div><label class="mini" id="lblName">اسمك</label><input id="name" placeholder="مثلاً Rayan" maxlength="18"></div>
 <div><label class="mini" id="lblRoom">الغرفة</label><input id="roomInput" placeholder="مثلاً 482913" maxlength="6" inputmode="numeric"></div>
+<div><label class="mini" id="lblMaxPlayers" for="maxPlayersSelect">عدد اللاعبين في الجولة</label><select id="maxPlayersSelect"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
+<div><label class="mini" id="lblQuestionCount" for="questionCountSelect">عدد الأسئلة في الجولة</label><select id="questionCountSelect"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20" selected>20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option></select></div>
 </div>
 <div class="actions">
 <button id="btnCreate" onclick="createRoom()">إنشاء غرفة</button><button class="secondary" id="btnJoin" onclick="joinRoom()">دخول لغرفة</button><button id="btnMatchmake" class="matchmaking-btn" onclick="toggleMatchmaking()"> <span id="btnMatchmakeText">ابحث عن خصم الآن</span></button><div id="matchStatus" class="match-status"></div>
@@ -403,21 +486,21 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 </section>
 
 <section id="lobby" class="card hidden">
-<div class="center"><div class="muted" id="lblRoomCode">رمز الغرفة</div><div id="roomCode" class="room">------</div></div>
-<div class="players"><div class="player"><div><b id="p1">Player 1</b><div class="muted" id="lblYou1">أنت</div></div><div class="score" id="s1">0</div></div><div class="player"><div><b id="p2">في الانتظار…</b><div class="muted" id="lblOpp1">الخصم</div></div><div class="score" id="s2">0</div></div></div>
+<div class="center"><div class="muted" id="lblRoomCode">رمز الغرفة</div><div id="roomCode" class="room">------</div><div class="player-count" id="playerCount"></div></div>
+<div class="players" id="lobbyPlayers"></div>
 <p class="status" id="lobbyStatus">جارٍ التحضير…</p>
 <div class="actions"><button id="startBtn" onclick="startGame()" disabled>ابدأ المباراة</button><button class="secondary" id="btnCopy" onclick="copyRoom()">نسخ رمز الغرفة</button><button class="danger" id="btnExit1" onclick="location.reload()">خروج</button></div>
 </section>
 
 <section id="game" class="card hidden">
-<div class="players"><div class="player"><div><b id="g1">أنت</b></div><div class="score" id="gs1">0</div></div><div class="player"><div><b id="g2">الخصم</b></div><div class="score" id="gs2">0</div></div></div>
+<div class="players compact" id="gamePlayers"></div>
 <div class="timer"><div class="bar" id="bar"></div></div>
 <div class="center"><div class="muted" id="counter">السؤال 1 / 10</div><div class="q" id="question"></div></div>
 <div id="choices" class="choices"></div><div class="status" id="status"></div>
 <div class="actions"><button class="danger" id="btnExit2" onclick="exitGame()">خروج</button></div>
 </section>
 
-<section id="end" class="card hidden center"><div class="muted" id="lblFinalResult">النتيجة النهائية</div><div id="winner" class="result"></div><p id="finalScore"></p><div class="actions center"><button id="btnPlayAgain" onclick="location.reload()">لعب مرة ثانية</button><button class="danger" id="btnExit3" onclick="exitGame()">خروج</button></div></section>
+<section id="end" class="card hidden center"><div class="muted" id="lblFinalResult">النتيجة النهائية</div><div id="winner" class="result"></div><p id="finalScore"></p><ol class="final-list" id="finalList"></ol><div class="actions center"><button id="btnPlayAgain" onclick="location.reload()">لعب مرة ثانية</button><button class="danger" id="btnExit3" onclick="exitGame()">خروج</button></div></section>
 </div>
 
 <div class="bottom-bar">
@@ -55440,11 +55523,15 @@ const i18n = {
     friendsLink: "👥 الأصدقاء",
     settingsLink: "⚙️ الإعدادات",
     signOutBtn: "تسجيل الخروج",
-    badge: "1v1 • سرعة + دقة",
+    badge: "2–8 لاعبين • سرعة + دقة",
     homeTitle: "مين أذكى؟",
-    homeDesc: "لعبة أسئلة مباشرة لشخصين. افتحوا نفس الرابط، ادخلوا نفس الغرفة، وابدؤوا المنافسة.",
+    homeDesc: "لعبة أسئلة مباشرة من 2 إلى 8 لاعبين. اختر عدد اللاعبين، أنشئ غرفة، وشارك الرمز مع أصحابك.",
     lblName: "اسمك",
     lblRoom: "الغرفة",
+    lblMaxPlayers: "عدد اللاعبين في الجولة",
+    playersOption: (n) => n === 2 ? "2 لاعبين (1 ضد 1)" : `${n} لاعبين`,
+    lblQuestionCount: "عدد الأسئلة في الجولة",
+    questionsCount: (n) => n <= 10 ? `${n} أسئلة` : `${n} سؤال`,
     namePlaceholder: "مثلاً Rayan",
     roomPlaceholder: "مثلاً 482913",
     btnCreate: "إنشاء غرفة",
@@ -55458,33 +55545,42 @@ const i18n = {
     matchError: "تعذر تشغيل البحث عن الخصوم. تأكد من اتصالك بالإنترنت.",
     lblRoomCode: "رمز الغرفة",
     lblYou: "أنت",
-    lblOpp: "الخصم",
+    lblHost: "صاحب الغرفة",
+    lblPlayer: "لاعب",
     waitingOpp: "في الانتظار…",
+    playerCount: (c, m) => `اللاعبون: ${c} / ${m}`,
     startBtn: "ابدأ المباراة",
     btnCopy: "نسخ رمز الغرفة",
     btnExit: "خروج",
     btnPlayAgain: "لعب مرة ثانية",
     lblFinalResult: "النتيجة النهائية",
     creatingRoom: "جارٍ إنشاء الغرفة…",
-    roomReady: "جاهز! انتظر انضمام اللاعب الثاني…",
+    roomReady: "جاهز! بانتظار انضمام اللاعبين…",
+    canStart: (c, m) => `انضم ${c} من ${m} لاعبين — تقدر تبدأ الآن أو تنتظر الباقين`,
+    roomFilled: "اكتمل العدد! اضغط ابدأ المباراة",
+    roomFull: "الغرفة ممتلئة أو المباراة بدأت بالفعل",
+    hostLeft: "صاحب الغرفة غادر",
+    notEnoughPlayers: "تحتاج لاعبين اثنين على الأقل للبدء",
     idTaken: "رمز الغرفة مستخدم حاليًا، اضغط خروج وجرب رمز/غرفة جديدة",
     connError: "خطأ بالاتصال، تأكد من اتصالك بالإنترنت",
     connecting: "جارٍ الاتصال بالغرفة ",
     joinFailed: "تعذر الاتصال، تأكد من رمز الغرفة والإنترنت",
     enterRoomFirst: "أدخل رمز الغرفة أولاً",
-    oppJoined: "اللاعب الثاني انضم! اضغط ابدأ المباراة",
     waitingHost: "تم الاتصال! بانتظار أن يبدأ صاحب الغرفة المباراة…",
-    disconnected: "انقطع الاتصال بالخصم",
-    noConn: "لا يوجد اتصال باللاعب الثاني بعد",
+    noConn: "لا يوجد اتصال باللاعبين بعد",
     copied: "تم نسخ رمز الغرفة: ",
     qCounter: (i, n) => `السؤال ${i} / ${n}`,
     correct: (p) => `صحيح! +${p} نقطة ⚡`,
     timeUp: "انتهى الوقت",
     wrong: "إجابة خاطئة",
     won: "فزت! 🏆", lost: "خسرت الجولة 😔", tie: "تعادل!", doneSolo: "أنهيت جولتك",
+    place: (r) => `المركز ${r}`,
     yourScore: (s, m) => `نتيجتك: ${s} من ${m}`,
-    oppScoreLine: (n, s) => `${n}: ${s} نقطة`,
-    oppNotDone: (n) => `${n}: لم ينهِ الجولة بعد…`,
+    rankLine: (r, n) => `مركزك ${r} من ${n}`,
+    ptsShort: (s) => `${s} نقطة`,
+    notDoneShort: "لم ينهِ بعد…",
+    leftTag: "غادر",
+    doneTag: "خلّص ✓",
     loginBtn: "تسجيل الدخول",
     messagesBtn: "الرسائل",
     contactUs: "تواصل معنا",
@@ -55506,11 +55602,15 @@ const i18n = {
     friendsLink: "👥 Friends",
     settingsLink: "⚙️ Settings",
     signOutBtn: "Sign Out",
-    badge: "1v1 • Speed + Accuracy",
+    badge: "2–8 Players • Speed + Accuracy",
     homeTitle: "Who is Smarter?",
-    homeDesc: "A live 2-player trivia game. Open the same link, enter the same room, and start competing.",
+    homeDesc: "A live trivia game for 2 to 8 players. Pick the player count, create a room, and share the code with your friends.",
     lblName: "Your Name",
     lblRoom: "Room Code",
+    lblMaxPlayers: "Players per round",
+    playersOption: (n) => n === 2 ? "2 players (1v1)" : `${n} players`,
+    lblQuestionCount: "Questions per round",
+    questionsCount: (n) => `${n} questions`,
     namePlaceholder: "e.g. Rayan",
     roomPlaceholder: "e.g. 482913",
     btnCreate: "Create Room",
@@ -55524,33 +55624,42 @@ const i18n = {
     matchError: "Could not start matchmaking. Check your internet connection.",
     lblRoomCode: "Room Code",
     lblYou: "You",
-    lblOpp: "Opponent",
+    lblHost: "Host",
+    lblPlayer: "Player",
     waitingOpp: "Waiting...",
+    playerCount: (c, m) => `Players: ${c} / ${m}`,
     startBtn: "Start Match",
     btnCopy: "Copy Room Code",
     btnExit: "Exit",
     btnPlayAgain: "Play Again",
     lblFinalResult: "Final Result",
     creatingRoom: "Creating room…",
-    roomReady: "Ready! Waiting for player 2 to join…",
+    roomReady: "Ready! Waiting for players to join…",
+    canStart: (c, m) => `${c} of ${m} players joined — start now or wait for the rest`,
+    roomFilled: "Room is full! Press Start Match",
+    roomFull: "This room is full or the match already started",
+    hostLeft: "The host left the room",
+    notEnoughPlayers: "You need at least 2 players to start",
     idTaken: "That room code is in use. Press Exit and try a new one",
     connError: "Connection error, check your internet",
     connecting: "Connecting to room ",
     joinFailed: "Could not connect, check the room code and your internet",
     enterRoomFirst: "Enter the room code first",
-    oppJoined: "Player 2 joined! Press Start Match",
     waitingHost: "Connected! Waiting for the host to start…",
-    disconnected: "Opponent disconnected",
-    noConn: "No connection to player 2 yet",
+    noConn: "Not connected to other players yet",
     copied: "Room code copied: ",
     qCounter: (i, n) => `Question ${i} / ${n}`,
     correct: (p) => `Correct! +${p} pts ⚡`,
     timeUp: "Time's up!",
     wrong: "Wrong answer",
     won: "You won! 🏆", lost: "You lost 😔", tie: "Draw!", doneSolo: "You finished your round",
+    place: (r) => `Place #${r}`,
     yourScore: (s, m) => `Your score: ${s} of ${m}`,
-    oppScoreLine: (n, s) => `${n}: ${s} pts`,
-    oppNotDone: (n) => `${n}: hasn't finished yet…`,
+    rankLine: (r, n) => `you placed ${r} of ${n}`,
+    ptsShort: (s) => `${s} pts`,
+    notDoneShort: "Not done yet…",
+    leftTag: "Left",
+    doneTag: "Done ✓",
     loginBtn: "Login",
     messagesBtn: "Messages",
     contactUs: "Contact Us",
@@ -55624,12 +55733,12 @@ function updateGameTexts() {
   $("btnExit3").textContent = t.btnExit;
   $("btnPlayAgain").textContent = t.btnPlayAgain;
   $("lblFinalResult").textContent = t.lblFinalResult;
-  $("lblYou1").textContent = t.lblYou;
-  $("lblOpp1").textContent = t.lblOpp;
-
-  if (!oppName) {
-    $("p2").textContent = t.waitingOpp;
-  }
+  $("lblMaxPlayers").textContent = t.lblMaxPlayers;
+  $("lblQuestionCount").textContent = t.lblQuestionCount;
+  renderSetupOptions(t);
+  renderLobby();
+  renderScoreboard();
+  if (myFinished) maybeShowFinal();
 
   if (questions.length > 0) {
     $("counter").textContent = t.qCounter(idx + 1, questions.length);
@@ -55661,16 +55770,12 @@ function updateStaticTexts() {
   if(document.getElementById('btnExit3')) document.getElementById('btnExit3').textContent = t.btnExit;
   if(document.getElementById('btnPlayAgain')) document.getElementById('btnPlayAgain').textContent = t.btnPlayAgain;
   if(document.getElementById('lblFinalResult')) document.getElementById('lblFinalResult').textContent = t.lblFinalResult;
-  if($("lblYou1")) $("lblYou1").textContent = t.lblYou;
-  if($("lblOpp1")) $("lblOpp1").textContent = t.lblOpp;
-  if($("p1")) $("p1").textContent = playerName || t.lblYou;
-  if($("p2")) $("p2").textContent = oppName || t.waitingOpp;
-  if($("g1")) $("g1").textContent = playerName || t.lblYou;
-  if($("g2")) $("g2").textContent = oppName || t.lblOpp;
+  if($("lblMaxPlayers")) $("lblMaxPlayers").textContent = t.lblMaxPlayers;
+  if($("lblQuestionCount")) $("lblQuestionCount").textContent = t.lblQuestionCount;
+  renderSetupOptions(t);
   if(questions.length && $("counter")) $("counter").textContent = t.qCounter(idx+1, questions.length);
   if(document.getElementById("loginBtnText")) document.getElementById("loginBtnText").textContent = t.loginBtn;
-  if(document.getElementById("messagesBtnText")) document.getElementById("messagesBtnText").textContent = t.messagesBtn;
-  if(document.getElementById("contactUsLink")) document.getElementById("contactUsLink").textContent = t.contactUs;
+  if(document.getElementById("messagesBtnText")) document.getElementById("messagesBtnText").textContent = t.messagesBtn;  if(document.getElementById("contactUsLink")) document.getElementById("contactUsLink").textContent = t.contactUs;
   if(document.getElementById("supportUsLink")) document.getElementById("supportUsLink").textContent = t.supportUs;
   if(document.getElementById("leaderboardLinkText")) document.getElementById("leaderboardLinkText").textContent = t.leaderboardLink;
   if(document.getElementById("lbTitle")) document.getElementById("lbTitle").textContent = t.lbTitle;
@@ -55736,9 +55841,13 @@ function bankForLang(l){return l === 'en' ? EN_QUESTION_BANK : AR_QUESTION_BANK;
 let questions=[];
 const QUESTIONS_PER_GAME=20;
 const TIME_PER_QUESTION=18;
-let playerName="",room="",score=0,oppScore=0,idx=0,timer=null,time=TIME_PER_QUESTION;
-let conn=null,isHost=false,oppName="",myFinished=false,oppFinished=false,oppFinalScore=0;
-let statsSaved=false; 
+const MIN_PLAYERS=2;
+const MAX_PLAYERS=8;
+let playerName="",room="",score=0,idx=0,timer=null,time=TIME_PER_QUESTION;
+let conn=null,isHost=false,myFinished=false;
+let maxPlayers=MIN_PLAYERS,roster=[],gameStarted=false,roomRejected=false;
+let questionCount=QUESTIONS_PER_GAME;
+let statsSaved=false;
 let loggedInUserId=null; 
 let matchmakingChannel=null, matchmakingActive=false, matchStatusLocked=false, isMatchmadeSession=false;
 let matchmakingId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now();
@@ -55747,15 +55856,101 @@ function $(id){return document.getElementById(id)}
 function show(id){["home","leaderboardSection","lobby","game","end"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden");if(id==="home")$("leaderboardSection").classList.remove("hidden")}
 function roomChannelName(code){return "brain-battle-room-"+code}
 function setLobbyStatus(msg){let el=$("lobbyStatus");if(el)el.textContent=msg}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function readMaxPlayers(){const n=parseInt($("maxPlayersSelect")?.value,10);return Math.min(MAX_PLAYERS,Math.max(MIN_PLAYERS,n||MIN_PLAYERS))}
+function readQuestionCount(){const n=parseInt($("questionCountSelect")?.value,10);return n>0?n:QUESTIONS_PER_GAME}
+function findPlayer(id){return roster.find(p=>p.id===id)}
+function otherPlayers(){return roster.filter(p=>p.id!==matchmakingId)}
+function makePlayer(id,name){return {id,name,score:0,finished:false,left:false}}
+function setRoster(players){
+roster=(players||[]).map(p=>{const old=findPlayer(p.id);return old?Object.assign(old,{name:p.name}):makePlayer(p.id,p.name)});
+}
+function broadcastRoster(){
+sendConnData({type:'roster',max:maxPlayers,q:questionCount,players:roster.map(p=>({id:p.id,name:p.name}))});
+}
+
+function renderSetupOptions(t){
+const players=$("maxPlayersSelect");
+if(players)[...players.options].forEach(o=>o.textContent=t.playersOption(+o.value));
+const qs=$("questionCountSelect");
+if(qs)[...qs.options].forEach(o=>o.textContent=t.questionsCount(+o.value));
+}
+
+function renderLobby(){
+const t=i18n[gameLang];
+const box=$("lobbyPlayers");if(!box)return;
+const list=roster.length?roster:[makePlayer(matchmakingId,playerName)];
+let html=list.map((p,i)=>{
+  const me=p.id===matchmakingId;
+  const role=me?t.lblYou:(i===0?t.lblHost:t.lblPlayer);
+  return `<div class="player${me?" me":""}"><div><b>${esc(p.name)}</b><div class="muted">${role}</div></div></div>`;
+}).join("");
+for(let i=list.length;i<maxPlayers;i++)html+=`<div class="player empty"><div><b>${t.waitingOpp}</b><div class="muted">${t.lblPlayer} ${i+1}</div></div></div>`;
+box.innerHTML=html;
+const count=$("playerCount");
+if(count){count.textContent=maxPlayers?t.playerCount(list.length,maxPlayers)+(questionCount?" • "+t.questionsCount(questionCount):""):"";count.classList.toggle("hidden",!maxPlayers)}
+}
+
+function renderScoreboard(){
+const t=i18n[gameLang];
+const box=$("gamePlayers");if(!box)return;
+box.innerHTML=roster.map(p=>{
+  const me=p.id===matchmakingId;
+  const sub=me?t.lblYou:(p.left?t.leftTag:(p.finished?t.doneTag:""));
+  return `<div class="player${me?" me":""}${p.left?" left":""}"><div><b>${esc(me?playerName:p.name)}</b>${sub?`<div class="muted">${sub}</div>`:""}</div><div class="score">${me?score:p.score}</div></div>`;
+}).join("");
+}
+
+function onRosterChanged(){
+const t=i18n[gameLang];
+renderLobby();
+if(gameStarted)return;
+if(isHost){
+  const ready=roster.length>=MIN_PLAYERS;
+  $("startBtn").disabled=!ready;
+  if(!ready)setLobbyStatus(t.roomReady);
+  else if(roster.length>=maxPlayers)setLobbyStatus(t.roomFilled);
+  else setLobbyStatus(t.canStart(roster.length,maxPlayers));
+  if(isMatchmadeSession&&roster.length>=maxPlayers)startGame();
+}else if(findPlayer(matchmakingId)){
+  setLobbyStatus(t.waitingHost);
+}
+}
+
+function rejectFromRoom(){
+roomRejected=true;
+$("startBtn").disabled=true;
+setLobbyStatus(i18n[gameLang].roomFull);
+closeConnChannel();
+}
+
+function handlePlayerLeft(id){
+if(!id||id===matchmakingId)return;
+const p=findPlayer(id);if(!p)return;
+if(gameStarted){
+  p.left=true;
+  renderScoreboard();
+  maybeShowFinal();
+  return;
+}
+if(isHost){
+  roster=roster.filter(x=>x.id!==id);
+  broadcastRoster();
+  onRosterChanged();
+}else if(roster[0]&&roster[0].id===id){
+  setLobbyStatus(i18n[gameLang].hostLeft);
+}
+}
 
 function sendConnData(msg){
 if(conn&&conn.open)conn.channel.send({type:'broadcast',event:'msg',payload:msg});
 }
 
 function closeConnChannel(){
-if(conn&&conn.helloTimer)clearInterval(conn.helloTimer);
-if(conn&&conn.channel){try{supabaseClient.removeChannel(conn.channel)}catch(e){}}
+const old=conn;
 conn=null;
+if(old&&old.helloTimer)clearInterval(old.helloTimer);
+if(old&&old.channel){try{supabaseClient.removeChannel(old.channel)}catch(e){}}
 }
 
 function connectGameChannel(code){
@@ -55765,8 +55960,9 @@ const channel=supabaseClient.channel(roomChannelName(code),{
 conn={channel,open:false,helloTimer:null};
 
 channel.on('broadcast',{event:'msg'},({payload})=>handleData(payload));
-channel.on('presence',{event:'leave'},()=>{
-  if(oppName){setLobbyStatus(i18n[gameLang].disconnected);$("startBtn").disabled=true;}
+channel.on('presence',{event:'leave'},({key,leftPresences})=>{
+  const ids=new Set([key,...(leftPresences||[]).map(p=>p&&p.id)].filter(Boolean));
+  ids.forEach(handlePlayerLeft);
 });
 
 channel.subscribe(async(status)=>{
@@ -55774,13 +55970,15 @@ channel.subscribe(async(status)=>{
     conn.open=true;
     try{await channel.track({id:matchmakingId})}catch(e){}
     if(!isHost){
-      sendConnData({type:'hello',name:playerName});
+      const hello=()=>sendConnData({type:'hello',id:matchmakingId,name:playerName});
+      hello();
       conn.helloTimer=setInterval(()=>{
-        if(!oppName)sendConnData({type:'hello',name:playerName});
+        if(!findPlayer(matchmakingId)&&!roomRejected)hello();
         else clearInterval(conn.helloTimer);
       },1000);
     }
   }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+    if(!conn||conn.channel!==channel)return; // closed on purpose (e.g. room full)
     console.error('game channel status:',status);
     setLobbyStatus(isHost?i18n[gameLang].connError:i18n[gameLang].joinFailed);
   }
@@ -55904,11 +56102,14 @@ updateGameTexts();
 const amHost=payload.hostId===matchmakingId;
 isHost=amHost;
 room=payload.matchId||'LIVE';
-oppName=amHost?payload.guestName:payload.hostName;
+const otherName=amHost?payload.guestName:payload.hostName;
+maxPlayers=MIN_PLAYERS;
+questionCount=QUESTIONS_PER_GAME;
+roster=amHost?[makePlayer(matchmakingId,playerName)]:[];
 await leaveMatchmakingChannel();
 enterLobby();
-setLobbyStatus(i18n[gameLang].matchFound(oppName));
-$("matchStatus").textContent=i18n[gameLang].matchFound(oppName);
+setLobbyStatus(i18n[gameLang].matchFound(otherName));
+$("matchStatus").textContent=i18n[gameLang].matchFound(otherName);
 
 if(!amHost)setLobbyStatus(i18n[gameLang].matchConnecting);
 connectGameChannel(room);
@@ -55935,6 +56136,9 @@ playerName=$("name").value.trim()||"Player 1";
 room=Math.floor(100000+Math.random()*900000)+"";
 isHost=true;
 isMatchmadeSession=false;
+maxPlayers=readMaxPlayers();
+questionCount=readQuestionCount();
+roster=[makePlayer(matchmakingId,playerName)];
 enterLobby();
 setLobbyStatus(i18n[gameLang].creatingRoom);
 connectGameChannel(room);
@@ -55947,38 +56151,57 @@ room=$("roomInput").value.trim();
 if(!room){alert(i18n[gameLang].enterRoomFirst);return}
 isHost=false;
 isMatchmadeSession=false;
+maxPlayers=0;
+questionCount=0;
+roster=[];
 enterLobby();
 setLobbyStatus(i18n[gameLang].connecting+room+"...");
 connectGameChannel(room);
 }
 
 function handleData(msg) {
+  if (!msg || roomRejected) return;
+
   if (msg.type === "hello") {
-    oppName = msg.name;
-    $("p2").textContent = oppName;
+    // Only the host owns the roster; guests ignore each other's hellos.
+    if (!isHost || !msg.id) return;
 
-    sendConnData({
-      type: "welcome",
-      name: playerName
-    });
-
-    setLobbyStatus(i18n[gameLang].oppJoined);
-    $("startBtn").disabled = false;
-
-    if (isHost && isMatchmadeSession) {
-      startGame();
+    if (!findPlayer(msg.id)) {
+      if (gameStarted || roster.length >= maxPlayers) {
+        sendConnData({ type: "full", to: msg.id });
+        return;
+      }
+      roster.push(makePlayer(msg.id, msg.name || i18n[gameLang].lblPlayer));
     }
+
+    broadcastRoster();
+    onRosterChanged();
   }
 
-  else if (msg.type === "welcome") {
-    oppName = msg.name;
-    $("p2").textContent = oppName;
-    setLobbyStatus(i18n[gameLang].waitingHost);
+  else if (msg.type === "roster") {
+    if (isHost) return;
+    maxPlayers = msg.max || maxPlayers;
+    questionCount = msg.q || questionCount;
+    setRoster(msg.players);
+    onRosterChanged();
+  }
+
+  else if (msg.type === "full") {
+    if (msg.to === matchmakingId && !findPlayer(matchmakingId)) rejectFromRoom();
   }
 
   else if (msg.type === "start") {
+    if (isHost) return;
+    const players = msg.players || [];
+    if (!players.some(p => p.id === matchmakingId)) {
+      rejectFromRoom();
+      return;
+    }
+
     gameLang = msg.lang || gameLang;
     questions = msg.questions || [];
+    maxPlayers = msg.max || maxPlayers;
+    setRoster(players);
 
     $("gameLangBtn").textContent =
       gameLang === "ar" ? "English" : "العربية";
@@ -55988,36 +56211,48 @@ function handleData(msg) {
   }
 
   else if (msg.type === "score") {
-    oppScore = msg.total;
-    $("gs2").textContent = oppScore;
+    const p = findPlayer(msg.id);
+    if (!p) return;
+    p.score = msg.total;
+    renderScoreboard();
   }
 
   else if (msg.type === "finished") {
-    oppFinished = true;
-    oppFinalScore = msg.total;
+    const p = findPlayer(msg.id);
+    if (!p) return;
+    p.score = msg.total;
+    p.finished = true;
+    renderScoreboard();
     maybeShowFinal();
   }
 }
 
 function enterLobby(){
     $("roomCode").textContent=room;
-    $("p1").textContent=playerName;
-    $("p2").textContent=i18n[gameLang].waitingOpp;
+    $("startBtn").disabled=true;
+    renderLobby();
     show("lobby");
 }
 
 function copyRoom(){navigator.clipboard?.writeText(room);alert(i18n[gameLang].copied+room)}
 
 function startGame() {
+  if (!isHost || gameStarted) return;
+
   if (!conn || !conn.open) {
     alert(i18n[gameLang].noConn);
+    return;
+  }
+
+  if (roster.length < MIN_PLAYERS) {
+    alert(i18n[gameLang].notEnoughPlayers);
     return;
   }
 
   const bank = bankForLang(gameLang);
   const picked = shuffle(bank).slice(
     0,
-    Math.min(QUESTIONS_PER_GAME, bank.length)
+    Math.min(questionCount || QUESTIONS_PER_GAME, bank.length)
   );
 
   questions = picked.map(([question, options, correctAnswer]) => {
@@ -56034,6 +56269,8 @@ function startGame() {
   sendConnData({
     type: "start",
     lang: gameLang,
+    max: maxPlayers,
+    players: roster.map(p => ({ id: p.id, name: p.name })),
     questions
   });
 
@@ -56047,9 +56284,10 @@ closeConnChannel();
 location.reload();
 }
 function beginGameLocal(){
-idx=0;score=0;oppScore=0;myFinished=false;oppFinished=false;oppFinalScore=0;statsSaved=false;
-$("gs1").textContent="0";$("gs2").textContent="0";
-$("g1").textContent=playerName;$("g2").textContent=oppName;
+gameStarted=true;
+idx=0;score=0;myFinished=false;statsSaved=false;
+roster.forEach(p=>{p.score=0;p.finished=false;p.left=false;});
+renderScoreboard();
 document.querySelector(".bottom-bar").classList.add("hidden");
 show("game");render();
 }
@@ -56063,32 +56301,48 @@ time=TIME_PER_QUESTION;clearInterval(timer);$("bar").style.width="100%";timer=se
 function answer(chosen,ans,btn){
 clearInterval(timer);document.querySelectorAll(".choice").forEach(b=>b.disabled=true);
 if(btn)btn.classList.add(chosen===ans?"correct":"wrong");
-if(chosen===ans){let pts=Math.max(1,Math.ceil(time));score+=pts;$("gs1").textContent=score;$("status").textContent=i18n[gameLang].correct(pts)}
+if(chosen===ans){let pts=Math.max(1,Math.ceil(time));score+=pts;renderScoreboard();$("status").textContent=i18n[gameLang].correct(pts)}
 else{$("status").textContent=chosen===-1?i18n[gameLang].timeUp:i18n[gameLang].wrong;}
-if(conn&&conn.open)sendConnData({type:'score',total:score});
+if(conn&&conn.open)sendConnData({type:'score',id:matchmakingId,total:score});
 setTimeout(()=>{idx++;if(idx>=questions.length)finish();else render()},900)
 }
 function finish(){
 myFinished=true;
-if(conn&&conn.open)sendConnData({type:'finished',total:score});
+if(conn&&conn.open)sendConnData({type:'finished',id:matchmakingId,total:score});
 maybeShowFinal();
 }
 function maybeShowFinal(){
 if(!myFinished)return;
 show("end");
-let maxScore=questions.length*TIME_PER_QUESTION;
-let oppLine=oppFinished?i18n[gameLang].oppScoreLine(oppName, oppFinalScore):i18n[gameLang].oppNotDone(oppName);
-let resultText;
-let didWin=false;
-if(oppFinished){
-if(score>oppFinalScore){resultText=i18n[gameLang].won;didWin=true;}
-else if(score<oppFinalScore)resultText=i18n[gameLang].lost;
-else resultText=i18n[gameLang].tie;
-}else{resultText=i18n[gameLang].doneSolo}
-$("winner").textContent=resultText;
-$("finalScore").innerHTML=`${i18n[gameLang].yourScore(score,maxScore)}<br>${oppLine}`;
+const t=i18n[gameLang];
+const maxScore=questions.length*TIME_PER_QUESTION;
+const others=otherPlayers();
+const rivals=others.filter(p=>p.finished);
+const pending=others.filter(p=>!p.finished&&!p.left);
+const resultIsFinal=pending.length===0||!(conn&&conn.open);
 
-const resultIsFinal = oppFinished || !(conn && conn.open);
+let resultText=t.doneSolo;
+let didWin=false;
+let place=0;
+if(resultIsFinal&&rivals.length){
+  const best=Math.max(...rivals.map(p=>p.score));
+  place=1+rivals.filter(p=>p.score>score).length;
+  if(score>best){resultText=t.won;didWin=true;}
+  else if(score===best)resultText=t.tie;
+  else resultText=rivals.length>1?t.place(place):t.lost;
+}
+$("winner").textContent=resultText;
+$("finalScore").textContent=t.yourScore(score,maxScore)+(place&&rivals.length>1?" — "+t.rankLine(place,rivals.length+1):"");
+
+const rows=roster.map(p=>{
+  const me=p.id===matchmakingId;
+  return {name:me?playerName:p.name,score:me?score:p.score,me,done:me||p.finished,left:!me&&!p.finished&&p.left};
+}).sort((a,b)=>(b.done-a.done)||(b.score-a.score));
+$("finalList").innerHTML=rows.map(r=>{
+  const value=r.done?t.ptsShort(r.score):(r.left?t.leftTag:t.notDoneShort);
+  return `<li class="${r.me?"me":""}"><b>${esc(r.name)}</b><span class="${r.done?"":"muted"}">${value}</span></li>`;
+}).join("");
+
 if(resultIsFinal && !statsSaved){
 statsSaved=true;
 saveGameResultToProfile(didWin, score);
