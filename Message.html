@@ -393,7 +393,7 @@ function renderList(filter=""){
       <div class="conv-top-row"><span class="conv-name">${GENERAL_CHAT_NAME}</span></div>
       <div class="conv-preview">${i18n[currentLang].generalChannelDesc}</div>
     </div>`;
-  generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", "قناة عامة"));
+  generalItem.addEventListener("click", () => openChat(GENERAL_CHAT_ID, GENERAL_CHAT_NAME, "👥", i18n[currentLang].generalChannel));
   list.appendChild(generalItem);
 
   const filtered = friendships.filter(f => (f.otherName||"").includes(filter));
@@ -422,7 +422,7 @@ function renderList(filter=""){
         window.location.href = `${PROFILE_PAGE_URL}?id=${f.otherUid}`;
       });
     });
-    item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", "محادثة خاصة", f.otherUid));
+    item.addEventListener("click", () => openChat(chatId, f.otherName, "🧑", i18n[currentLang].privateChat, f.otherUid));
     list.appendChild(item);
   });
 }
