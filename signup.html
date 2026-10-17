@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>إنشاء حساب جديد — Brain Battle</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="logo-180.png">
+<script src="intro.js"></script>
 <script src="spotify-player.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
     const supabaseClient = window.supabase.createClient("https://fhvxlyrdvzimgzfyjdxo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZodnhseXJkdnppbWd6ZnlqZHhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzE3MjksImV4cCI6MjEwNDM0NzcyOX0.EFi5L9-ahYr4Jv2IdJae5gvJ81Wbhd399RclkwToTbg");
@@ -106,6 +108,29 @@
         margin-top: 6px;
     }
 
+    .email-suggest {
+        display: none;
+        margin-top: 8px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: #fff7e6;
+        border: 1px solid #f5c66b;
+        color: #7a4b00;
+        font-size: 13px;
+    }
+
+    .email-suggest button {
+        margin-inline-start: 6px;
+        padding: 3px 10px;
+        border: 0;
+        border-radius: 6px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
     .btn-submit {
         width: 100%;
         padding: 12px;
@@ -193,6 +218,7 @@
             <div class="input-group">
                 <label for="email" id="EmailText">البريد الإلكتروني</label>
                 <input type="email" id="email" placeholder="example@email.com" required>
+                <div class="email-suggest" id="emailSuggest"></div>
             </div>
 
             <div class="input-group">
@@ -239,9 +265,12 @@ const i18n = {
     passwordLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
     passwordMismatch: "كلمتا المرور غير متطابقتين",
     emailExists: "هذا الإيميل مسجل بحساب موجود بالفعل",
-    sendError: "تعذّر إرسال كود التحقق. تأكد من إعداد EmailJS ثم حاول مرة أخرى",
+    sendError: "تعذّر إنشاء الحساب، حاول مرة أخرى",
     usernameExists: "اسم المستخدم موجود بالفعل، جرّب اسمًا آخر",
     sendingCode: "جارٍ إرسال الكود",
+    didYouMean: "هل تقصد",
+    useIt: "استخدمه",
+    typoAgain: "إذا كان إيميلك صحيح فعلاً، اضغط إنشاء الحساب مرة ثانية.",
   },
   en: {
     backBtn: "Back",
@@ -262,9 +291,12 @@ const i18n = {
     passwordLength: "Password must be at least 6 characters",
     passwordMismatch: "Passwords do not match",
     emailExists: "This email is already registered",
-    sendError: "Failed to send verification code. Make sure EmailJS is set up and try again",
+    sendError: "Could not create the account. Please try again.",
     usernameExists: "Username already exists, try another one",
     sendingCode: "Sending code",
+    didYouMean: "Did you mean",
+    useIt: "Use it",
+    typoAgain: "If your email is really correct, press Create Account again.",
   }
 };
 
@@ -289,15 +321,66 @@ function applyTranslations(l) {
   document.getElementById("errorMsg").textContent = "";
 }
 
-const EMAILJS_PUBLIC_KEY  = "l4A_cZFEUEwyCzUn1";
-const EMAILJS_SERVICE_ID  = "service_kvvq0zo";
-const EMAILJS_TEMPLATE_ID = "template_d4m9id9";
+// ---------- Email typo check ----------
+// A domain one or two letters away from a popular provider is probably a typo (gmil.com → gmail.com).
+const COMMON_DOMAINS = [
+    "gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "icloud.com", "live.com",
+    "aol.com", "msn.com", "outlook.sa", "hotmail.co.uk", "yahoo.co.uk", "protonmail.com", "proton.me"
+];
+// Real providers that look close to the ones above and must not be "corrected".
+const REAL_DOMAINS = new Set([
+    "mail.com", "gmx.com", "ymail.com", "me.com", "mac.com", "email.com", "googlemail.com",
+    "live.co.uk", "hotmail.fr", "yahoo.fr", "outlook.fr", "hotmail.de", "yahoo.de", "outlook.de"
+]);
 
-if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
-function generateCode() {
-    return String(Math.floor(100000 + Math.random() * 900000)); 
+function editDistance(a, b) {
+    const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+        let prev = row[0];
+        row[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+            const cur = row[j];
+            row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+            prev = cur;
+        }
+    }
+    return row[b.length];
 }
+
+// Returns the corrected email, or null when the domain looks fine.
+function suggestEmail(email) {
+    const at = email.lastIndexOf("@");
+    if (at < 1) return null;
+    const domain = email.slice(at + 1).toLowerCase();
+    if (COMMON_DOMAINS.includes(domain) || REAL_DOMAINS.has(domain)) return null;
+    let best = null, bestDistance = 3;
+    for (const d of COMMON_DOMAINS) {
+        const dist = editDistance(domain, d);
+        if (dist < bestDistance) { bestDistance = dist; best = d; }
+    }
+    return best ? email.slice(0, at + 1) + best : null;
+}
+
+const emailInput = document.getElementById('email');
+const suggestBox = document.getElementById('emailSuggest');
+let typoWarnedFor = "";
+
+function showEmailSuggestion() {
+    const lang = localStorage.getItem('lang') || 'en';
+    const t = i18n[lang];
+    const fixed = suggestEmail(emailInput.value.trim());
+    if (!fixed) { suggestBox.style.display = 'none'; return null; }
+    suggestBox.textContent = `${t.didYouMean} ${fixed}${lang === 'ar' ? '؟' : '?'}`;
+    const useBtn = document.createElement('button');
+    useBtn.type = 'button';
+    useBtn.textContent = t.useIt;
+    useBtn.onclick = () => { emailInput.value = fixed; suggestBox.style.display = 'none'; };
+    suggestBox.appendChild(useBtn);
+    suggestBox.style.display = 'block';
+    return fixed;
+}
+emailInput.addEventListener('blur', showEmailSuggestion);
+emailInput.addEventListener('input', () => { suggestBox.style.display = 'none'; });
 
 async function handleSignup(e) {
     e.preventDefault();
@@ -332,6 +415,14 @@ async function handleSignup(e) {
 
 const lang = localStorage.getItem('lang') || 'en';
 
+    // Looks like a typo (e.g. @gmil.com): stop once and suggest the fix. Pressing again with the same email goes through.
+    if (showEmailSuggestion() && typoWarnedFor !== email) {
+        typoWarnedFor = email;
+        errorMsg.textContent = i18n[lang].typoAgain;
+        errorMsg.style.display = 'block';
+        return false;
+    }
+
 const { data: existingProfile, error: usernameCheckError } = await supabaseClient
     .from('profiles')
     .select('id')
@@ -350,13 +441,23 @@ const { data: existingProfile, error: usernameCheckError } = await supabaseClien
         return false;
     }
 
-    const { error: signUpError } = await supabaseClient.auth.signUp({
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `${i18n[lang].sendingCode}<span class="spinner"></span>`;
+    const resetButton = () => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = i18n[lang].submitBtn;
+    };
+
+    // Supabase creates the account and emails the 6-digit code itself.
+    // With "Confirm email" turned on, the account can't log in until that code is entered.
+    const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
         email,
         password,
         options: { data: { fullname } }
     });
 
     if (signUpError) {
+    resetButton();
     const duplicateUsername =
         signUpError.message.includes('profiles_fullname_unique_idx') ||
         signUpError.message.includes('duplicate key');
@@ -371,38 +472,26 @@ const { data: existingProfile, error: usernameCheckError } = await supabaseClien
     return false;
     }
 
-    const code = generateCode();
-    const pendingUser = {
-        fullname, email, password, code,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 5 * 60 * 1000 
-    };
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `${i18n[lang].sendingCode}<span class="spinner"></span>`;
-
-    try {
-        if (!window.emailjs || EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
-            throw new Error('EmailJS غير مُعد بعد');
-        }
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-            to_name: fullname,
-            to_email: email,
-            code: code
-        });
-
-        sessionStorage.setItem('bb_pending_user', JSON.stringify(pendingUser));
-        successMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].successMsg;
-        successMsg.style.display = 'block';
-        setTimeout(() => { window.location.href = 'verify.html'; }, 900);
-    } catch (err) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = i18n[localStorage.getItem('lang') || 'en'].submitBtn;
-        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].sendError;
+    // When confirmation is on, Supabase doesn't say if an email is taken; it returns a user with no identities instead.
+    const identities = signUpData?.user?.identities;
+    if (Array.isArray(identities) && identities.length === 0) {
+        resetButton();
+        errorMsg.textContent = i18n[lang].emailExists;
         errorMsg.style.display = 'block';
-        console.error(err);
+        return false;
     }
 
+    // Logged in straight away means "Confirm email" is still off in Supabase, so there's no code to enter.
+    if (signUpData?.session) {
+        window.location.href = 'index.html';
+        return false;
+    }
+
+    // Only what the next page needs to show; never the password.
+    sessionStorage.setItem('bb_pending_user', JSON.stringify({ email, fullname, sentAt: Date.now() }));
+    successMsg.textContent = i18n[lang].successMsg;
+    successMsg.style.display = 'block';
+    setTimeout(() => { window.location.href = 'verify.html'; }, 900);
     return false;
 }
 applyTranslations(localStorage.getItem('lang') || 'en');

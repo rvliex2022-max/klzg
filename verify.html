@@ -4,8 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>تأكيد الحساب — Brain Battle</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="logo-180.png">
+<script src="intro.js"></script>
 <script src="spotify-player.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+    const supabaseClient = window.supabase.createClient(
+        "https://fhvxlyrdvzimgzfyjdxo.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZodnhseXJkdnppbWd6ZnlqZHhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzE3MjksImV4cCI6MjEwNDM0NzcyOX0.EFi5L9-ahYr4Jv2IdJae5gvJ81Wbhd399RclkwToTbg"
+    );
+</script>
 <style>
     * {
         margin: 0;
@@ -209,7 +218,7 @@
             <input type="text" inputmode="numeric" maxlength="1" data-i="5">
         </div>
 
-        <div class="timer" id="timerBox">الكود صالح لمدة <strong id="timeLeft">05:00</strong></div>
+        <div class="timer" id="timerBox">الكود صالح لمدة <strong id="timeLeft">60:00</strong></div>
 
         <div class="error-msg" id="errorMsg"></div>
         <div class="success-msg" id="successMsg">تم تأكيد حسابك بنجاح! جارٍ تحويلك...</div>
@@ -218,7 +227,7 @@
 
         <div class="resend-link" id="resendLink">
             لم يصلك الكود؟
-            <button id="resendBtn" onclick="resendCode()" disabled>إعادة الإرسال (<span id="resendTimer">30</span>)</button>
+            <button id="resendBtn" onclick="resendCode()" disabled>إعادة الإرسال (<span id="resendTimer">60</span>)</button>
         </div>
     </div>
 </div>
@@ -240,6 +249,7 @@ const i18n = {
     enterFullCode: "أدخل الكود كاملًا (6 أرقام)",
     requestNewCode: "انتهت صلاحية الكود، اطلب كود جديد",
     wrongCode: "الكود غير صحيح، حاول مرة أخرى",
+    wrongOrExpired: "الكود غير صحيح أو انتهت صلاحيته. تأكد منه أو اطلب كود جديد.",
     verifying: "جارٍ التفعيل"
   },
   en:{
@@ -256,6 +266,7 @@ const i18n = {
     enterFullCode: "Enter the complete 6-digit code",
     requestNewCode: "The code has expired. Request a new code.",
     wrongCode: "Incorrect code. Try again.",
+    wrongOrExpired: "That code is wrong or has expired. Check it or request a new one.",
     verifying: "Verifying"
   }
 };
@@ -270,27 +281,27 @@ function applyTranslations(l) {
   const t = i18n[l];
   document.getElementById('TtlVerify').textContent = t.TtlVerify;
   document.getElementById('SubTtl').textContent = t.SubTtl;
-  document.getElementById('timerBox').innerHTML = `${t.timerBox} <strong id="timeLeft">05:00</strong>`;
+  document.getElementById('timerBox').innerHTML = `${t.timerBox} <strong id="timeLeft">60:00</strong>`;
   document.getElementById('errorMsg').textContent = '';
   document.getElementById('successMsg').textContent = t.successMsg;
   document.getElementById('verifyBtn').textContent = t.verifyBtn;
   document.getElementById('resendLink').firstChild.textContent = t.resendLink;
-  document.getElementById('resendBtn').innerHTML = `${t.resendBtn} (<span id="resendTimer">30</span>)`;
+  document.getElementById('resendBtn').innerHTML = `${t.resendBtn} (<span id="resendTimer">60</span>)`;
 }
 
-const EMAILJS_PUBLIC_KEY  = "l4A_cZFEUEwyCzUn1";
-const EMAILJS_SERVICE_ID  = "service_kvvq0zo";
-const EMAILJS_TEMPLATE_ID = "template_d4m9id9";
-
-if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+// Supabase emails the code and checks it; this page only collects it.
+// Keep these in line with Supabase: "Email OTP Expiration" (default 3600 s) and its one-email-per-minute limit.
+const CODE_VALID_MS = 60 * 60 * 1000;
+const RESEND_WAIT_SECONDS = 60;
 
 let pendingUser = JSON.parse(sessionStorage.getItem('bb_pending_user') || 'null');
 let countdownInterval = null;
 let resendInterval = null;
 
-if (!pendingUser) {
+if (!pendingUser || !pendingUser.email) {
     window.location.href = 'signup.html';
 }
+pendingUser.expiresAt = (pendingUser.sentAt || Date.now()) + CODE_VALID_MS;
 
 document.getElementById('userEmail').textContent = pendingUser.email;
 
@@ -352,36 +363,25 @@ function startResendCooldown(seconds) {
     }, 1000);
 }
 
-function generateCode() {
-    return String(Math.floor(100000 + Math.random() * 900000));
-}
-
 async function resendCode() {
     const btn = document.getElementById('resendBtn');
     btn.disabled = true;
-    const newCode = generateCode();
-    pendingUser.code = newCode;
-    pendingUser.expiresAt = Date.now() + 5 * 60 * 1000;
-    sessionStorage.setItem('bb_pending_user', JSON.stringify(pendingUser));
 
-    try {
-        if (window.emailjs && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                to_name: pendingUser.fullname,
-                to_email: pendingUser.email,
-                code: newCode
-            });
-        }
+    const { error } = await supabaseClient.auth.resend({ type: 'signup', email: pendingUser.email });
+    if (error) {
+        document.getElementById('errorMsg').textContent = t().resendFailed;
+        console.error(error);
+    } else {
+        pendingUser.sentAt = Date.now();
+        pendingUser.expiresAt = pendingUser.sentAt + CODE_VALID_MS;
+        sessionStorage.setItem('bb_pending_user', JSON.stringify({ email: pendingUser.email, fullname: pendingUser.fullname, sentAt: pendingUser.sentAt }));
         document.getElementById('verifyBtn').disabled = false;
         document.getElementById('errorMsg').textContent = '';
         inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
         inputs[0].focus();
         startExpiryCountdown();
-    } catch (err) {
-        document.getElementById('errorMsg').textContent = t().resendFailed;
-        console.error(err);
     }
-    startResendCooldown(30);
+    startResendCooldown(RESEND_WAIT_SECONDS);
 }
 
 async function verifyCode() {
@@ -397,30 +397,32 @@ async function verifyCode() {
         return;
     }
 
-    if (Date.now() > pendingUser.expiresAt) {
-        errorMsg.textContent = t().requestNewCode;
-        return;
-    }
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = `${t().verifying}<span class="spinner"></span>`;
 
-    if (entered !== pendingUser.code) {
-        errorMsg.textContent = t().wrongCode;
+    // Supabase checks the code; on success the email is confirmed and the person is logged in.
+    const { error } = await supabaseClient.auth.verifyOtp({ email: pendingUser.email, token: entered, type: 'signup' });
+
+    if (error) {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = t().verifyBtn;
+        // Supabase gives the same answer for a wrong code and an expired one.
+        errorMsg.textContent = (error.code === 'otp_expired' || /expired|invalid|token|otp/i.test(error.message))
+            ? t().wrongOrExpired
+            : error.message;
         inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
         inputs[0].focus();
         return;
     }
 
-    verifyBtn.disabled = true;
-    verifyBtn.innerHTML = `${t().verifying}<span class="spinner"></span>`;
-
     sessionStorage.removeItem('bb_pending_user');
-
     successMsg.style.display = 'block';
-    setTimeout(() => { window.location.href = 'login.html'; }, 900);
+    setTimeout(() => { window.location.href = 'index.html'; }, 900);
 }
 
 applyTranslations(localStorage.getItem('lang') || 'en');
 startExpiryCountdown();
-startResendCooldown(30);
+startResendCooldown(RESEND_WAIT_SECONDS);
 inputs[0].focus();
 </script>
 

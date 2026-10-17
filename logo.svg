@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Brain Battle">
+  <!-- Brain Battle logo: two half brains facing off, with a spark between them -->
+  <g transform="translate(-276 -21)">
+    <path d="M334 58 C324 50 306 50 302 62 C288 62 280 76 288 86 C278 96 284 112 298 114 C300 128 316 132 326 124 C330 128 334 128 334 126 Z" fill="#7c5cff"/>
+    <path d="M346 58 C356 50 374 50 378 62 C392 62 400 76 392 86 C402 96 396 112 382 114 C380 128 364 132 354 124 C350 128 346 128 346 126 Z" fill="#2fd4c8"/>
+    <path d="M318 72 C312 78 314 88 322 90 M304 98 C312 96 318 102 316 110" fill="none" stroke="#080b14" stroke-width="4" stroke-linecap="round"/>
+    <path d="M362 72 C368 78 366 88 358 90 M376 98 C368 96 362 102 364 110" fill="none" stroke="#080b14" stroke-width="4" stroke-linecap="round"/>
+    <polygon points="340,40 344,52 356,52 346,59 350,71 340,64 330,71 334,59 324,52 336,52" fill="#ffd166"/>
+  </g>
+</svg>

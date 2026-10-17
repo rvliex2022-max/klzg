@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>تسجيل الدخول — Brain Battle</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="logo-180.png">
+<script src="intro.js"></script>
 <script src="spotify-player.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -190,6 +193,10 @@ const i18n = {
     SubmitBtn: "دخول",
     FooterLink: "ليس لديك حساب؟ <a href=\"signup.html\">أنشئ حسابًا جديدًا</a>",
     usernameNotFound: "اسم المستخدم غير موجود",
+    emailNotConfirmed: "لازم تأكد إيميلك أول. <a href=\"verify.html\">أدخل الكود اللي وصلك</a>",
+    wrongPassword: "كلمة المرور غير صحيحة",
+    tooManyAttempts: "محاولات كثيرة، انتظر شوي وحاول مرة ثانية",
+    usernameLoginOff: "الدخول باسم المستخدم مو متاح الحين، سجّل دخولك بإيميلك",
   },
   en: {
     backBtn: "Back",
@@ -203,6 +210,10 @@ const i18n = {
     SubmitBtn: "Login",
     FooterLink: "Don't have an account? <a href=\"signup.html\">Create a new account</a>",
     usernameNotFound: "Username not found",
+    emailNotConfirmed: "Please confirm your email first. <a href=\"verify.html\">Enter the code we sent you</a>",
+    wrongPassword: "Wrong password",
+    tooManyAttempts: "Too many attempts. Wait a moment and try again.",
+    usernameLoginOff: "Logging in with a username isn't available right now. Use your email instead.",
   }
 };
 
@@ -222,6 +233,34 @@ function applyTranslations(l) {
   document.getElementById('FooterLink').innerHTML = t.FooterLink;
 }
 
+// Username login runs on the server (Supabase function "login-with-username"),
+// so nobody's email is ever sent to the browser. Returns {} on success or { error, email? }.
+async function loginWithUsername(username, password) {
+    const { data, error } = await supabaseClient.functions.invoke('login-with-username', {
+        body: { username, password }
+    });
+    if (error) {
+        // Our function answers with { error: "..." }; anything else (not deployed yet, network) counts as unavailable.
+        const body = error.context && typeof error.context.json === 'function'
+            ? await error.context.json().catch(() => ({}))
+            : {};
+        return body.error ? { error: body.error, email: body.email } : { error: 'unavailable' };
+    }
+    if (!data || !data.access_token) return { error: 'unavailable' };
+    const { error: sessionError } = await supabaseClient.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token
+    });
+    return sessionError ? { error: 'unavailable' } : {};
+}
+
+function showNotConfirmed(email, lang) {
+    if (email) sessionStorage.setItem('bb_pending_user', JSON.stringify({ email }));
+    const errorMsg = document.getElementById('errorMsg');
+    errorMsg.innerHTML = i18n[lang].emailNotConfirmed;
+    errorMsg.style.display = 'block';
+}
+
 async function handleLogin(e) {
     e.preventDefault();
 
@@ -238,35 +277,38 @@ async function handleLogin(e) {
         return false;
     }
 
-    let email = usernameOrEmail;
-
     if (!usernameOrEmail.includes('@')) {
-        const { data, error } = await supabaseClient
-            .rpc('get_email_by_fullname', {
-                input_fullname: usernameOrEmail
-            });
-
-        if (error) {
-            errorMsg.textContent = error.message;
-            errorMsg.style.display = 'block';
+        const result = await loginWithUsername(usernameOrEmail, password);
+        if (!result.error) {
+            window.location.href = 'index.html';
             return false;
         }
-
-        if (!data) {
-            errorMsg.textContent = i18n[lang].usernameNotFound;
-            errorMsg.style.display = 'block';
+        if (result.error === 'email_not_confirmed') {
+            showNotConfirmed(result.email, lang);
             return false;
         }
-
-        email = data;
+        const messages = {
+            username_not_found: i18n[lang].usernameNotFound,
+            invalid_credentials: i18n[lang].wrongPassword,
+            too_many_attempts: i18n[lang].tooManyAttempts,
+        };
+        errorMsg.textContent = messages[result.error] || i18n[lang].usernameLoginOff;
+        errorMsg.style.display = 'block';
+        return false;
     }
 
+    const email = usernameOrEmail;
     const { error } = await supabaseClient.auth.signInWithPassword({
         email,
         password
     });
 
     if (error) {
+        // Signed up but never entered the emailed code: point them to the code page (it can resend the code).
+        if (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message)) {
+            showNotConfirmed(email, lang);
+            return false;
+        }
         errorMsg.textContent = error.message;
         errorMsg.style.display = 'block';
         return false;
