@@ -224,7 +224,7 @@
             <div class="input-group">
                 <label for="password" id="PasswordText">كلمة المرور</label>
                 <input type="password" id="password" placeholder="••••••••" required>
-                <div class="hint">6 أحرف على الأقل</div>
+                <div class="hint" id="PasswordHint">6 أحرف على الأقل</div>
             </div>
 
             <div class="input-group">
@@ -253,6 +253,7 @@ const i18n = {
     usernameText: "الاسم المستعار",
     EmailText: "البريد الإلكتروني",
     PasswordText: "كلمة المرور",
+    PasswordHint: "6 أحرف على الأقل",
     ConfirmPasswordText: "تأكيد كلمة المرور",
     placeholderUsername: "مثلاً vliex",
     placeholderEmail: "example@email.com",
@@ -279,6 +280,7 @@ const i18n = {
     usernameText: "Username",
     EmailText: "Email",
     PasswordText: "Password",
+    PasswordHint: "At least 6 characters",
     ConfirmPasswordText: "Confirm Password",
     placeholderUsername: "e.g., vliex",
     placeholderEmail: "example@email.com",
@@ -310,6 +312,7 @@ function applyTranslations(l) {
   document.getElementById('usernameText').textContent = t.usernameText;
   document.getElementById('EmailText').textContent = t.EmailText;
   document.getElementById('PasswordText').textContent = t.PasswordText;
+  document.getElementById('PasswordHint').textContent = t.PasswordHint;
   document.getElementById('ConfirmPasswordText').textContent = t.ConfirmPasswordText;
   document.getElementById('fullname').placeholder = t.placeholderUsername;
   document.getElementById('email').placeholder = t.placeholderEmail;
