@@ -52284,7 +52284,22 @@ if(resultIsFinal && !statsSaved){
 statsSaved=true;
 if(didWin)sfx("win");else if(didLose)sfx("lose");
 // Solo rounds are practice: they don't count toward wins or the brain score leaderboard.
-if(gameMode!=="solo")saveGameResultToProfile(didWin, score);
+if(gameMode!=="solo"){
+saveGameResultToProfile(didWin, score);
+try{
+const teamMode=isTeamGame(),mineTeam=myTeam();
+const opp=teamMode?rivals.filter(p=>p.team!==mineTeam):rivals;
+if(opp.length){
+saveMatchHistory({
+opponentName:opp.map(p=>p.name).join(", ").slice(0,120),
+myScore:teamMode?teamScore(mineTeam):score,
+opponentScore:teamMode?teamScore(1-mineTeam):Math.max(...opp.map(p=>p.score||0)),
+result:didWin?"win":(didLose?"loss":"tie"),
+mode:gameMode
+});
+}
+}catch(e){ console.error("saveMatchHistory: unexpected error:", e); }
+}
 }
 }
 
@@ -52311,6 +52326,23 @@ const { error: updateError } = await supabaseClient
 if(updateError) console.error("saveGameResultToProfile: update error:", updateError);
 }catch(e){
 console.error("saveGameResultToProfile: unexpected error:", e);
+}
+}
+
+async function saveMatchHistory({opponentName,myScore,opponentScore,result,mode}){
+if(!loggedInUserId) return;
+try{
+const { error } = await supabaseClient.from("match_history").insert({
+user_id: loggedInUserId,
+opponent_name: opponentName || "",
+my_score: myScore || 0,
+opponent_score: opponentScore || 0,
+result: result,
+mode: mode || null
+});
+if(error) console.error("saveMatchHistory: insert error:", error);
+}catch(e){
+console.error("saveMatchHistory: unexpected error:", e);
 }
 }
 setLanguage(localStorage.getItem('lang') || 'en');

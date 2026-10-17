@@ -139,6 +139,42 @@ button#saveBtn:active{transform:translateY(0)}
 .stat h2{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:18px}
 .stat-box{font-size:20px;font-weight:800;color:var(--text)}
 
+.history{
+  margin-top:36px;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:clamp(20px,3vw,32px);
+  backdrop-filter:blur(14px);box-shadow:0 24px 70px #0006;
+}
+.history-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.history-head .stat-icon{margin:0;font-size:24px}
+.history-head h2{font-size:18px;font-weight:800;color:var(--text)}
+.history-list{display:flex;flex-direction:column;gap:12px;max-height:440px;overflow-y:auto;padding:2px}
+.history-list::-webkit-scrollbar{width:8px}
+.history-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
+.history-empty{text-align:center;color:var(--muted);font-weight:700;padding:28px 12px}
+.history-item{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;
+  background:#ffffff0a;border:1px solid var(--border);border-radius:var(--radius-md);
+  padding:14px 18px;border-inline-start-width:4px;
+}
+.history-item.win{border-inline-start-color:var(--success)}
+.history-item.loss{border-inline-start-color:var(--danger)}
+.history-item.tie{border-inline-start-color:var(--muted)}
+.history-badge{
+  min-width:74px;text-align:center;font-size:13px;font-weight:800;
+  padding:6px 14px;border-radius:999px;
+}
+.history-item.win .history-badge{background:#3fe0a526;color:var(--success)}
+.history-item.loss .history-badge{background:#ff668626;color:var(--danger)}
+.history-item.tie .history-badge{background:#8b93b526;color:var(--muted)}
+.history-meta{min-width:0}
+.history-opp{font-weight:700;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-date{font-size:12px;color:var(--muted);margin-top:2px}
+.history-score{font-size:20px;font-weight:800;direction:ltr;unicode-bidi:isolate;letter-spacing:1px;white-space:nowrap}
+@media(max-width:720px){
+  .history-item{grid-template-columns:1fr auto;gap:10px 12px}
+  .history-badge{grid-column:1 / -1;justify-self:start}
+}
+
 @media(max-width:720px){
   header{padding:18px 20px}
   nav{gap:18px}
@@ -193,6 +229,14 @@ button#saveBtn:active{transform:translateY(0)}
       <div class="stat-box" id="statLevelBox">Brain Level: 0</div>
     </div>
   </section>
+
+  <section class="history">
+    <div class="history-head">
+      <div class="stat-icon">📜</div>
+      <h2 id="historyTitle">Match History</h2>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </section>
 </main>
 <script>
 
@@ -205,7 +249,14 @@ const i18n = {
     statLevelTitle: "مستوى ذكائك", statLevelBox: "المستوى: 0",
     saveBtn: "حفظ",
     saveFailed: "تعذّر الحفظ ⚠",
-    uploadFailed: "تعذّر رفع الصورة ⚠"
+    uploadFailed: "تعذّر رفع الصورة ⚠",
+    historyTitle: "سجل المباريات",
+    historyEmpty: "ما فيه مباريات بعد",
+    historyLoading: "جارٍ التحميل…",
+    historyFailed: "تعذّر تحميل السجل ⚠",
+    vs: "ضد",
+    win: "فوز", loss: "خسارة", tie: "تعادل",
+    unknownOpponent: "لاعب"
   },
   en: {
     navBrand: "Brain Battle", navContact: "Contact Us", navSupport: "Support us",
@@ -215,7 +266,14 @@ const i18n = {
     statLevelTitle: "Brain Level", statLevelBox: "Brain Level: 0",
     saveBtn: "Save",
     saveFailed: "Failed to save ⚠",
-    uploadFailed: "Failed to upload image ⚠"
+    uploadFailed: "Failed to upload image ⚠",
+    historyTitle: "Match History",
+    historyEmpty: "No matches yet",
+    historyLoading: "Loading…",
+    historyFailed: "Failed to load history ⚠",
+    vs: "vs",
+    win: "Win", loss: "Loss", tie: "Tie",
+    unknownOpponent: "Player"
   }
 };
 
@@ -238,6 +296,8 @@ function applyTranslations(l){
     ? `المستوى: ${currentBrainScore}`
     : `Brain Level: ${currentBrainScore}`;
   document.getElementById('saveBtn').textContent = t.saveBtn;
+  document.getElementById('historyTitle').textContent = t.historyTitle;
+  renderHistory();
   document.getElementById('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
 
   if(aboutBox.textContent.trim() === defaultAbout.ar || aboutBox.textContent.trim() === defaultAbout.en){
@@ -265,6 +325,8 @@ let viewedUserId = null;
 let isOwnProfile = true;
 let currentGamesWon = 0;
 let currentBrainScore = 0;
+let historyRows = [];
+let historyState = 'loading'; // 'loading' | 'ready' | 'error'
 
 profileImageWrap.addEventListener("click", () => { if (isOwnProfile) imageInput.click(); });
 
@@ -414,6 +476,77 @@ async function recordGameResult({ won = false, scoreDelta = 0 } = {}) {
 
 window.recordGameResult = recordGameResult;
 
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  if(!list) return;
+  const t = i18n[currentLang];
+  list.textContent = '';
+
+  const note = (text) => {
+    const d = document.createElement('div');
+    d.className = 'history-empty';
+    d.textContent = text;
+    list.appendChild(d);
+  };
+
+  if(historyState === 'loading') return note(t.historyLoading);
+  if(historyState === 'error') return note(t.historyFailed);
+  if(!historyRows.length) return note(t.historyEmpty);
+
+  const locale = currentLang === 'ar' ? 'ar-u-ca-gregory' : 'en-GB';
+  historyRows.forEach(row => {
+    const result = ['win','loss','tie'].includes(row.result) ? row.result : 'tie';
+
+    const item = document.createElement('div');
+    item.className = 'history-item ' + result;
+
+    const badge = document.createElement('span');
+    badge.className = 'history-badge';
+    badge.textContent = t[result];
+
+    const meta = document.createElement('div');
+    meta.className = 'history-meta';
+    const opp = document.createElement('div');
+    opp.className = 'history-opp';
+    const oppName = row.opponent_name || t.unknownOpponent;
+    opp.textContent = `${t.vs} ${oppName}`;
+    opp.title = oppName;
+    const date = document.createElement('div');
+    date.className = 'history-date';
+    date.textContent = row.created_at
+      ? new Date(row.created_at).toLocaleDateString(locale, { day:'numeric', month:'short', year:'numeric' })
+      : '';
+    meta.append(opp, date);
+
+    const score = document.createElement('div');
+    score.className = 'history-score';
+    score.textContent = `${row.my_score ?? 0} - ${row.opponent_score ?? 0}`;
+
+    item.append(badge, meta, score);
+    list.appendChild(item);
+  });
+}
+
+async function loadHistory(){
+  historyState = 'loading';
+  renderHistory();
+  const { data, error } = await supabaseClient
+    .from('match_history')
+    .select('opponent_name, my_score, opponent_score, result, created_at')
+    .eq('user_id', viewedUserId)
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  if(error){
+    console.error('Load history error:', error);
+    historyState = 'error';
+  }else{
+    historyRows = data || [];
+    historyState = 'ready';
+  }
+  renderHistory();
+}
+
 async function initProfile() {
   const usernameEl = document.getElementById("profileUsername");
 
@@ -467,6 +600,7 @@ async function initProfile() {
   currentGamesWon = profileRow?.games_won ?? 0;
   currentBrainScore = profileRow?.brain_score ?? 0;
   applyTranslations(currentLang);
+  loadHistory();
 }
 
 initProfile();
