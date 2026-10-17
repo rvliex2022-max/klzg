@@ -10,6 +10,7 @@
 <script src="intro.js"></script>
 <script src="spotify-player.js" defer></script>
 <script src="match-found.js" defer></script>
+<script src="game-sounds.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -319,6 +320,67 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 .final-list{list-style:none;padding:0;margin:14px auto 0;max-width:380px;display:flex;flex-direction:column;gap:8px;text-align:start}.final-list li{display:flex;justify-content:space-between;gap:10px;background:#0c1120;border:1px solid #28304a;border-radius:12px;padding:10px 14px;color:#dbe2ff}.final-list li.me{border-color:#7c5cff}.final-list li .muted{font-size:13px}
 .center{text-align:center}.hidden{display:none!important}.q{font-size:30px;font-weight:850;line-height:1.3;margin:20px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{background:#171e31;border:1px solid #303953;text-align:start}.choice.correct{background:#155c43;border-color:#2bd28b}.choice.wrong{background:#63253a;border-color:#ff6686}.timer{height:9px;background:#242b40;border-radius:99px;overflow:hidden}.bar{height:100%;width:100%;background:#7c5cff;transition:width .1s linear}.status{margin:12px 0;color:#aeb7cf;min-height:22px}.result{font-size:54px;font-weight:950}.mini{font-size:12px;color:#7f8aa7}
 .q-img{display:block;max-width:100%;max-height:300px;margin:-6px auto 20px;border-radius:14px;object-fit:contain;background:#0c1120}
+/* Game mode button on the home card */
+.mode-field{grid-column:1/-1}
+.mode-btn{width:100%;display:flex;align-items:center;gap:14px;margin-top:6px;padding:12px 16px;background:#0a0e19;border:1px solid #303750;border-radius:16px;color:#f7f8ff;text-align:start;font-family:'Cairo',system-ui,sans-serif}
+.mode-btn:hover{border-color:#7c5cff;transform:none}
+.mode-btn-text{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mode-btn-text b{font-size:17px;font-weight:800;line-height:1.35}
+.mode-btn-text span{font-size:13.5px;font-weight:600;color:#9eabd0}
+.mode-btn-arrow{font-size:28px;line-height:1;color:#7f8aa7}
+[dir=rtl] .mode-btn-arrow{transform:scaleX(-1)}
+.mode-icon{flex-shrink:0;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:23px}
+/* Game mode panel: slides in from the start side (left in English, right in Arabic) */
+.mode-backdrop{position:fixed;inset:0;z-index:20000;background:#04060cc4;backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+.mode-backdrop.open{opacity:1;pointer-events:auto}
+.mode-drawer{position:fixed;top:0;bottom:0;inset-inline-start:0;z-index:20001;width:min(440px,90vw);display:flex;flex-direction:column;background:#0d1220;border-inline-end:1px solid #252d46;box-shadow:0 0 60px #000a;font-family:'Cairo',system-ui,sans-serif;color:#f7f8ff;transform:translateX(-100%);visibility:hidden;transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s}
+.mode-drawer[dir=rtl]{transform:translateX(100%)}
+.mode-drawer.open{transform:none;visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.mode-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 20px 12px}
+.mode-head h2{margin:0;font-size:22px;font-weight:800}
+.mode-close{width:40px;height:40px;padding:0;border-radius:12px;background:#1b2235;color:#dbe2ff;font-size:16px;flex-shrink:0}
+.mode-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:4px 20px 20px;scrollbar-width:thin;scrollbar-color:#2a3350 transparent}
+.mode-list{display:flex;flex-direction:column;gap:10px}
+.mode-card{display:flex;align-items:center;gap:14px;width:100%;padding:14px;background:#111727;border:2px solid #232b43;border-radius:18px;color:#f7f8ff;text-align:start;font-family:inherit;font-weight:600}
+.mode-card:hover{border-color:#3a4468;transform:none}
+.mode-card[aria-checked=true]{border-color:#7c5cff;background:#171d33}
+.mode-info{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.mode-info b{font-size:17px;font-weight:800;line-height:1.35}
+.mode-info span{font-size:13.5px;line-height:1.6;color:#aeb7cf;font-weight:500}
+.mode-pill{flex-shrink:0;align-self:flex-start;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:#1b2235;color:#c9d2ee;white-space:nowrap}
+.mode-card[aria-checked=true] .mode-pill{background:#7c5cff;color:#fff}
+.mode-section{margin:24px 0 10px;font-size:15px;font-weight:800;color:#dbe2ff}
+/* Size choices under the picked mode, joined to its card */
+.mode-card.has-sizes{border-bottom-color:transparent;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.mode-sizes{margin-top:-10px;padding:2px 14px 14px;background:#171d33;border:2px solid #7c5cff;border-top:0;border-radius:0 0 18px 18px}
+.mode-sizes-label{margin:0 0 8px;font-size:13.5px;font-weight:700;color:#c9d2ee}
+.mode-size-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.mode-size-chips.teams{grid-template-columns:repeat(4,1fr)}
+.mode-size-chips .q-chip{padding:8px 0;font-size:15px;background:#111727}
+.mode-size-chips .q-chip[aria-checked=true]{background:#7c5cff}
+.q-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.q-chip{padding:10px 0;border-radius:12px;background:#111727;border:2px solid #232b43;color:#dbe2ff;font-family:inherit;font-size:16px;font-weight:800}
+.q-chip:hover{border-color:#3a4468;transform:none}
+.q-chip[aria-checked=true]{background:#7c5cff;border-color:#7c5cff;color:#fff}
+.mode-foot{padding:14px 20px 20px;border-top:1px solid #1c2338}
+.mode-foot button{width:100%;font-family:inherit;font-size:17px}
+.mode-btn:focus-visible,.mode-card:focus-visible,.q-chip:focus-visible,.mode-close:focus-visible{outline:2px solid #a78bfa;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.mode-drawer,.mode-backdrop{transition:none}}
+@media (max-width:480px){
+  /* Phones: the player-count badge goes under the text so names and descriptions get the full width. */
+  .mode-card{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:6px;align-items:center}
+  .mode-card .mode-icon{grid-row:1/3}
+  .mode-pill{grid-column:2;justify-self:start}
+}
+/* 2 vs 2 teams */
+.players.teams{grid-template-columns:1fr 1fr}
+.team-col{display:flex;flex-direction:column;gap:10px}
+.team-head{font-weight:800;font-size:14px;color:#a78bfa;padding:0 4px}
+.team-col.team-1 .team-head{color:#2fd4c8}
+.team-0>.player,.player.team-0,.final-list li.team-0{border-inline-start:4px solid #7c5cff}
+.team-1>.player,.player.team-1,.final-list li.team-1{border-inline-start:4px solid #2fd4c8}
+.player.more{justify-content:center;align-items:center;color:#9eabd0}
+#startBtn:disabled,#btnSwitchTeam:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}
 @media(max-width:700px){h1{font-size:32px}.grid,.players,.choices{grid-template-columns:1fr}.q{font-size:24px}.q-img{max-height:200px}.wrap{padding:24px 12px 90px}.lb-card{margin-top:60px}.room{font-size:26px;letter-spacing:4px}.bottom-bar{bottom:8px;inset-inline-end:8px}}
 
 .pixel-field{
@@ -480,8 +542,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 <div class="grid">
 <div><label class="mini" id="lblName">اسمك</label><input id="name" placeholder="مثلاً Rayan" maxlength="18"></div>
 <div><label class="mini" id="lblRoom">الغرفة</label><input id="roomInput" placeholder="مثلاً 482913" maxlength="6" inputmode="numeric"></div>
-<div><label class="mini" id="lblMaxPlayers" for="maxPlayersSelect">عدد اللاعبين في الجولة</label><select id="maxPlayersSelect"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
-<div><label class="mini" id="lblQuestionCount" for="questionCountSelect">عدد الأسئلة في الجولة</label><select id="questionCountSelect"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20" selected>20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option></select></div>
+<div class="mode-field"><span class="mini" id="lblMode">طريقة اللعب</span><button type="button" id="modeBtn" class="mode-btn" onclick="openModeDrawer()" aria-haspopup="dialog" aria-controls="modeDrawer"><span class="mode-icon" id="modeBtnIcon" aria-hidden="true">⚔️</span><span class="mode-btn-text"><b id="modeBtnName"></b><span id="modeBtnSub"></span></span><span class="mode-btn-arrow" aria-hidden="true">›</span></button></div>
 </div>
 <div class="actions">
 <button id="btnCreate" onclick="createRoom()">إنشاء غرفة</button><button class="secondary" id="btnJoin" onclick="joinRoom()">دخول لغرفة</button><button id="btnMatchmake" class="matchmaking-btn" onclick="toggleMatchmaking()"> <span id="btnMatchmakeText">ابحث عن خصم الآن</span></button><div id="matchStatus" class="match-status"></div>
@@ -502,7 +563,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 <div class="center"><div class="muted" id="lblRoomCode">رمز الغرفة</div><div id="roomCode" class="room">------</div><div class="player-count" id="playerCount"></div></div>
 <div class="players" id="lobbyPlayers"></div>
 <p class="status" id="lobbyStatus">جارٍ التحضير…</p>
-<div class="actions"><button id="startBtn" onclick="startGame()" disabled>ابدأ المباراة</button><button class="secondary" id="btnCopy" onclick="copyRoom()">نسخ رمز الغرفة</button><button class="danger" id="btnExit1" onclick="location.reload()">خروج</button></div>
+<div class="actions"><button id="startBtn" onclick="startGame()" disabled>ابدأ المباراة</button><button class="secondary hidden" id="btnSwitchTeam" onclick="switchTeam()">⇄</button><button class="secondary" id="btnCopy" onclick="copyRoom()">نسخ رمز الغرفة</button><button class="danger" id="btnExit1" onclick="location.reload()">خروج</button></div>
 </section>
 
 <section id="game" class="card hidden">
@@ -515,6 +576,21 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 
 <section id="end" class="card hidden center"><div class="muted" id="lblFinalResult">النتيجة النهائية</div><div id="winner" class="result"></div><p id="finalScore"></p><ol class="final-list" id="finalList"></ol><div class="actions center"><button id="btnPlayAgain" onclick="location.reload()">لعب مرة ثانية</button><button class="danger" id="btnExit3" onclick="exitGame()">خروج</button></div></section>
 </div>
+
+<!-- Game mode panel: slides in from the left in English and from the right in Arabic. -->
+<div class="mode-backdrop" id="modeBackdrop" onclick="closeModeDrawer()"></div>
+<aside class="mode-drawer" id="modeDrawer" role="dialog" aria-modal="true" aria-labelledby="modeDrawerTitle">
+  <div class="mode-head">
+    <h2 id="modeDrawerTitle"></h2>
+    <button type="button" class="mode-close" id="modeClose" onclick="closeModeDrawer()">✕</button>
+  </div>
+  <div class="mode-body">
+    <div class="mode-list" id="modeList" role="radiogroup" aria-labelledby="modeDrawerTitle"></div>
+    <h3 class="mode-section" id="lblQuestionCount"></h3>
+    <div class="q-chips" id="questionChips" role="radiogroup" aria-labelledby="lblQuestionCount"></div>
+  </div>
+  <div class="mode-foot"><button type="button" id="modeDone" onclick="closeModeDrawer()"></button></div>
+</aside>
 
 <div class="bottom-bar">
   <button id="messagesBtn" class="secondary" onclick="location.href='Message.html'">💬 <span id="messagesBtnText">الرسائل</span></button>
@@ -51013,13 +51089,39 @@ const i18n = {
     friendsLink: "👥 الأصدقاء",
     settingsLink: "⚙️ الإعدادات",
     signOutBtn: "تسجيل الخروج",
-    badge: "2–8 لاعبين • سرعة + دقة",
+    badge: "من 1 إلى 20 لاعب • سرعة + دقة",
     homeTitle: "مين أذكى؟",
-    homeDesc: "لعبة أسئلة مباشرة من 2 إلى 8 لاعبين. اختر عدد اللاعبين، أنشئ غرفة، وشارك الرمز مع أصحابك.",
+    homeDesc: "العب لحالك، أو واحد ضد واحد، أو فرق، أو الكل ضد الكل حتى 20 لاعب. اختر طريقة اللعب، أنشئ غرفة، وشارك الرمز مع أصحابك.",
     lblName: "اسمك",
     lblRoom: "الغرفة",
-    lblMaxPlayers: "عدد اللاعبين في الجولة",
-    playersOption: (n) => n === 2 ? "2 لاعبين (1 ضد 1)" : `${n} لاعبين`,
+    lblMode: "طريقة اللعب",
+    modeDrawerTitle: "اختر طريقة اللعب",
+    modeDone: "تم",
+    modeClose: "إغلاق",
+    modes: {
+      solo:  { name: "لعب فردي", desc: "العب لحالك وتدرّب على الأسئلة", pill: "لاعب واحد" },
+      duel:  { name: "واحد ضد واحد", desc: "تحدَّ صاحبك وجهاً لوجه", pill: "2 لاعبين" },
+      teams: { name: "فرق", desc: "أنت وأصحابك ضد فريق ثاني، ونقاطكم تنجمع" },
+      party: { name: "الكل ضد الكل", desc: "كل أصحابك ضد بعض، والأعلى نقاط يفوز" }
+    },
+    playersN: (n) => n <= 10 ? `${n} لاعبين` : `${n} لاعب`,
+    teamVs: (n) => `${n} ضد ${n}`,
+    groupSizeLabel: "كم لاعب في المجموعة؟",
+    teamSizeLabel: "كم لاعب في كل فريق؟",
+    btnStartSolo: "ابدأ اللعب",
+    teamName: (i) => `الفريق ${i + 1}`,
+    yourTeam: "فريقك",
+    otherTeam: "الفريق المنافس",
+    switchTeam: "⇄ انتقل للفريق الثاني",
+    teamsNotReady: "تقدرون تبدؤون لما يكون في الفريقين نفس العدد، ولاعبين اثنين على الأقل في كل فريق",
+    balanceTeams: "وزّعوا اللاعبين بالتساوي بين الفريقين",
+    teamsCanStart: (a, k) => `الفرق جاهزة ${a} ضد ${a} — ابدأ الآن أو انتظر حتى ${k} ضد ${k}`,
+    teamWon: "فاز فريقك! 🏆",
+    teamLost: "خسر فريقك 😔",
+    teamScoreLine: (a, b) => `فريقك ${a} — المنافس ${b}`,
+    morePlayers: (n) => `+${n} لاعب`,
+    canJoinMore: (n) => `يقدر ينضم ${n} لاعب بعد`,
+    listSep: "، ",
     lblQuestionCount: "عدد الأسئلة في الجولة",
     questionsCount: (n) => n <= 10 ? `${n} أسئلة` : `${n} سؤال`,
     namePlaceholder: "مثلاً Rayan",
@@ -51100,13 +51202,39 @@ const i18n = {
     friendsLink: "👥 Friends",
     settingsLink: "⚙️ Settings",
     signOutBtn: "Sign Out",
-    badge: "2–8 Players • Speed + Accuracy",
+    badge: "1–20 Players • Speed + Accuracy",
     homeTitle: "Who is Smarter?",
-    homeDesc: "A live trivia game for 2 to 8 players. Pick the player count, create a room, and share the code with your friends.",
+    homeDesc: "Play solo, 1 vs 1, in teams, or free for all with up to 20 players. Pick a game mode, create a room, and share the code with your friends.",
     lblName: "Your Name",
     lblRoom: "Room Code",
-    lblMaxPlayers: "Players per round",
-    playersOption: (n) => n === 2 ? "2 players (1v1)" : `${n} players`,
+    lblMode: "Game mode",
+    modeDrawerTitle: "Choose how to play",
+    modeDone: "Done",
+    modeClose: "Close",
+    modes: {
+      solo:  { name: "Solo", desc: "Play on your own and practice", pill: "1 player" },
+      duel:  { name: "1 vs 1", desc: "Challenge a friend head to head", pill: "2 players" },
+      teams: { name: "Teams", desc: "You and your friends against another team — your points add up" },
+      party: { name: "Free for all", desc: "All your friends against each other — highest score wins" }
+    },
+    playersN: (n) => `${n} players`,
+    teamVs: (n) => `${n} vs ${n}`,
+    groupSizeLabel: "How many players in the group?",
+    teamSizeLabel: "How many players on each team?",
+    btnStartSolo: "Start Playing",
+    teamName: (i) => `Team ${i + 1}`,
+    yourTeam: "Your team",
+    otherTeam: "Other team",
+    switchTeam: "⇄ Switch team",
+    teamsNotReady: "You can start once both teams have the same number of players, at least 2 each",
+    balanceTeams: "Balance the teams so both have the same number of players",
+    teamsCanStart: (a, k) => `Teams ready (${a} vs ${a}) — start now or wait for ${k} vs ${k}`,
+    teamWon: "Your team won! 🏆",
+    teamLost: "Your team lost 😔",
+    teamScoreLine: (a, b) => `Your team ${a} — Other team ${b}`,
+    morePlayers: (n) => `+${n} more`,
+    canJoinMore: (n) => `${n} more can join`,
+    listSep: ", ",
     lblQuestionCount: "Questions per round",
     questionsCount: (n) => `${n} questions`,
     namePlaceholder: "e.g. Rayan",
@@ -51186,8 +51314,13 @@ const i18n = {
 
 function setLanguage(l){
     currentLang = l;
+    // The game (its texts, questions and the language button) starts in the site's language too.
+    gameLang = l;
+    const langBtn = document.getElementById("gameLangBtn");
+    if (langBtn) langBtn.textContent = l === "ar" ? "English" : "العربية";
     document.documentElement.lang = l;
     document.documentElement.dir = (l === 'en') ? 'ltr' : 'rtl';
+    setGameCardsDirection(l);
     updateStaticTexts();
 }
 
@@ -51239,9 +51372,8 @@ function updateGameTexts() {
   $("btnExit3").textContent = t.btnExit;
   $("btnPlayAgain").textContent = t.btnPlayAgain;
   $("lblFinalResult").textContent = t.lblFinalResult;
-  $("lblMaxPlayers").textContent = t.lblMaxPlayers;
-  $("lblQuestionCount").textContent = t.lblQuestionCount;
-  renderSetupOptions(t);
+  $("btnSwitchTeam").textContent = t.switchTeam;
+  renderModePicker(gameLang);
   renderLobby();
   renderScoreboard();
   if (myFinished) maybeShowFinal();
@@ -51276,9 +51408,8 @@ function updateStaticTexts() {
   if(document.getElementById('btnExit3')) document.getElementById('btnExit3').textContent = t.btnExit;
   if(document.getElementById('btnPlayAgain')) document.getElementById('btnPlayAgain').textContent = t.btnPlayAgain;
   if(document.getElementById('lblFinalResult')) document.getElementById('lblFinalResult').textContent = t.lblFinalResult;
-  if($("lblMaxPlayers")) $("lblMaxPlayers").textContent = t.lblMaxPlayers;
-  if($("lblQuestionCount")) $("lblQuestionCount").textContent = t.lblQuestionCount;
-  renderSetupOptions(t);
+  if($("btnSwitchTeam")) $("btnSwitchTeam").textContent = t.switchTeam;
+  renderModePicker(currentLang);
   if(questions.length && $("counter")) $("counter").textContent = t.qCounter(idx+1, questions.length);
   if(document.getElementById("loginBtnText")) document.getElementById("loginBtnText").textContent = t.loginBtn;
   if(document.getElementById("messagesBtnText")) document.getElementById("messagesBtnText").textContent = t.messagesBtn;  if(document.getElementById("contactUsLink")) document.getElementById("contactUsLink").textContent = t.contactUs;
@@ -51348,11 +51479,34 @@ let questions=[];
 const QUESTIONS_PER_GAME=20;
 const TIME_PER_QUESTION=18;
 const MIN_PLAYERS=2;
-const MAX_PLAYERS=8;
+// Ways to play, picked in the game mode panel. min/max = players needed / allowed in the room.
+// sizes: choices shown under the mode when it's picked (players in the group, or players per team).
+const GAME_MODES=[
+  {id:"solo", icon:"🧠",color:"#60a5fa",min:1,max:1},
+  {id:"duel", icon:"⚔️",color:"#7c5cff",min:2,max:2},
+  {id:"teams",icon:"🤝",color:"#2fd4c8",min:4,teams:true,sizes:[2,3,4,5],defaultSize:2},
+  {id:"party",icon:"🎉",color:"#ffd166",min:2,sizes:[3,4,5,6,7,8,10,12,15,20],defaultSize:4}
+];
+const QUESTION_COUNTS=[5,10,15,20,30,40,50];
+function readSaved(key){try{return localStorage.getItem(key)}catch(e){return null}}
+function save(key,value){try{localStorage.setItem(key,value)}catch(e){}}
+function modeInfo(id){return GAME_MODES.find(m=>m.id===id)||GAME_MODES[1]}
+function savedChoice(key,options,fallback){const n=+readSaved(key);return options.includes(n)?n:fallback}
+let selectedMode=modeInfo(readSaved("bb_game_mode")).id; // what this player picked on the home screen
+let selectedQuestions=savedChoice("bb_question_count",QUESTION_COUNTS,QUESTIONS_PER_GAME);
+// Picked size per mode: players in the free-for-all group, players per team.
+const selectedSize={
+  party:savedChoice("bb_size_party",modeInfo("party").sizes,modeInfo("party").defaultSize),
+  teams:savedChoice("bb_size_teams",modeInfo("teams").sizes,modeInfo("teams").defaultSize)
+};
+// Seats in a new room of this mode.
+function seatsFor(mode){return mode==="teams"?selectedSize.teams*2:mode==="party"?selectedSize.party:modeInfo(mode).max}
+let gameMode="duel"; // the mode of the room you are in (guests get it from the host)
 let playerName="",room="",score=0,idx=0,timer=null,time=TIME_PER_QUESTION;
 let conn=null,isHost=false,myFinished=false;
 let maxPlayers=MIN_PLAYERS,roster=[],gameStarted=false,roomRejected=false;
 let matchIntro=null; // the VS / battle screen; the game waits for it
+let lobbySeen=new Set(); // players already in the lobby, so the join sound plays only for newcomers
 let questionCount=QUESTIONS_PER_GAME;
 let statsSaved=false;
 let loggedInUserId=null;
@@ -51364,63 +51518,233 @@ function $(id){return document.getElementById(id)}
 function show(id){["home","leaderboardSection","lobby","game","end"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden");if(id==="home")$("leaderboardSection").classList.remove("hidden")}
 function roomChannelName(code){return "brain-battle-room-"+code}
 function setLobbyStatus(msg){let el=$("lobbyStatus");if(el)el.textContent=msg}
+function sfx(name){try{window.gameSounds&&window.gameSounds[name]()}catch(e){}}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function readMaxPlayers(){const n=parseInt($("maxPlayersSelect")?.value,10);return Math.min(MAX_PLAYERS,Math.max(MIN_PLAYERS,n||MIN_PLAYERS))}
-function readQuestionCount(){const n=parseInt($("questionCountSelect")?.value,10);return n>0?n:QUESTIONS_PER_GAME}
 function findPlayer(id){return roster.find(p=>p.id===id)}
 function otherPlayers(){return roster.filter(p=>p.id!==matchmakingId)}
 // Only accept profile pictures from this site's own storage, never arbitrary links sent by other players.
 const AVATAR_PREFIX="https://fhvxlyrdvzimgzfyjdxo.supabase.co/storage/v1/object/public/avatars/";
 function safeAvatar(url){return typeof url==="string"&&url.startsWith(AVATAR_PREFIX)?url:""}
-function makePlayer(id,name,avatar){return {id,name,avatar:safeAvatar(avatar),score:0,finished:false,left:false}}
+function makePlayer(id,name,avatar,team){return {id,name,avatar:safeAvatar(avatar),team:team===0||team===1?team:null,score:0,finished:false,left:false}}
 function setRoster(players){
-roster=(players||[]).map(p=>{const old=findPlayer(p.id);return old?Object.assign(old,{name:p.name,avatar:safeAvatar(p.avatar)}):makePlayer(p.id,p.name,p.avatar)});
+roster=(players||[]).map(p=>{const old=findPlayer(p.id);return old?Object.assign(old,{name:p.name,avatar:safeAvatar(p.avatar),team:p.team===0||p.team===1?p.team:null}):makePlayer(p.id,p.name,p.avatar,p.team)});
 }
-function rosterForWire(){return roster.map(p=>({id:p.id,name:p.name,avatar:p.avatar}))}
+function rosterForWire(){return roster.map(p=>({id:p.id,name:p.name,avatar:p.avatar,team:p.team}))}
 function broadcastRoster(){
-sendConnData({type:'roster',max:maxPlayers,q:questionCount,players:rosterForWire()});
+sendConnData({type:'roster',mode:gameMode,max:maxPlayers,q:questionCount,players:rosterForWire()});
 }
 
-function renderSetupOptions(t){
-const players=$("maxPlayersSelect");
-if(players)[...players.options].forEach(o=>o.textContent=t.playersOption(+o.value));
-const qs=$("questionCountSelect");
-if(qs)[...qs.options].forEach(o=>o.textContent=t.questionsCount(+o.value));
+// ----- Teams (2 vs 2) -----
+function isTeamGame(){return modeInfo(gameMode).teams===true}
+function teamSize(team){return roster.filter(p=>p.team===team).length}
+function myTeam(){const me=findPlayer(matchmakingId);return me&&me.team===1?1:0}
+function playerScore(p){return p.id===matchmakingId?score:p.score}
+function teamScore(team){return roster.filter(p=>p.team===team).reduce((sum,p)=>sum+playerScore(p),0)}
+function teamCap(){return Math.max(1,Math.floor(maxPlayers/2))} // seats on each team
+// Whether the host can press Start: teams need the same number of players on both sides (2 or more each),
+// other modes need the mode's minimum.
+function lobbyReady(){
+if(!isTeamGame())return roster.length>=modeInfo(gameMode).min;
+return teamSize(0)===teamSize(1)&&teamSize(0)>=2;
 }
+function switchTeam(){
+const me=findPlayer(matchmakingId);
+if(!me||!isTeamGame()||gameStarted)return;
+const target=me.team===0?1:0;
+if(teamSize(target)>=teamCap())return;
+if(isHost){me.team=target;broadcastRoster();onRosterChanged()}
+else sendConnData({type:'team',id:matchmakingId,team:target});
+}
+
+// ----- Game mode panel -----
+let modeLang=null; // language the panel was last drawn in
+// The short line under a mode's name: "2 players", "6 players", "3 vs 3"...
+function modePill(t,id){
+if(id==="teams")return t.teamVs(selectedSize.teams);
+if(id==="party")return t.playersN(selectedSize.party);
+return t.modes[id].pill;
+}
+function renderModePicker(lang){
+modeLang=lang;
+const t=i18n[lang];
+const info=modeInfo(selectedMode);
+const words=t.modes[info.id];
+const icon=$("modeBtnIcon");
+if(!icon)return;
+icon.textContent=info.icon;
+icon.style.background=info.color+"26";
+icon.style.boxShadow=`inset 0 0 0 1px ${info.color}66`;
+$("lblMode").textContent=t.lblMode;
+$("modeBtnName").textContent=words.name;
+$("modeBtnSub").textContent=`${modePill(t,info.id)} • ${t.questionsCount(selectedQuestions)}`;
+$("btnCreate").textContent=selectedMode==="solo"?t.btnStartSolo:t.btnCreate;
+
+const drawer=$("modeDrawer");
+drawer.dir=lang==="ar"?"rtl":"ltr";
+drawer.lang=lang;
+$("modeDrawerTitle").textContent=t.modeDrawerTitle;
+$("modeClose").setAttribute("aria-label",t.modeClose);
+$("lblQuestionCount").textContent=t.lblQuestionCount;
+$("modeDone").textContent=t.modeDone;
+$("modeList").innerHTML=GAME_MODES.map(m=>{
+  const w=t.modes[m.id];
+  const on=m.id===selectedMode;
+  const withSizes=on&&m.sizes;
+  let html=`<button type="button" class="mode-card${withSizes?" has-sizes":""}" role="radio" aria-checked="${on}" tabindex="${on?0:-1}" data-mode="${m.id}" onclick="pickMode('${m.id}')">`+
+    `<span class="mode-icon" aria-hidden="true" style="background:${m.color}26;box-shadow:inset 0 0 0 1px ${m.color}66">${m.icon}</span>`+
+    `<span class="mode-info"><b>${w.name}</b><span>${w.desc}</span></span><span class="mode-pill">${modePill(t,m.id)}</span></button>`;
+  if(withSizes){
+    // Size choices right under the picked mode: players in the group, or players per team.
+    const teams=m.id==="teams";
+    const label=teams?t.teamSizeLabel:t.groupSizeLabel;
+    html+=`<div class="mode-sizes"><div class="mode-sizes-label" id="modeSizesLabel">${label}</div>`+
+      `<div class="mode-size-chips${teams?" teams":""}" role="radiogroup" aria-labelledby="modeSizesLabel">`+
+      m.sizes.map(n=>{
+        const sel=n===selectedSize[m.id];
+        const text=teams?t.teamVs(n):String(n);
+        const name=teams?t.teamVs(n):t.playersN(n);
+        return `<button type="button" class="q-chip" role="radio" aria-checked="${sel}" tabindex="${sel?0:-1}" aria-label="${name}" data-size="${n}" onclick="pickSize('${m.id}',${n})">${text}</button>`;
+      }).join("")+`</div></div>`;
+  }
+  return html;
+}).join("");
+$("questionChips").innerHTML=QUESTION_COUNTS.map(n=>{
+  const on=n===selectedQuestions;
+  return `<button type="button" class="q-chip" role="radio" aria-checked="${on}" tabindex="${on?0:-1}" aria-label="${t.questionsCount(n)}" data-n="${n}" onclick="pickQuestionCount(${n})">${n}</button>`;
+}).join("");
+}
+function pickMode(id){
+selectedMode=modeInfo(id).id;save("bb_game_mode",selectedMode);
+renderModePicker(modeLang||gameLang);
+$("modeList").querySelector(`[data-mode="${selectedMode}"]`)?.focus();
+}
+function pickQuestionCount(n){
+selectedQuestions=n;save("bb_question_count",String(n));
+renderModePicker(modeLang||gameLang);
+$("questionChips").querySelector(`[data-n="${n}"]`)?.focus();
+}
+function pickSize(mode,n){
+if(!modeInfo(mode).sizes?.includes(n))return;
+selectedSize[mode]=n;save("bb_size_"+mode,String(n));
+renderModePicker(modeLang||gameLang);
+$("modeList").querySelector(`[data-size="${n}"]`)?.focus();
+}
+function modeDrawerOpen(){return $("modeDrawer").classList.contains("open")}
+function openModeDrawer(){
+renderModePicker($("home").lang||gameLang);
+$("modeDrawer").classList.add("open");
+$("modeBackdrop").classList.add("open");
+document.body.style.overflow="hidden";
+setTimeout(()=>$("modeList").querySelector('[aria-checked="true"]')?.focus(),50);
+}
+function closeModeDrawer(){
+if(!modeDrawerOpen())return;
+$("modeDrawer").classList.remove("open");
+$("modeBackdrop").classList.remove("open");
+document.body.style.overflow="";
+$("modeBtn").focus();
+}
+document.addEventListener("keydown",e=>{
+if(!modeDrawerOpen())return;
+if(e.key==="Escape"){closeModeDrawer();return}
+// Arrow keys move the choice inside a group (mode cards, question counts), like normal radio buttons.
+const group=e.target.closest&&e.target.closest(".mode-size-chips,#modeList,#questionChips");
+if(!group||!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key))return;
+e.preventDefault();
+const items=[...group.querySelectorAll(group.id==="modeList"?".mode-card":'[role="radio"]')];
+const rtl=$("modeDrawer").dir==="rtl";
+const forward=e.key==="ArrowDown"||e.key===(rtl?"ArrowLeft":"ArrowRight");
+const next=items[(items.indexOf(e.target)+(forward?1:items.length-1))%items.length];
+next.click();
+});
 
 function renderLobby(){
 const t=i18n[gameLang];
 const box=$("lobbyPlayers");if(!box)return;
 const list=roster.length?roster:[makePlayer(matchmakingId,playerName)];
-let html=list.map((p,i)=>{
+const card=(p)=>{
   const me=p.id===matchmakingId;
-  const role=me?t.lblYou:(i===0?t.lblHost:t.lblPlayer);
+  const role=me?t.lblYou:(list.indexOf(p)===0?t.lblHost:t.lblPlayer);
   return `<div class="player${me?" me":""}"><div><b>${esc(p.name)}</b><div class="muted">${role}</div></div></div>`;
-}).join("");
-for(let i=list.length;i<maxPlayers;i++)html+=`<div class="player empty"><div><b>${t.waitingOpp}</b><div class="muted">${t.lblPlayer} ${i+1}</div></div></div>`;
+};
+const empty=(label)=>`<div class="player empty"><div><b>${t.waitingOpp}</b><div class="muted">${label}</div></div></div>`;
+let html="";
+if(isTeamGame()){
+  // Two columns, one per team, each with its seats.
+  html=[0,1].map(team=>{
+    const members=list.filter(p=>p.team===team);
+    let seats=members.map(card).join("");
+    for(let i=members.length;i<teamCap();i++)seats+=empty(t.teamName(team));
+    return `<div class="team-col team-${team}"><div class="team-head">${t.teamName(team)}</div>${seats}</div>`;
+  }).join("");
+}else{
+  html=list.map(card).join("");
+  const free=maxPlayers-list.length;
+  if(maxPlayers<=8)for(let i=list.length;i<maxPlayers;i++)html+=empty(`${t.lblPlayer} ${i+1}`);
+  else if(free>0)html+=empty(t.canJoinMore(free)); // big groups: one "waiting" card instead of 20
+}
 box.innerHTML=html;
+box.classList.toggle("teams",isTeamGame());
+const switchBtn=$("btnSwitchTeam");
+if(switchBtn){
+  const me=findPlayer(matchmakingId);
+  switchBtn.classList.toggle("hidden",!(isTeamGame()&&me&&!gameStarted));
+  switchBtn.disabled=!me||teamSize(me.team===0?1:0)>=teamCap();
+}
 const count=$("playerCount");
-if(count){count.textContent=maxPlayers?t.playerCount(list.length,maxPlayers)+(questionCount?" • "+t.questionsCount(questionCount):""):"";count.classList.toggle("hidden",!maxPlayers)}
+if(count){
+  const modeName=isTeamGame()?`${t.modes.teams.name} ${t.teamVs(teamCap())}`:t.modes[gameMode].name;
+  const parts=maxPlayers?[modeName,t.playerCount(list.length,maxPlayers)]:[];
+  if(maxPlayers&&questionCount)parts.push(t.questionsCount(questionCount));
+  count.textContent=parts.join(" • ");
+  count.classList.toggle("hidden",!maxPlayers);
+}
 }
 
 function renderScoreboard(){
 const t=i18n[gameLang];
 const box=$("gamePlayers");if(!box)return;
-box.innerHTML=roster.map(p=>{
+if(isTeamGame()){
+  // One card per team: team total, with the members' names under it.
+  const mine=myTeam();
+  box.innerHTML=[mine,1-mine].map(team=>{
+    const names=roster.filter(p=>p.team===team).map(p=>esc(p.id===matchmakingId?t.lblYou:p.name)+(p.left?` (${t.leftTag})`:"")).join(t.listSep);
+    return `<div class="player team-${team}${team===mine?" me":""}"><div><b>${team===mine?t.yourTeam:t.otherTeam}</b><div class="muted">${names}</div></div><div class="score">${teamScore(team)}</div></div>`;
+  }).join("");
+  return;
+}
+let shown=roster;
+if(roster.length>8){
+  // Big groups: only the top 5 (and you), so the question stays on screen.
+  shown=roster.slice().sort((a,b)=>playerScore(b)-playerScore(a)).slice(0,5);
+  const me=findPlayer(matchmakingId);
+  if(me&&!shown.includes(me))shown.push(me);
+}
+let html=shown.map(p=>{
   const me=p.id===matchmakingId;
   const sub=me?t.lblYou:(p.left?t.leftTag:(p.finished?t.doneTag:""));
-  return `<div class="player${me?" me":""}${p.left?" left":""}"><div><b>${esc(me?playerName:p.name)}</b>${sub?`<div class="muted">${sub}</div>`:""}</div><div class="score">${me?score:p.score}</div></div>`;
+  return `<div class="player${me?" me":""}${p.left?" left":""}"><div><b>${esc(me?playerName:p.name)}</b>${sub?`<div class="muted">${sub}</div>`:""}</div><div class="score">${playerScore(p)}</div></div>`;
 }).join("");
+if(shown.length<roster.length)html+=`<div class="player more"><b>${t.morePlayers(roster.length-shown.length)}</b></div>`;
+box.innerHTML=html;
 }
 
 function onRosterChanged(){
 const t=i18n[gameLang];
 renderLobby();
 if(gameStarted)return;
+const someoneJoined=roster.some(p=>!lobbySeen.has(p.id));
+roster.forEach(p=>lobbySeen.add(p.id));
+if(someoneJoined&&!isMatchmadeSession)sfx("join"); // Find Opponent games already have the VS screen sound
 if(isHost){
-  const ready=roster.length>=MIN_PLAYERS;
+  const ready=lobbyReady();
   $("startBtn").disabled=!ready;
-  if(!ready)setLobbyStatus(t.roomReady);
+  if(isTeamGame()){
+    const a=teamSize(0),b=teamSize(1);
+    if(ready)setLobbyStatus(a>=teamCap()?t.roomFilled:t.teamsCanStart(a,teamCap()));
+    else setLobbyStatus(a!==b&&Math.min(a,b)>=1&&roster.length>=4?t.balanceTeams:t.teamsNotReady);
+  }
+  else if(!ready)setLobbyStatus(t.roomReady);
   else if(roster.length>=maxPlayers)setLobbyStatus(t.roomFilled);
   else setLobbyStatus(t.canStart(roster.length,maxPlayers));
   if(isMatchmadeSession&&roster.length>=maxPlayers)afterMatchIntro(()=>{if(!gameStarted&&roster.length>=maxPlayers)startGame()});
@@ -51601,6 +51925,7 @@ $("btnMatchmake")?.classList.remove("searching");
 updateGameTexts();
 isHost=amHost;
 room=payload.matchId||'LIVE';
+gameMode="duel"; // Find Opponent is always 1 vs 1
 maxPlayers=MIN_PLAYERS;
 questionCount=QUESTIONS_PER_GAME;
 roster=amHost?[makePlayer(matchmakingId,playerName,myAvatar)]:[];
@@ -51630,13 +51955,15 @@ updateGameTexts();
 }
 
 function createRoom(){
+if(selectedMode==="solo"){startSolo();return}
 playerName=$("name").value.trim()||"Player 1";
 room=Math.floor(100000+Math.random()*900000)+"";
 isHost=true;
 isMatchmadeSession=false;
-maxPlayers=readMaxPlayers();
-questionCount=readQuestionCount();
-roster=[makePlayer(matchmakingId,playerName,myAvatar)];
+gameMode=selectedMode;
+maxPlayers=seatsFor(gameMode);
+questionCount=selectedQuestions;
+roster=[makePlayer(matchmakingId,playerName,myAvatar,isTeamGame()?0:null)];
 enterLobby();
 setLobbyStatus(i18n[gameLang].creatingRoom);
 connectGameChannel(room);
@@ -51649,6 +51976,7 @@ room=$("roomInput").value.trim();
 if(!room){alert(i18n[gameLang].enterRoomFirst);return}
 isHost=false;
 isMatchmadeSession=false;
+gameMode="party"; // until the host's roster says which mode this room is
 maxPlayers=0;
 questionCount=0;
 roster=[];
@@ -51669,15 +51997,29 @@ function handleData(msg) {
         sendConnData({ type: "full", to: msg.id });
         return;
       }
-      roster.push(makePlayer(msg.id, msg.name || i18n[gameLang].lblPlayer, msg.avatar));
+      // Teams: newcomers go to the team with fewer players; they can switch in the lobby.
+      const team = isTeamGame() ? (teamSize(0) <= teamSize(1) ? 0 : 1) : null;
+      roster.push(makePlayer(msg.id, msg.name || i18n[gameLang].lblPlayer, msg.avatar, team));
     }
 
     broadcastRoster();
     onRosterChanged();
   }
 
+  else if (msg.type === "team") {
+    // A guest asks to switch teams; the host checks there's room and tells everyone.
+    if (!isHost || gameStarted || !isTeamGame()) return;
+    const p = findPlayer(msg.id);
+    if (!p || (msg.team !== 0 && msg.team !== 1) || p.team === msg.team || teamSize(msg.team) >= teamCap()) return;
+    p.team = msg.team;
+    broadcastRoster();
+    onRosterChanged();
+  }
+
   else if (msg.type === "roster") {
     if (isHost) return;
+    // Rooms from before game modes existed don't send one: 2 seats is a duel, more is free for all.
+    gameMode = modeInfo(msg.mode || (msg.max === 2 ? "duel" : "party")).id;
     maxPlayers = msg.max || maxPlayers;
     questionCount = msg.q || questionCount;
     setRoster(msg.players);
@@ -51698,6 +52040,7 @@ function handleData(msg) {
 
     gameLang = msg.lang || gameLang;
     questions = msg.questions || [];
+    if (msg.mode) gameMode = modeInfo(msg.mode).id;
     maxPlayers = msg.max || maxPlayers;
     setRoster(players);
 
@@ -51729,6 +52072,7 @@ function handleData(msg) {
 function enterLobby(){
     $("roomCode").textContent=room;
     $("startBtn").disabled=true;
+    lobbySeen=new Set(roster.map(p=>p.id));
     renderLobby();
     show("lobby");
 }
@@ -51743,18 +52087,36 @@ function startGame() {
     return;
   }
 
-  if (roster.length < MIN_PLAYERS) {
-    alert(i18n[gameLang].notEnoughPlayers);
+  if (!lobbyReady()) {
+    const t = i18n[gameLang];
+    alert(isTeamGame() ? t.teamsNotReady : t.notEnoughPlayers);
     return;
   }
 
+  questions = pickQuestions();
+
+  sendConnData({
+    type: "start",
+    lang: gameLang,
+    mode: gameMode,
+    max: maxPlayers,
+    players: rosterForWire(),
+    questions
+  });
+
+  if (!isMatchmadeSession) matchIntro = startBattleScreen();
+  afterMatchIntro(beginGameLocal);
+}
+
+// Random questions for one round, with the answers shuffled.
+function pickQuestions() {
   const bank = bankForLang(gameLang);
   const picked = shuffle(bank).slice(
     0,
     Math.min(questionCount || QUESTIONS_PER_GAME, bank.length)
   );
 
-  questions = picked.map((entry) => {
+  return picked.map((entry) => {
     const { text, options, answers, image } = parseQuestion(entry);
     const correctTexts = answers.map((i) => options[i]);
     const shuffledOptions = shuffle(options);
@@ -51766,17 +52128,21 @@ function startGame() {
       image
     ];
   });
+}
 
-  sendConnData({
-    type: "start",
-    lang: gameLang,
-    max: maxPlayers,
-    players: rosterForWire(),
-    questions
-  });
-
-  if (!isMatchmadeSession) matchIntro = startBattleScreen();
-  afterMatchIntro(beginGameLocal);
+// Solo: no room or other players, the questions start right away.
+function startSolo() {
+  playerName = $("name").value.trim() || "Player";
+  room = "";
+  isHost = true;
+  isMatchmadeSession = false;
+  gameMode = "solo";
+  maxPlayers = 1;
+  questionCount = selectedQuestions;
+  roster = [makePlayer(matchmakingId, playerName, myAvatar)];
+  questions = pickQuestions();
+  updateGameTexts();
+  beginGameLocal();
 }
 
 // Room games: everyone in the room sees the battle screen together when the match starts.
@@ -51786,10 +52152,15 @@ function startBattleScreen() {
   const t = i18n[gameLang];
   return showBattleStart({
     players: roster.map(p => p.id === matchmakingId
-      ? { id: p.id, name: playerName, avatar: safeAvatar(myAvatar) }
-      : { id: p.id, name: p.name, avatar: p.avatar }),
+      ? { id: p.id, name: playerName, avatar: safeAvatar(myAvatar), team: p.team }
+      : { id: p.id, name: p.name, avatar: p.avatar, team: p.team }),
     meId: matchmakingId,
-    texts: { title: t.battleTitle, subtitle: t.battlePlayers(roster.length), you: t.lblYou, opponent: t.matchOpponent, go: t.matchGo }
+    teams: isTeamGame(),
+    texts: {
+      title: t.battleTitle,
+      subtitle: isTeamGame() ? t.teamVs(teamSize(0)) : t.battlePlayers(roster.length),
+      you: t.lblYou, opponent: t.matchOpponent, yourTeam: t.yourTeam, otherTeam: t.otherTeam, go: t.matchGo
+    }
   });
 }
 
@@ -51854,6 +52225,7 @@ function answer(chosen,ans,btn){
 clearInterval(timer);document.querySelectorAll(".choice").forEach(b=>b.disabled=true);
 const isCorrect=Array.isArray(ans)?ans.includes(chosen):chosen===ans;
 if(btn)btn.classList.add(isCorrect?"correct":"wrong");
+sfx(isCorrect?"correct":"wrong");
 if(isCorrect){let pts=Math.max(1,Math.ceil(time));score+=pts;renderScoreboard();$("status").textContent=i18n[gameLang].correct(pts)}
 else{$("status").textContent=chosen===-1?i18n[gameLang].timeUp:i18n[gameLang].wrong;}
 if(conn&&conn.open)sendConnData({type:'score',id:matchmakingId,total:score});
@@ -51875,30 +52247,44 @@ const pending=others.filter(p=>!p.finished&&!p.left);
 const resultIsFinal=pending.length===0||!(conn&&conn.open);
 
 let resultText=t.doneSolo;
-let didWin=false;
+let didWin=false,didLose=false;
 let place=0;
-if(resultIsFinal&&rivals.length){
+let scoreLine=t.yourScore(score,maxScore);
+if(isTeamGame()){
+  // Teams: the team totals decide, once at least one player of the other team has finished.
+  const mine=myTeam(),mineTotal=teamScore(mine),theirTotal=teamScore(1-mine);
+  if(resultIsFinal&&rivals.some(p=>p.team!==mine)){
+    if(mineTotal>theirTotal){resultText=t.teamWon;didWin=true;}
+    else if(mineTotal===theirTotal)resultText=t.tie;
+    else{resultText=t.teamLost;didLose=true;}
+  }
+  scoreLine+=" — "+t.teamScoreLine(mineTotal,theirTotal);
+}else if(resultIsFinal&&rivals.length){
   const best=Math.max(...rivals.map(p=>p.score));
   place=1+rivals.filter(p=>p.score>score).length;
   if(score>best){resultText=t.won;didWin=true;}
   else if(score===best)resultText=t.tie;
-  else resultText=rivals.length>1?t.place(place):t.lost;
+  else{resultText=rivals.length>1?t.place(place):t.lost;didLose=true;}
+  if(rivals.length>1)scoreLine+=" — "+t.rankLine(place,rivals.length+1);
 }
 $("winner").textContent=resultText;
-$("finalScore").textContent=t.yourScore(score,maxScore)+(place&&rivals.length>1?" — "+t.rankLine(place,rivals.length+1):"");
+$("finalScore").textContent=scoreLine;
 
 const rows=roster.map(p=>{
   const me=p.id===matchmakingId;
-  return {name:me?playerName:p.name,score:me?score:p.score,me,done:me||p.finished,left:!me&&!p.finished&&p.left};
+  return {name:me?playerName:p.name,score:me?score:p.score,me,team:p.team,done:me||p.finished,left:!me&&!p.finished&&p.left};
 }).sort((a,b)=>(b.done-a.done)||(b.score-a.score));
 $("finalList").innerHTML=rows.map(r=>{
   const value=r.done?t.ptsShort(r.score):(r.left?t.leftTag:t.notDoneShort);
-  return `<li class="${r.me?"me":""}"><b>${esc(r.name)}</b><span class="${r.done?"":"muted"}">${value}</span></li>`;
+  const cls=[r.me?"me":"",isTeamGame()&&r.team!==null?"team-"+r.team:""].join(" ").trim();
+  return `<li class="${cls}"><b>${esc(r.name)}</b><span class="${r.done?"":"muted"}">${value}</span></li>`;
 }).join("");
 
 if(resultIsFinal && !statsSaved){
 statsSaved=true;
-saveGameResultToProfile(didWin, score);
+if(didWin)sfx("win");else if(didLose)sfx("lose");
+// Solo rounds are practice: they don't count toward wins or the brain score leaderboard.
+if(gameMode!=="solo")saveGameResultToProfile(didWin, score);
 }
 }
 

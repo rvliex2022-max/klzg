@@ -1,8 +1,9 @@
 // Battle start screens with sound. Both return a Promise that resolves once the screen is gone,
 // so the game can wait for it before the first question.
 //   showMatchFound({ me, opponent, meAvatar, opponentAvatar, texts })   VS screen for two players. texts: { title, you, opponent, go }
-//   showBattleStart({ players, meId, texts })     for a room: VS screen for 2 players, a circle of players for 3–8.
-//                                                 players: [{ id, name, avatar }], texts: { title, subtitle, you, opponent, go }
+//   showBattleStart({ players, meId, teams, texts })  for a room: VS screen for 2 players, a circle of players for 3–20,
+//                                                 or with teams: true, your team vs the other team.
+//                                                 players: [{ id, name, avatar, team }], texts: { title, subtitle, you, opponent, yourTeam, otherTeam, go }
 (function () {
   // Timeline in ms. Sounds and visuals both follow these.
   const HIT = 650;                       // the two sides collide
@@ -73,6 +74,12 @@
       font-size:clamp(30px,7vmin,42px)}
     #bbMatch .bbm-player .bbm-name{font-size:clamp(13px,2.6vw,16px)}
     #bbMatch .bbm-player .bbm-role{font-size:11px;color:var(--c)}
+    #bbMatch .bbm-side.bbm-team{width:var(--team-w,220px)}
+    #bbMatch .bbm-members{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%;margin-top:-64px}
+    #bbMatch .bbm-member{display:flex;flex-direction:column;align-items:center;gap:4px;width:calc(var(--team-av,64px) + 14px);min-width:0}
+    #bbMatch .bbm-member .bbm-avatar{margin-top:0;width:var(--team-av,64px);height:var(--team-av,64px);font-size:calc(var(--team-av,64px) * .42)}
+    #bbMatch .bbm-member.bbm-is-me .bbm-avatar{box-shadow:0 0 0 3px #fff,0 0 26px var(--c)}
+    #bbMatch .bbm-member .bbm-name{font-size:clamp(12px,2.6vw,16px)}
     @keyframes bbmHalfL{from{transform:translateX(-60px) rotate(-14deg);opacity:0}to{transform:none;opacity:1}}
     @keyframes bbmHalfR{from{transform:translateX(60px) rotate(14deg);opacity:0}to{transform:none;opacity:1}}
     @keyframes bbmSpark{from{transform:scale(0) rotate(-90deg);opacity:0}to{transform:none;opacity:1}}
@@ -239,7 +246,53 @@
     return run(el, texts.go);
   };
 
-  window.showBattleStart = function ({ players, meId, texts }) {
+  // Teams (2 vs 2 up to 5 vs 5): your team on one side, the other team on the other.
+  function showTeams(players, meId, texts) {
+    const me = players.find((p) => p.id === meId) || players[0];
+    const sides = [players.filter((p) => p.team === me.team), players.filter((p) => p.team !== me.team)];
+    const el = newScreen();
+    // Each side gets about half the screen beside "VS". Bigger teams wrap into rows of 2–3 photos,
+    // and photos shrink (down to 36px) so a row always fits.
+    const perSide = Math.max(sides[0].length, sides[1].length, 1);
+    const sideWidth = Math.round(Math.min(340, Math.max(130, (innerWidth - 110) / 2)));
+    const fitPerRow = Math.max(1, Math.floor((sideWidth + 8) / (36 + 14 + 8)));
+    const perRow = Math.min(perSide <= 3 ? perSide : Math.ceil(perSide / 2), fitPerRow);
+    const photo = Math.floor(Math.max(36, Math.min(84, (sideWidth - (perRow - 1) * 8) / perRow - 15)));
+    el.style.setProperty("--team-w", sideWidth + "px");
+    el.style.setProperty("--team-av", photo + "px");
+    el.innerHTML = `
+      <div class="bbm-flash"></div>
+      <p class="bbm-title"></p>
+      <p class="bbm-sub"></p>
+      <div class="bbm-arena">
+        <div class="bbm-side bbm-team bbm-me">${LEFT_HALF}<div class="bbm-members"></div><span class="bbm-role"></span></div>
+        <div class="bbm-vs">${SPARK}<span>VS</span><div class="bbm-ring"></div></div>
+        <div class="bbm-side bbm-team bbm-opp">${RIGHT_HALF}<div class="bbm-members"></div><span class="bbm-role"></span></div>
+      </div>
+      <p class="bbm-count"></p>`;
+    el.querySelector(".bbm-title").textContent = texts.title;
+    el.querySelector(".bbm-sub").textContent = texts.subtitle || "";
+    el.querySelector(".bbm-me .bbm-role").textContent = texts.yourTeam || texts.you;
+    el.querySelector(".bbm-opp .bbm-role").textContent = texts.otherTeam || texts.opponent;
+    [".bbm-me", ".bbm-opp"].forEach((side, i) => {
+      const box = el.querySelector(side + " .bbm-members");
+      sides[i].forEach((p) => {
+        const member = document.createElement("div");
+        member.className = "bbm-member" + (p.id === meId ? " bbm-is-me" : "");
+        const name = document.createElement("span");
+        name.className = "bbm-name";
+        name.textContent = p.name || "?";
+        member.append(makeAvatar(p.name, p.avatar, COLORS[i]), name);
+        box.appendChild(member);
+      });
+    });
+    return run(el, texts.go);
+  }
+
+  window.showBattleStart = function ({ players, meId, teams, texts }) {
+    if (teams && players.some((p) => p.team === 0) && players.some((p) => p.team === 1)) {
+      return showTeams(players, meId, texts);
+    }
     if (players.length === 2) {
       // Two players: the classic VS screen, with you always on the left.
       const me = players.find((p) => p.id === meId) || players[0];
@@ -280,10 +333,12 @@
       const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
       return { x: Math.cos(angle) * rx, y: Math.sin(angle) * ry };
     });
-    const nameWidth = Math.min(120, Math.max(84, innerWidth * 0.22));
+    // Big groups (more than 8): photos only, plus your own name, so the circle doesn't get crowded.
+    const compact = n > 8;
+    const nameWidth = compact ? 0 : Math.min(120, Math.max(84, innerWidth * 0.22));
     const overlaps = (size) => seats.some((a, i) => seats.some((b, j) => j > i &&
-      Math.abs(a.x - b.x) < Math.max(size, nameWidth) && Math.abs(a.y - b.y) < size + 42));
-    while (photo > 48 && overlaps(photo)) photo -= 4;
+      Math.abs(a.x - b.x) < Math.max(size, nameWidth) && Math.abs(a.y - b.y) < size + (compact ? 6 : 42)));
+    while (photo > (compact ? 34 : 48) && overlaps(photo)) photo -= 4;
     const chipWidth = Math.max(photo, nameWidth);
     stage.style.setProperty("--av", photo + "px");
     stage.style.setProperty("--w", chipWidth + "px");
@@ -304,10 +359,13 @@
       chip.style.animationDuration = (HIT - delay) + "ms";
 
       const avatar = makeAvatar(p.name, p.avatar, COLORS[i % COLORS.length]);
-      const name = document.createElement("span");
-      name.className = "bbm-name";
-      name.textContent = p.name || "?";
-      chip.append(avatar, name);
+      chip.append(avatar);
+      if (!compact || p.id === meId) {
+        const name = document.createElement("span");
+        name.className = "bbm-name";
+        name.textContent = p.name || "?";
+        chip.append(name);
+      }
       if (p.id === meId) {
         const role = document.createElement("span");
         role.className = "bbm-role";
