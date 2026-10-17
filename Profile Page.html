@@ -298,7 +298,8 @@ function applyTranslations(l){
   document.getElementById('saveBtn').textContent = t.saveBtn;
   document.getElementById('historyTitle').textContent = t.historyTitle;
   renderHistory();
-  document.getElementById('langToggleBtn').textContent = (l === 'ar') ? 'English' : 'العربية';
+  const langBtn = document.getElementById('langToggleBtn');
+  if(langBtn) langBtn.textContent = (l === 'ar') ? 'English' : 'العربية';
 
   if(aboutBox.textContent.trim() === defaultAbout.ar || aboutBox.textContent.trim() === defaultAbout.en){
     currentAboutText = defaultAbout[l];
@@ -327,6 +328,7 @@ let currentGamesWon = 0;
 let currentBrainScore = 0;
 let historyRows = [];
 let historyState = 'loading'; // 'loading' | 'ready' | 'error'
+let historyError = '';
 
 profileImageWrap.addEventListener("click", () => { if (isOwnProfile) imageInput.click(); });
 
@@ -490,7 +492,17 @@ function renderHistory(){
   };
 
   if(historyState === 'loading') return note(t.historyLoading);
-  if(historyState === 'error') return note(t.historyFailed);
+  if(historyState === 'error'){
+    note(t.historyFailed);
+    if(historyError){
+      const d = document.createElement('div');
+      d.className = 'history-empty';
+      d.style.cssText = 'font-size:12px;direction:ltr;padding-top:0';
+      d.textContent = historyError;
+      list.appendChild(d);
+    }
+    return;
+  }
   if(!historyRows.length) return note(t.historyEmpty);
 
   const locale = currentLang === 'ar' ? 'ar-u-ca-gregory' : 'en-GB';
@@ -529,20 +541,28 @@ function renderHistory(){
 
 async function loadHistory(){
   historyState = 'loading';
+  historyError = '';
   renderHistory();
-  const { data, error } = await supabaseClient
-    .from('match_history')
-    .select('opponent_name, my_score, opponent_score, result, created_at')
-    .eq('user_id', viewedUserId)
-    .order('created_at', { ascending: false })
-    .limit(30);
+  try{
+    const { data, error } = await supabaseClient
+      .from('match_history')
+      .select('opponent_name, my_score, opponent_score, result, created_at')
+      .eq('user_id', viewedUserId)
+      .order('created_at', { ascending: false })
+      .limit(30);
 
-  if(error){
-    console.error('Load history error:', error);
+    if(error){
+      console.error('Load history error:', error);
+      historyState = 'error';
+      historyError = error.message || String(error);
+    }else{
+      historyRows = data || [];
+      historyState = 'ready';
+    }
+  }catch(e){
+    console.error('Load history exception:', e);
     historyState = 'error';
-  }else{
-    historyRows = data || [];
-    historyState = 'ready';
+    historyError = (e && e.message) || String(e);
   }
   renderHistory();
 }
@@ -562,6 +582,7 @@ async function initProfile() {
   const params = new URLSearchParams(window.location.search);
   viewedUserId = params.get("id") || currentUser.id;
   isOwnProfile = viewedUserId === currentUser.id;
+  loadHistory();
 
   if (!isOwnProfile){
     profileImageWrap.classList.add("readonly");
@@ -600,7 +621,6 @@ async function initProfile() {
   currentGamesWon = profileRow?.games_won ?? 0;
   currentBrainScore = profileRow?.brain_score ?? 0;
   applyTranslations(currentLang);
-  loadHistory();
 }
 
 initProfile();
