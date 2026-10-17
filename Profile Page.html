@@ -139,15 +139,6 @@ button#saveBtn:active{transform:translateY(0)}
 .stat h2{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:18px}
 .stat-box{font-size:20px;font-weight:800;color:var(--text)}
 
-.bottom-bar{position:fixed;bottom:22px;left:22px;z-index:999}
-#langToggleBtn{
-  background:#12172bdd;color:var(--text);border:1px solid var(--border);
-  border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;
-  cursor:pointer;font-family:'Cairo',Arial,sans-serif;
-  box-shadow:0 10px 24px #0008;backdrop-filter:blur(8px);
-}
-#langToggleBtn:hover{border-color:var(--accent)}
-
 @media(max-width:720px){
   header{padding:18px 20px}
   nav{gap:18px}
@@ -203,11 +194,6 @@ button#saveBtn:active{transform:translateY(0)}
     </div>
   </section>
 </main>
-
-<div class="bottom-bar">
-  <button id="langToggleBtn" onclick="toggleLanguage()">English</button>
-</div>
-
 <script>
 
 const i18n = {
@@ -217,7 +203,9 @@ const i18n = {
     aboutTitle: "نبذة عني:",
     statGamesTitle: "ألعابك", statGamesBox: "لا توجد ألعاب بعد",
     statLevelTitle: "مستوى ذكائك", statLevelBox: "المستوى: 0",
-    saveBtn: "حفظ"
+    saveBtn: "حفظ",
+    saveFailed: "تعذّر الحفظ ⚠",
+    uploadFailed: "تعذّر رفع الصورة ⚠"
   },
   en: {
     navBrand: "Brain Battle", navContact: "Contact Us", navSupport: "Support us",
@@ -225,7 +213,9 @@ const i18n = {
     aboutTitle: "About me:",
     statGamesTitle: "Game Win", statGamesBox: "No games yet",
     statLevelTitle: "Brain Level", statLevelBox: "Brain Level: 0",
-    saveBtn: "Save"
+    saveBtn: "Save",
+    saveFailed: "Failed to save ⚠",
+    uploadFailed: "Failed to upload image ⚠"
   }
 };
 
@@ -254,12 +244,6 @@ function applyTranslations(l){
     currentAboutText = defaultAbout[l];
     aboutBox.textContent = defaultAbout[l];
   }
-}
-
-function toggleLanguage(){
-  currentLang = currentLang === 'ar' ? 'en' : 'ar';
-  localStorage.setItem('lang', currentLang);
-  applyTranslations(currentLang);
 }
 
 const profileImg = document.getElementById("profileImg");
@@ -340,14 +324,14 @@ async function uploadAvatarIfNeeded(){
 
 saveBtn.addEventListener("click", async () => {
   if(!currentUser){
-    flashStatus("تعذّر الحفظ ⚠");
+    flashStatus(i18n[currentLang].saveFailed);
     return;
   }
 
   const { url: newAvatarUrl, error: uploadError } = await uploadAvatarIfNeeded();
   if(uploadError){
     console.error("Upload error:", uploadError);
-    flashStatus("تعذّر رفع الصورة ⚠");
+    flashStatus(i18n[currentLang].uploadFailed);
     return;
   }
 
@@ -361,7 +345,7 @@ saveBtn.addEventListener("click", async () => {
 
   if(error){
     console.error("Save error:", error);
-    flashStatus("تعذّر الحفظ ⚠");
+    flashStatus(i18n[currentLang].saveFailed);
   }else{
     currentImageFile = null;
     flashStatus(randomSuccessMessage());
