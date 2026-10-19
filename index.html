@@ -377,6 +377,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 .team-col{display:flex;flex-direction:column;gap:10px}
 .team-head{font-weight:800;font-size:14px;color:#a78bfa;padding:0 4px}
 .team-col.team-1 .team-head{color:#2fd4c8}
+.team-hint{grid-column:1/-1;margin:0;text-align:center;font-size:13px;color:#9eabd0}
 .team-0>.player,.player.team-0,.final-list li.team-0{border-inline-start:4px solid #7c5cff}
 .team-1>.player,.player.team-1,.final-list li.team-1{border-inline-start:4px solid #2fd4c8}
 .player.more{justify-content:center;align-items:center;color:#9eabd0}
@@ -51113,6 +51114,7 @@ const i18n = {
     yourTeam: "فريقك",
     otherTeam: "الفريق المنافس",
     switchTeam: "⇄ انتقل للفريق الثاني",
+    pairHint: "اللاعبون في نفس الصف تجيهم نفس الأسئلة، وكل صف أسئلته مختلفة عن الباقين",
     teamsNotReady: "تقدرون تبدؤون لما يكون في الفريقين نفس العدد، ولاعبين اثنين على الأقل في كل فريق",
     balanceTeams: "وزّعوا اللاعبين بالتساوي بين الفريقين",
     teamsCanStart: (a, k) => `الفرق جاهزة ${a} ضد ${a} — ابدأ الآن أو انتظر حتى ${k} ضد ${k}`,
@@ -51226,6 +51228,7 @@ const i18n = {
     yourTeam: "Your team",
     otherTeam: "Other team",
     switchTeam: "⇄ Switch team",
+    pairHint: "Players in the same row get the same questions; every row gets different ones",
     teamsNotReady: "You can start once both teams have the same number of players, at least 2 each",
     balanceTeams: "Balance the teams so both have the same number of players",
     teamsCanStart: (a, k) => `Teams ready (${a} vs ${a}) — start now or wait for ${k} vs ${k}`,
@@ -51676,7 +51679,7 @@ if(isTeamGame()){
     let seats=members.map(card).join("");
     for(let i=members.length;i<teamCap();i++)seats+=empty(t.teamName(team));
     return `<div class="team-col team-${team}"><div class="team-head">${t.teamName(team)}</div>${seats}</div>`;
-  }).join("");
+  }).join("")+`<p class="team-hint">${t.pairHint}</p>`;
 }else{
   html=list.map(card).join("");
   const free=maxPlayers-list.length;
@@ -52039,10 +52042,13 @@ function handleData(msg) {
     }
 
     gameLang = msg.lang || gameLang;
-    questions = msg.questions || [];
     if (msg.mode) gameMode = modeInfo(msg.mode).id;
     maxPlayers = msg.max || maxPlayers;
     setRoster(players);
+    // Team games send one question set per pair; take the set for my position on my team.
+    questions = Array.isArray(msg.questionSets)
+      ? (msg.questionSets[pairIndex(matchmakingId)] || msg.questionSets[0] || [])
+      : (msg.questions || []);
 
     $("gameLangBtn").textContent =
       gameLang === "ar" ? "English" : "العربية";
@@ -52093,7 +52099,10 @@ function startGame() {
     return;
   }
 
-  questions = pickQuestions();
+  // Teams: one question set per pair (player 1 of each team share set 1, player 2 of each team share set 2...).
+  // Everyone else: one set for the whole room.
+  const questionSets = isTeamGame() ? drawQuestionSets(teamSize(0)) : null;
+  questions = questionSets ? questionSets[pairIndex(matchmakingId)] : pickQuestions();
 
   sendConnData({
     type: "start",
@@ -52101,33 +52110,46 @@ function startGame() {
     mode: gameMode,
     max: maxPlayers,
     players: rosterForWire(),
-    questions
+    ...(questionSets ? { questionSets } : { questions })
   });
 
   if (!isMatchmadeSession) matchIntro = startBattleScreen();
   afterMatchIntro(beginGameLocal);
 }
 
+// A player's position in their team (0 = first player), in roster order, which is the same for everyone.
+// Players in the same position on the two teams are a pair and answer the same questions.
+function pairIndex(id) {
+  const p = findPlayer(id);
+  return p ? roster.filter((x) => x.team === p.team).indexOf(p) : 0;
+}
+
 // Random questions for one round, with the answers shuffled.
 function pickQuestions() {
-  const bank = bankForLang(gameLang);
-  const picked = shuffle(bank).slice(
-    0,
-    Math.min(questionCount || QUESTIONS_PER_GAME, bank.length)
+  return drawQuestionSets(1)[0];
+}
+
+// Several rounds' worth of questions with no question repeated between sets
+// (unless the bank is too small for that many).
+function drawQuestionSets(setCount) {
+  const bank = shuffle(bankForLang(gameLang));
+  const perSet = Math.min(questionCount || QUESTIONS_PER_GAME, bank.length);
+  return Array.from({ length: setCount }, (_, s) =>
+    Array.from({ length: perSet }, (_, i) => prepareQuestion(bank[(s * perSet + i) % bank.length]))
   );
+}
 
-  return picked.map((entry) => {
-    const { text, options, answers, image } = parseQuestion(entry);
-    const correctTexts = answers.map((i) => options[i]);
-    const shuffledOptions = shuffle(options);
+function prepareQuestion(entry) {
+  const { text, options, answers, image } = parseQuestion(entry);
+  const correctTexts = answers.map((i) => options[i]);
+  const shuffledOptions = shuffle(options);
 
-    return [
-      text,
-      shuffledOptions,
-      shuffledOptions.map((o, i) => (correctTexts.includes(o) ? i : -1)).filter((i) => i >= 0),
-      image
-    ];
-  });
+  return [
+    text,
+    shuffledOptions,
+    shuffledOptions.map((o, i) => (correctTexts.includes(o) ? i : -1)).filter((i) => i >= 0),
+    image
+  ];
 }
 
 // Solo: no room or other players, the questions start right away.
