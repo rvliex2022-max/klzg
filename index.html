@@ -360,6 +360,8 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
 .mode-size-chips .q-chip[aria-checked=true]{background:#7c5cff}
 .q-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .q-chip{padding:10px 0;border-radius:12px;background:#111727;border:2px solid #232b43;color:#dbe2ff;font-family:inherit;font-size:16px;font-weight:800}
+#genreChips{display:flex;flex-wrap:wrap}
+#genreChips .q-chip{padding:10px 14px;flex:0 0 auto}
 .q-chip:hover{border-color:#3a4468;transform:none}
 .q-chip[aria-checked=true]{background:#7c5cff;border-color:#7c5cff;color:#fff}
 .mode-foot{padding:14px 20px 20px;border-top:1px solid #1c2338}
@@ -589,6 +591,8 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
     <div class="mode-list" id="modeList" role="radiogroup" aria-labelledby="modeDrawerTitle"></div>
     <h3 class="mode-section" id="lblQuestionCount"></h3>
     <div class="q-chips" id="questionChips" role="radiogroup" aria-labelledby="lblQuestionCount"></div>
+    <h3 class="mode-section" id="lblGenre"></h3>
+    <div class="q-chips" id="genreChips" role="group" aria-labelledby="lblGenre"></div>
   </div>
   <div class="mode-foot"><button type="button" id="modeDone" onclick="closeModeDrawer()"></button></div>
 </aside>
@@ -597,6 +601,7 @@ button{border:0;border-radius:13px;padding:14px 18px;font-weight:800;font-size:1
   <button id="messagesBtn" class="secondary" onclick="location.href='Message.html'">💬 <span id="messagesBtnText">الرسائل</span></button>
 </div>
 
+<script src="questions-bank.js"></script>
 <script>
 const AR_QUESTION_BANK=[
   [
@@ -51083,7 +51088,6 @@ const EN_QUESTION_BANK=[
 let currentLang = 'en';
 let gameLang = currentLang;
 
-
 const i18n = {
   ar: {
     profileLink: "👤 الملف الشخصي",
@@ -51497,6 +51501,35 @@ function modeInfo(id){return GAME_MODES.find(m=>m.id===id)||GAME_MODES[1]}
 function savedChoice(key,options,fallback){const n=+readSaved(key);return options.includes(n)?n:fallback}
 let selectedMode=modeInfo(readSaved("bb_game_mode")).id; // what this player picked on the home screen
 let selectedQuestions=savedChoice("bb_question_count",QUESTION_COUNTS,QUESTIONS_PER_GAME);
+
+let selectedGenres = new Set((readSaved("bb_question_genre") || "all").split(","));
+let gameGenre = new Set(["all"]);
+const GENRE_NAMES = {
+  all: { en: "All genres", ar: "كل التصنيفات" },
+  math: { en: "Math", ar: "رياضيات" },
+  science: { en: "Science", ar: "علوم" },
+  history: { en: "History", ar: "تاريخ" },
+  geography: { en: "Geography", ar: "جغرافيا" },
+  nature_and_body: { en: "Nature & Body", ar: "الطبيعة والجسم" },
+  arts_and_literature: { en: "Arts & Literature", ar: "الفنون والأدب" },
+  sports: { en: "Sports", ar: "رياضة" },
+  pop_culture: { en: "Pop Culture", ar: "الثقافة الشعبية" },
+  general_knowledge: { en: "General knowledge", ar: "معلومات عامة" }
+};
+function aiBankForLang(lang) {return lang === "en" ? AI_QUESTIONS_EN : AI_QUESTIONS_AR;}
+function toggleGenre(genre) {
+  if (genre === "all") {
+    selectedGenres = new Set(["all"]);
+  } else {
+    selectedGenres.delete("all");
+    if (selectedGenres.has(genre)) selectedGenres.delete(genre);
+    else selectedGenres.add(genre);
+    if (selectedGenres.size === 0) selectedGenres.add("all");
+  }
+  save("bb_question_genre", [...selectedGenres].join(","));
+  renderModePicker(modeLang || gameLang);
+}
+
 // Picked size per mode: players in the free-for-all group, players per team.
 const selectedSize={
   party:savedChoice("bb_size_party",modeInfo("party").sizes,modeInfo("party").defaultSize),
@@ -51570,6 +51603,14 @@ return t.modes[id].pill;
 function renderModePicker(lang){
 modeLang=lang;
 const t=i18n[lang];
+
+const categories = aiBankForLang(lang);
+const genres = ["all", ...Object.keys(categories).filter(genre => categories[genre].length > 0)];
+selectedGenres = new Set([...selectedGenres].filter(g => genres.includes(g)));
+if (selectedGenres.size === 0) selectedGenres.add("all");
+$("lblGenre").textContent = lang === "ar" ? "تصنيف الأسئلة" : "Question genre";
+$("genreChips").innerHTML = genres.map(genre => {const on = selectedGenres.has(genre);return `<button type="button" class="q-chip" role="checkbox" aria-checked="${on}" tabindex="${on?0:-1}" data-genre="${esc(genre)}" onclick="toggleGenre('${genre}')">${esc(GENRE_NAMES[genre]?.[lang] || genre)}</button>`;}).join("");
+
 const info=modeInfo(selectedMode);
 const words=t.modes[info.id];
 const icon=$("modeBtnIcon");
@@ -51966,6 +52007,7 @@ isMatchmadeSession=false;
 gameMode=selectedMode;
 maxPlayers=seatsFor(gameMode);
 questionCount=selectedQuestions;
+gameGenres = new Set(selectedGenres);
 roster=[makePlayer(matchmakingId,playerName,myAvatar,isTeamGame()?0:null)];
 enterLobby();
 setLobbyStatus(i18n[gameLang].creatingRoom);
@@ -52130,13 +52172,38 @@ function pickQuestions() {
 }
 
 // Several rounds' worth of questions with no question repeated between sets
-// (unless the bank is too small for that many).
+// (unless the bank is too small for that many), with each active genre
+// getting an equal share of every round instead of a flat random mix.
 function drawQuestionSets(setCount) {
-  const bank = shuffle(bankForLang(gameLang));
-  const perSet = Math.min(questionCount || QUESTIONS_PER_GAME, bank.length);
-  return Array.from({ length: setCount }, (_, s) =>
-    Array.from({ length: perSet }, (_, i) => prepareQuestion(bank[(s * perSet + i) % bank.length]))
+  const categories = aiBankForLang(gameLang);
+  const activeGenres = shuffle(
+    isMatchmadeSession || gameGenres.has("all")
+      ? Object.keys(categories).filter((g) => categories[g].length)
+      : [...gameGenres].filter((g) => categories[g]?.length)
   );
+  if (activeGenres.length === 0) return Array.from({ length: setCount }, () => []);
+
+  const perSet = Math.min(
+    questionCount || QUESTIONS_PER_GAME,
+    activeGenres.reduce((n, g) => n + categories[g].length, 0)
+  );
+  const base = Math.floor(perSet / activeGenres.length);
+  let remainder = perSet % activeGenres.length;
+  const quotas = Object.fromEntries(activeGenres.map((g) => [g, base + (remainder-- > 0 ? 1 : 0)]));
+
+  const shuffledByGenre = Object.fromEntries(activeGenres.map((g) => [g, shuffle(categories[g])]));
+
+  return Array.from({ length: setCount }, (_, s) => {
+    const setEntries = [];
+    for (const genre of activeGenres) {
+      const pool = shuffledByGenre[genre];
+      const quota = quotas[genre];
+      for (let i = 0; i < quota; i++) {
+        setEntries.push(pool[(s * quota + i) % pool.length]);
+      }
+    }
+    return shuffle(setEntries).map(prepareQuestion);
+  });
 }
 
 function prepareQuestion(entry) {
@@ -52161,6 +52228,7 @@ function startSolo() {
   gameMode = "solo";
   maxPlayers = 1;
   questionCount = selectedQuestions;
+  gameGenres = new Set(selectedGenres);
   roster = [makePlayer(matchmakingId, playerName, myAvatar)];
   questions = pickQuestions();
   updateGameTexts();
