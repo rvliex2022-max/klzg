@@ -3,11 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b14">
 <title>تسجيل الدخول — Brain Battle</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="apple-touch-icon" href="logo-180.png">
 <script src="intro.js"></script>
 <script src="spotify-player.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
     const supabaseClient = window.supabase.createClient(
@@ -15,159 +20,49 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZodnhseXJkdnppbWd6ZnlqZHhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzE3MjksImV4cCI6MjEwNDM0NzcyOX0.EFi5L9-ahYr4Jv2IdJae5gvJ81Wbhd399RclkwToTbg"
     );
 </script>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-        background-color: #f4f6f9;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .top-header {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-    }
-
-    .back-btn {
-        background-color: #e2e8f0;
-        color: #1e293b;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: bold;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .back-btn:hover {
-        background-color: #cbd5e1;
-    }
-
-    .login-wrapper {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
-
-    .login-card {
-        background: white;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .login-card h2 {
-        color: #1e293b;
-        margin-bottom: 8px;
-        font-size: 24px;
-    }
-
-    .subtitle {
-        color: #64748b;
-        font-size: 14px;
-        margin-bottom: 24px;
-    }
-
-    .input-group {
-        margin-bottom: 20px;
-    }
-
-    .input-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #334155;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .input-group input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        font-size: 14px;
-        outline: none;
-    }
-
-    .input-group input:focus {
-        border-color: #2563eb;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 12px;
-        background-color: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-top: 4px;
-    }
-
-    .btn-submit:hover {
-        background-color: #1d4ed8;
-    }
-
-    .error-msg {
-        color: #dc2626;
-        font-size: 13px;
-        margin-top: -12px;
-        margin-bottom: 16px;
-        display: none;
-    }
-
-    .footer-link {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 13px;
-        color: #64748b;
-    }
-
-    .footer-link a {
-        color: #2563eb;
-        text-decoration: none;
-        font-weight: 600;
-    }
-</style>
 </head>
 <body>
 
+<div class="auth-bg" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+</div>
+
 <header class="top-header">
-    <a href="index.html" class="back-btn" id="backBtn">رجوع</a>
+    <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        <span id="backBtn">رجوع</span>
+    </a>
 </header>
 
-<div class="login-wrapper">
+<main class="login-wrapper">
     <div class="login-card">
-        <h2 id="TtlLogin">🧠 تسجيل الدخول</h2>
+        <img class="card-logo" src="logo.svg" alt="" width="64" height="64">
+        <h2 id="TtlLogin">تسجيل الدخول</h2>
         <p class="subtitle" id="SubTtl">سجّل دخولك للمتابعة إلى Brain Battle</p>
 
-        <form id="loginForm" onsubmit="handleLogin(event); return false;">
+        <form id="loginForm" onsubmit="handleLogin(event); return false;" novalidate>
             <div class="input-group">
                 <label for="username" id="UsernameText">اسم المستخدم أو البريد الإلكتروني</label>
-                <input type="text" id="username" placeholder="اكتب اسمك أو بريدك" required>
+                <input type="text" id="username" name="username" placeholder="اكتب اسمك أو بريدك"
+                       autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
             </div>
 
             <div class="input-group">
                 <label for="password" id="PasswordText">كلمة المرور</label>
-                <input type="password" id="password" placeholder="••••••••" required>
+                <div class="password-field">
+                    <input type="password" id="password" name="password" placeholder="••••••••"
+                           autocomplete="current-password" required>
+                    <button type="button" class="toggle-pass" aria-controls="password" aria-pressed="false" aria-label="إظهار كلمة المرور">
+                        <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-6.4 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.4 0 10 7 10 7a18.6 18.6 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                    </button>
+                </div>
+                <div class="caps-hint" id="CapsHint" role="status">Caps Lock مفعّل</div>
             </div>
 
-            <div class="error-msg" id="errorMsg">يرجى تعبئة جميع الحقول بشكل صحيح</div>
+            <div class="error-msg" id="errorMsg" role="alert">يرجى تعبئة جميع الحقول بشكل صحيح</div>
 
             <button type="submit" class="btn-submit" id="SubmitBtn">دخول</button>
         </form>
@@ -176,43 +71,58 @@
             ليس لديك حساب؟ <a href="signup.html">أنشئ حسابًا جديدًا</a>
         </div>
     </div>
-</div>
+</main>
 
+<script src="auth.js"></script>
 <script>
 
 const i18n = {
   ar: {
     backBtn: "رجوع",
-    TtlLogin: "🧠 تسجيل الدخول",
+    TtlLogin: "تسجيل الدخول",
     SubTtl: "سجّل دخولك للمتابعة إلى Brain Battle",
     UsernameText: "اسم المستخدم أو البريد الإلكتروني",
     PasswordText: "كلمة المرور",
     UserPlaceholder: "اكتب اسمك أو بريدك",
     PassPlaceholder: "••••••••",
+    showPassword: "إظهار كلمة المرور",
+    hidePassword: "إخفاء كلمة المرور",
+    capsLock: "تنبيه: Caps Lock مفعّل",
     errorMsg: "يرجى تعبئة جميع الحقول بشكل صحيح",
     SubmitBtn: "دخول",
+    loggingIn: "جارٍ تسجيل الدخول",
     FooterLink: "ليس لديك حساب؟ <a href=\"signup.html\">أنشئ حسابًا جديدًا</a>",
     usernameNotFound: "اسم المستخدم غير موجود",
     emailNotConfirmed: "لازم تأكد إيميلك أول. <a href=\"verify.html\">أدخل الكود اللي وصلك</a>",
     wrongPassword: "كلمة المرور غير صحيحة",
+    invalidCredentials: "الإيميل أو كلمة المرور غير صحيحة",
     tooManyAttempts: "محاولات كثيرة، انتظر شوي وحاول مرة ثانية",
+    networkError: "تعذّر الاتصال، تأكد من الإنترنت وحاول مرة ثانية",
+    loginFailed: "تعذّر تسجيل الدخول، حاول مرة ثانية",
     usernameLoginOff: "الدخول باسم المستخدم مو متاح الحين، سجّل دخولك بإيميلك",
   },
   en: {
     backBtn: "Back",
-    TtlLogin: "🧠 Login",
+    TtlLogin: "Login",
     SubTtl: "Log in to continue to Brain Battle",
     UsernameText: "Username or Email",
     PasswordText: "Password",
     UserPlaceholder: "Enter your username or email",
     PassPlaceholder: "••••••••",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    capsLock: "Heads up: Caps Lock is on",
     errorMsg: "Please fill in all fields correctly",
     SubmitBtn: "Login",
+    loggingIn: "Logging in",
     FooterLink: "Don't have an account? <a href=\"signup.html\">Create a new account</a>",
     usernameNotFound: "Username not found",
     emailNotConfirmed: "Please confirm your email first. <a href=\"verify.html\">Enter the code we sent you</a>",
     wrongPassword: "Wrong password",
+    invalidCredentials: "Wrong email or password",
     tooManyAttempts: "Too many attempts. Wait a moment and try again.",
+    networkError: "Couldn't connect. Check your internet and try again.",
+    loginFailed: "Couldn't log in. Please try again.",
     usernameLoginOff: "Logging in with a username isn't available right now. Use your email instead.",
   }
 };
@@ -221,6 +131,7 @@ function applyTranslations(l) {
   document.documentElement.lang = l;
   document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
   const t = i18n[l];
+  document.title = t.TtlLogin + ' — Brain Battle';
   document.getElementById('backBtn').textContent = t.backBtn;
   document.getElementById('TtlLogin').textContent = t.TtlLogin;
   document.getElementById('SubTtl').textContent = t.SubTtl;
@@ -228,9 +139,11 @@ function applyTranslations(l) {
   document.getElementById('PasswordText').textContent = t.PasswordText;
   document.getElementById('username').placeholder = t.UserPlaceholder;
   document.getElementById('password').placeholder = t.PassPlaceholder;
+  document.getElementById('CapsHint').textContent = t.capsLock;
   document.getElementById('errorMsg').textContent = t.errorMsg;
   document.getElementById('SubmitBtn').textContent = t.SubmitBtn;
   document.getElementById('FooterLink').innerHTML = t.FooterLink;
+  setPasswordToggleLabels(t.showPassword, t.hidePassword);
 }
 
 // Username login runs on the server (Supabase function "login-with-username"),
@@ -261,63 +174,98 @@ function showNotConfirmed(email, lang) {
     errorMsg.style.display = 'block';
 }
 
+// Turns a Supabase signInWithPassword error into one of our translated messages.
+function friendlyAuthError(error, t) {
+    const msg = error.message || '';
+    if (error.code === 'invalid_credentials' || /invalid login credentials/i.test(msg)) return t.invalidCredentials;
+    if (error.status === 429 || /rate limit|too many/i.test(msg)) return t.tooManyAttempts;
+    if (error.name === 'AuthRetryableFetchError' || /failed to fetch|network/i.test(msg)) return t.networkError;
+    return t.loginFailed;
+}
+
+let loginInFlight = false;
+
 async function handleLogin(e) {
     e.preventDefault();
+    if (loginInFlight) return false;
 
+    // Only the identifier is trimmed: spaces in a password are part of the password.
     const usernameOrEmail = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+    const password = document.getElementById('password').value;
     const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.getElementById('SubmitBtn');
     const lang = localStorage.getItem('lang') || 'en';
+    const t = i18n[lang];
+
+    const showError = text => {
+        errorMsg.textContent = text;
+        errorMsg.style.display = 'block';
+    };
 
     errorMsg.style.display = 'none';
 
     if (!usernameOrEmail || !password) {
-        errorMsg.textContent = i18n[lang].errorMsg;
-        errorMsg.style.display = 'block';
+        showError(t.errorMsg);
+        document.getElementById(usernameOrEmail ? 'password' : 'username').focus();
         return false;
     }
 
-    if (!usernameOrEmail.includes('@')) {
-        const result = await loginWithUsername(usernameOrEmail, password);
-        if (!result.error) {
-            window.location.href = 'index.html';
+    loginInFlight = true;
+    setBusy(submitBtn, true, t.loggingIn);
+    const done = () => {
+        loginInFlight = false;
+        setBusy(submitBtn, false, t.SubmitBtn);
+    };
+
+    try {
+        if (!usernameOrEmail.includes('@')) {
+            const result = await loginWithUsername(usernameOrEmail, password);
+            if (!result.error) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            done();
+            if (result.error === 'email_not_confirmed') {
+                showNotConfirmed(result.email, lang);
+                return false;
+            }
+            const messages = {
+                username_not_found: t.usernameNotFound,
+                invalid_credentials: t.wrongPassword,
+                too_many_attempts: t.tooManyAttempts,
+            };
+            showError(messages[result.error] || t.usernameLoginOff);
             return false;
         }
-        if (result.error === 'email_not_confirmed') {
-            showNotConfirmed(result.email, lang);
+
+        const email = usernameOrEmail;
+        const { error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) {
+            done();
+            // Signed up but never entered the emailed code: point them to the code page (it can resend the code).
+            if (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message)) {
+                showNotConfirmed(email, lang);
+                return false;
+            }
+            showError(friendlyAuthError(error, t));
             return false;
         }
-        const messages = {
-            username_not_found: i18n[lang].usernameNotFound,
-            invalid_credentials: i18n[lang].wrongPassword,
-            too_many_attempts: i18n[lang].tooManyAttempts,
-        };
-        errorMsg.textContent = messages[result.error] || i18n[lang].usernameLoginOff;
-        errorMsg.style.display = 'block';
-        return false;
+
+        window.location.href = 'index.html';
+    } catch (err) {
+        console.error(err);
+        done();
+        showError(t.networkError);
     }
-
-    const email = usernameOrEmail;
-    const { error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-    });
-
-    if (error) {
-        // Signed up but never entered the emailed code: point them to the code page (it can resend the code).
-        if (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message)) {
-            showNotConfirmed(email, lang);
-            return false;
-        }
-        errorMsg.textContent = error.message;
-        errorMsg.style.display = 'block';
-        return false;
-    }
-
-    errorMsg.style.display = 'none';
-    window.location.href = 'index.html';
     return false;
 }
+
+initPasswordToggles();
+watchCapsLock([document.getElementById('password')], 'CapsHint');
 applyTranslations(localStorage.getItem('lang') || 'en');
 </script>
 
