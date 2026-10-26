@@ -1,0 +1,411 @@
+/* Shared look for login.html and signup.html: dark Brain Battle theme with a frosted-glass card. */
+:root {
+    --bg: #080b14;
+    --text: #f7f8ff;
+    --muted: #aeb7cf;
+    --faint: #7d87a6;
+    --field: rgba(10, 14, 25, 0.62);
+    --field-border: #2a3350;
+    --purple: #8b5cf6;
+    --purple-deep: #6d4aff;
+    --teal: #2fd4c8;
+    --gold: #ffd166;
+    --danger: #ff6b81;
+    --success: #3ddc97;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html { color-scheme: dark; }
+
+body {
+    font-family: 'Cairo', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* ---------- Animated background behind the glass ---------- */
+.auth-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 20% 10%, #35206a66, transparent 40%),
+        radial-gradient(circle at 80% 90%, #005c7a66, transparent 40%),
+        var(--bg);
+}
+
+.auth-bg .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.55;
+    animation: drift 18s ease-in-out infinite alternate;
+}
+
+.auth-bg .b1 { width: 420px; height: 420px; background: var(--purple-deep); top: -120px; inset-inline-start: -100px; }
+.auth-bg .b2 { width: 360px; height: 360px; background: var(--teal); bottom: -120px; inset-inline-end: -80px; animation-duration: 22s; animation-delay: -6s; opacity: 0.4; }
+.auth-bg .b3 { width: 220px; height: 220px; background: var(--gold); top: 55%; inset-inline-start: 12%; animation-duration: 26s; animation-delay: -12s; opacity: 0.22; }
+
+/* Faint grid so the blur has something to frost */
+.auth-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at center, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(circle at center, #000 30%, transparent 75%);
+}
+
+@keyframes drift {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(60px, 40px) scale(1.12); }
+    100% { transform: translate(-40px, 70px) scale(0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-bg .blob { animation: none; }
+}
+
+/* ---------- Back button ---------- */
+.top-header {
+    position: absolute;
+    top: 20px;
+    inset-inline-start: 20px;
+    z-index: 9999;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px 9px 14px;
+    border-radius: 999px;
+    background: rgba(17, 22, 37, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.back-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+[dir="rtl"] .back-btn svg { transform: scaleX(-1); }
+
+.back-btn:hover {
+    background: rgba(139, 92, 246, 0.22);
+    border-color: rgba(139, 92, 246, 0.55);
+}
+
+.back-btn:active { transform: scale(0.97); }
+
+/* ---------- Card ---------- */
+.login-wrapper {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 84px 16px 40px;
+}
+
+.login-card {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 36px 32px 30px;
+    border-radius: 26px;
+    background: linear-gradient(160deg, rgba(30, 36, 60, 0.55), rgba(12, 16, 30, 0.45));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    animation: card-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .login-card { background: rgba(17, 22, 37, 0.94); }
+}
+
+@keyframes card-in {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-card { animation: none; }
+}
+
+.card-logo {
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+    filter: drop-shadow(0 6px 18px rgba(124, 92, 255, 0.45));
+}
+
+.login-card h2 {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 26px;
+}
+
+/* ---------- Fields ---------- */
+.input-group { margin-bottom: 18px; }
+
+.input-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #dbe2ff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.input-group input {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid var(--field-border);
+    background: var(--field);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.input-group input::placeholder { color: var(--faint); }
+
+.input-group input:hover { border-color: #3a4468; }
+
+.input-group input:focus {
+    border-color: var(--purple);
+    background: rgba(10, 14, 25, 0.8);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.22);
+}
+
+/* Emails are always typed left to right, even on the Arabic page */
+.input-group input[type="email"] { direction: ltr; }
+[dir="rtl"] .input-group input[type="email"]::placeholder { text-align: right; }
+
+/* Browser autofill would otherwise paint the field white */
+.input-group input:-webkit-autofill {
+    -webkit-text-fill-color: var(--text);
+    -webkit-box-shadow: 0 0 0 100px #121831 inset;
+    caret-color: var(--text);
+}
+
+/* ---------- Show / hide password ---------- */
+.password-field { position: relative; }
+
+.password-field input { padding-inline-end: 52px; }
+
+.toggle-pass {
+    position: absolute;
+    top: 50%;
+    inset-inline-end: 6px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--faint);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+}
+
+.toggle-pass:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+
+.toggle-pass:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 1px;
+    color: var(--text);
+}
+
+.toggle-pass[aria-pressed="true"] { color: var(--teal); }
+
+.toggle-pass svg { width: 20px; height: 20px; }
+.toggle-pass .icon-hide { display: none; }
+.toggle-pass[aria-pressed="true"] .icon-show { display: none; }
+.toggle-pass[aria-pressed="true"] .icon-hide { display: block; }
+
+.hint {
+    color: var(--faint);
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.caps-hint {
+    display: none;
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+.caps-hint.show { display: block; }
+
+.email-suggest {
+    display: none;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255, 209, 102, 0.1);
+    border: 1px solid rgba(255, 209, 102, 0.45);
+    color: #ffe3a3;
+    font-size: 13px;
+}
+
+.email-suggest button {
+    margin-inline-start: 8px;
+    padding: 3px 12px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #241a00;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ---------- Messages ---------- */
+.error-msg,
+.success-msg {
+    display: none;
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.error-msg {
+    color: #ffc2cc;
+    background: rgba(255, 107, 129, 0.1);
+    border: 1px solid rgba(255, 107, 129, 0.4);
+}
+
+.success-msg {
+    color: #b9f5da;
+    background: rgba(61, 220, 151, 0.1);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+}
+
+.error-msg a { color: #fff; font-weight: 800; }
+
+/* ---------- Submit ---------- */
+.btn-submit {
+    width: 100%;
+    height: 50px;
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--purple), var(--purple-deep));
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(109, 74, 255, 0.4);
+    transition: transform 0.15s, box-shadow 0.2s, filter 0.2s;
+}
+
+.btn-submit:hover { filter: brightness(1.08); box-shadow: 0 12px 32px rgba(109, 74, 255, 0.55); }
+.btn-submit:active { transform: scale(0.98); }
+
+.btn-submit:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 3px;
+}
+
+.btn-submit:disabled {
+    cursor: progress;
+    filter: saturate(0.6) brightness(0.85);
+    box-shadow: none;
+    transform: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Footer link ---------- */
+.footer-link {
+    text-align: center;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.footer-link a {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.footer-link a:hover { text-decoration: underline; }
+
+.footer-link a:focus-visible,
+.error-msg a:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 480px) {
+    .top-header { top: 14px; inset-inline-start: 14px; }
+    .login-wrapper { padding: 72px 16px 90px; align-items: flex-start; }
+    .login-card { padding: 28px 20px 24px; border-radius: 22px; }
+    .login-card h2 { font-size: 23px; }
+    .card-logo { width: 56px; height: 56px; }
+    .auth-bg .b1 { width: 300px; height: 300px; }
+    .auth-bg .b2 { width: 260px; height: 260px; }
+}

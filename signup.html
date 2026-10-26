@@ -3,237 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b14">
 <title>إنشاء حساب جديد — Brain Battle</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="apple-touch-icon" href="logo-180.png">
 <script src="intro.js"></script>
 <script src="spotify-player.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
     const supabaseClient = window.supabase.createClient("https://fhvxlyrdvzimgzfyjdxo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZodnhseXJkdnppbWd6ZnlqZHhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzE3MjksImV4cCI6MjEwNDM0NzcyOX0.EFi5L9-ahYr4Jv2IdJae5gvJ81Wbhd399RclkwToTbg");
 </script>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-        background-color: #f4f6f9;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .top-header {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-    }
-
-    .back-btn {
-        background-color: #e2e8f0;
-        color: #1e293b;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: bold;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .back-btn:hover {
-        background-color: #cbd5e1;
-    }
-
-    .login-wrapper {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
-
-    .login-card {
-        background: white;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .login-card h2 {
-        color: #1e293b;
-        margin-bottom: 8px;
-        font-size: 24px;
-    }
-
-    .subtitle {
-        color: #64748b;
-        font-size: 14px;
-        margin-bottom: 24px;
-    }
-
-    .input-group {
-        margin-bottom: 20px;
-    }
-
-    .input-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #334155;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .input-group input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        font-size: 14px;
-        outline: none;
-    }
-
-    .input-group input:focus {
-        border-color: #2563eb;
-    }
-
-    .hint {
-        color: #94a3b8;
-        font-size: 12px;
-        margin-top: 6px;
-    }
-
-    .email-suggest {
-        display: none;
-        margin-top: 8px;
-        padding: 8px 10px;
-        border-radius: 8px;
-        background: #fff7e6;
-        border: 1px solid #f5c66b;
-        color: #7a4b00;
-        font-size: 13px;
-    }
-
-    .email-suggest button {
-        margin-inline-start: 6px;
-        padding: 3px 10px;
-        border: 0;
-        border-radius: 6px;
-        background: #2563eb;
-        color: #fff;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 12px;
-        background-color: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-top: 4px;
-    }
-
-    .btn-submit:hover {
-        background-color: #1d4ed8;
-    }
-
-    .btn-submit:disabled {
-        background-color: #93b4f2;
-        cursor: not-allowed;
-    }
-
-    .error-msg {
-        color: #dc2626;
-        font-size: 13px;
-        margin-top: -12px;
-        margin-bottom: 16px;
-        display: none;
-    }
-
-    .success-msg {
-        color: #16a34a;
-        font-size: 13px;
-        margin-top: -12px;
-        margin-bottom: 16px;
-        display: none;
-    }
-
-    .footer-link {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 13px;
-        color: #64748b;
-    }
-
-    .footer-link a {
-        color: #2563eb;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .spinner {
-        display: inline-block;
-        width: 14px;
-        height: 14px;
-        border: 2px solid #ffffff88;
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin .7s linear infinite;
-        vertical-align: middle;
-        margin-left: 8px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-</style>
 </head>
 <body>
 
+<div class="auth-bg" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+</div>
+
 <header class="top-header">
-    <a href="index.html" class="back-btn" id="BackBtn">رجوع</a>
+    <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        <span id="BackBtn">رجوع</span>
+    </a>
 </header>
 
-<div class="login-wrapper">
+<main class="login-wrapper">
     <div class="login-card">
-        <h2 id="TtlSignup">🧠 إنشاء حساب جديد</h2>
+        <img class="card-logo" src="logo.svg" alt="" width="64" height="64">
+        <h2 id="TtlSignup">إنشاء حساب جديد</h2>
         <p class="subtitle" id="SubTtl">انضم إلى Brain Battle وابدأ التحدي</p>
 
-        <form id="signupForm" onsubmit="return handleSignup(event)">
+        <form id="signupForm" onsubmit="return handleSignup(event)" novalidate>
             <div class="input-group">
                 <label for="fullname" id="usernameText">الاسم</label>
-                <input type="text" id="fullname" placeholder="مثلاً vliex" maxlength="18" required>
+                <input type="text" id="fullname" name="username" placeholder="مثلاً vliex" maxlength="18"
+                       autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
             </div>
 
             <div class="input-group">
                 <label for="email" id="EmailText">البريد الإلكتروني</label>
-                <input type="email" id="email" placeholder="example@email.com" required>
-                <div class="email-suggest" id="emailSuggest"></div>
+                <input type="email" id="email" name="email" placeholder="example@email.com"
+                       autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" required>
+                <div class="email-suggest" id="emailSuggest" role="status"></div>
             </div>
 
             <div class="input-group">
                 <label for="password" id="PasswordText">كلمة المرور</label>
-                <input type="password" id="password" placeholder="••••••••" required>
+                <div class="password-field">
+                    <input type="password" id="password" name="password" placeholder="••••••••"
+                           autocomplete="new-password" minlength="6" aria-describedby="PasswordHint" required>
+                    <button type="button" class="toggle-pass" aria-controls="password" aria-pressed="false" aria-label="إظهار كلمة المرور">
+                        <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-6.4 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.4 0 10 7 10 7a18.6 18.6 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                    </button>
+                </div>
                 <div class="hint" id="PasswordHint">6 أحرف على الأقل</div>
             </div>
 
             <div class="input-group">
                 <label for="confirmPassword" id="ConfirmPasswordText">تأكيد كلمة المرور</label>
-                <input type="password" id="confirmPassword" placeholder="••••••••" required>
+                <div class="password-field">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••"
+                           autocomplete="new-password" required>
+                    <button type="button" class="toggle-pass" aria-controls="confirmPassword" aria-pressed="false" aria-label="إظهار كلمة المرور">
+                        <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-6.4 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.4 0 10 7 10 7a18.6 18.6 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                    </button>
+                </div>
+                <div class="caps-hint" id="CapsHint" role="status">Caps Lock مفعّل</div>
             </div>
 
-            <div class="error-msg" id="errorMsg"></div>
-            <div class="success-msg" id="successMsg">تم إرسال كود التحقق إلى إيميلك! جارٍ تحويلك...</div>
+            <div class="error-msg" id="errorMsg" role="alert"></div>
+            <div class="success-msg" id="successMsg" role="status">تم إرسال كود التحقق إلى إيميلك! جارٍ تحويلك...</div>
 
             <button type="submit" class="btn-submit" id="submitBtn">إنشاء الحساب</button>
         </form>
@@ -242,13 +89,14 @@
             لديك حساب بالفعل؟ <a href="login.html">سجّل دخولك</a>
         </div>
     </div>
-</div>
+</main>
 
+<script src="auth.js"></script>
 <script>
 const i18n = {
   ar: {
     backBtn: "رجوع",
-    TtlSignup: "🧠 إنشاء حساب جديد",
+    TtlSignup: "إنشاء حساب جديد",
     SubTtl: "انضم إلى Brain Battle وابدأ التحدي",
     usernameText: "الاسم المستعار",
     EmailText: "البريد الإلكتروني",
@@ -259,6 +107,9 @@ const i18n = {
     placeholderEmail: "example@email.com",
     placeholderPassword: "••••••••",
     placeholderConfirmPassword: "••••••••",
+    showPassword: "إظهار كلمة المرور",
+    hidePassword: "إخفاء كلمة المرور",
+    capsLock: "تنبيه: Caps Lock مفعّل",
     successMsg: "تم إرسال كود التحقق إلى إيميلك! جارٍ تحويلك...",
     submitBtn: "إنشاء الحساب",
     FooterLink: "لديك حساب بالفعل؟ <a href='login.html'>سجّل دخولك</a>",
@@ -266,8 +117,12 @@ const i18n = {
     passwordLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
     passwordMismatch: "كلمتا المرور غير متطابقتين",
     emailExists: "هذا الإيميل مسجل بحساب موجود بالفعل",
+    invalidEmail: "الإيميل غير صحيح، تأكد منه",
     sendError: "تعذّر إنشاء الحساب، حاول مرة أخرى",
+    tooManyAttempts: "محاولات كثيرة، انتظر شوي وحاول مرة ثانية",
+    networkError: "تعذّر الاتصال، تأكد من الإنترنت وحاول مرة ثانية",
     usernameExists: "اسم المستخدم موجود بالفعل، جرّب اسمًا آخر",
+    checking: "جارٍ التحقق",
     sendingCode: "جارٍ إرسال الكود",
     didYouMean: "هل تقصد",
     useIt: "استخدمه",
@@ -275,7 +130,7 @@ const i18n = {
   },
   en: {
     backBtn: "Back",
-    TtlSignup: "🧠 Create a New Account",
+    TtlSignup: "Create a New Account",
     SubTtl: "Join Brain Battle and start the challenge",
     usernameText: "Username",
     EmailText: "Email",
@@ -286,6 +141,9 @@ const i18n = {
     placeholderEmail: "example@email.com",
     placeholderPassword: "••••••••",
     placeholderConfirmPassword: "••••••••",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    capsLock: "Heads up: Caps Lock is on",
     successMsg: "Verification code sent to your email! Redirecting...",
     submitBtn: "Create Account",
     FooterLink: "Already have an account? <a href='login.html'>Log in</a>",
@@ -293,8 +151,12 @@ const i18n = {
     passwordLength: "Password must be at least 6 characters",
     passwordMismatch: "Passwords do not match",
     emailExists: "This email is already registered",
+    invalidEmail: "That email doesn't look right. Please check it.",
     sendError: "Could not create the account. Please try again.",
+    tooManyAttempts: "Too many attempts. Wait a moment and try again.",
+    networkError: "Couldn't connect. Check your internet and try again.",
     usernameExists: "Username already exists, try another one",
+    checking: "Checking",
     sendingCode: "Sending code",
     didYouMean: "Did you mean",
     useIt: "Use it",
@@ -306,6 +168,7 @@ function applyTranslations(l) {
   document.documentElement.lang = l;
   document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
   const t = i18n[l];
+  document.title = t.TtlSignup + ' — Brain Battle';
   document.getElementById('BackBtn').textContent = t.backBtn;
   document.getElementById('TtlSignup').textContent = t.TtlSignup;
   document.getElementById('SubTtl').textContent = t.SubTtl;
@@ -318,10 +181,12 @@ function applyTranslations(l) {
   document.getElementById('email').placeholder = t.placeholderEmail;
   document.getElementById('password').placeholder = t.placeholderPassword;
   document.getElementById('confirmPassword').placeholder = t.placeholderConfirmPassword;
+  document.getElementById('CapsHint').textContent = t.capsLock;
   document.getElementById('successMsg').textContent = t.successMsg;
   document.getElementById('submitBtn').textContent = t.submitBtn;
   document.getElementById('FooterLink').innerHTML = t.FooterLink;
   document.getElementById("errorMsg").textContent = "";
+  setPasswordToggleLabels(t.showPassword, t.hidePassword);
 }
 
 // ---------- Email typo check ----------
@@ -377,7 +242,7 @@ function showEmailSuggestion() {
     const useBtn = document.createElement('button');
     useBtn.type = 'button';
     useBtn.textContent = t.useIt;
-    useBtn.onclick = () => { emailInput.value = fixed; suggestBox.style.display = 'none'; };
+    useBtn.onclick = () => { emailInput.value = fixed; suggestBox.style.display = 'none'; emailInput.focus(); };
     suggestBox.appendChild(useBtn);
     suggestBox.style.display = 'block';
     return fixed;
@@ -385,8 +250,23 @@ function showEmailSuggestion() {
 emailInput.addEventListener('blur', showEmailSuggestion);
 emailInput.addEventListener('input', () => { suggestBox.style.display = 'none'; });
 
+// Turns a Supabase signUp error into one of our translated messages.
+function friendlySignupError(error, t) {
+    const msg = error.message || '';
+    if (msg.includes('profiles_fullname_unique_idx') || msg.includes('duplicate key')) return t.usernameExists;
+    if (error.code === 'user_already_exists' || msg.includes('already registered')) return t.emailExists;
+    if (error.code === 'weak_password' || /password should be/i.test(msg)) return t.passwordLength;
+    if (error.code === 'email_address_invalid' || /invalid.*email|email.*invalid/i.test(msg)) return t.invalidEmail;
+    if (error.status === 429 || /rate limit|too many/i.test(msg)) return t.tooManyAttempts;
+    if (error.name === 'AuthRetryableFetchError' || /failed to fetch|network/i.test(msg)) return t.networkError;
+    return t.sendError;
+}
+
+let signupInFlight = false;
+
 async function handleSignup(e) {
     e.preventDefault();
+    if (signupInFlight) return false;
     const fullname = document.getElementById('fullname').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -394,109 +274,98 @@ async function handleSignup(e) {
     const errorMsg = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
     const submitBtn = document.getElementById('submitBtn');
+    const lang = localStorage.getItem('lang') || 'en';
+    const t = i18n[lang];
+
+    const showError = text => {
+        errorMsg.textContent = text;
+        errorMsg.style.display = 'block';
+        return false;
+    };
 
     errorMsg.style.display = 'none';
     successMsg.style.display = 'none';
 
-    if (!fullname || !email || !password || !confirmPassword) {
-        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].fillAllFields;
-        errorMsg.style.display = 'block';
-        return false;
-    }
-
-    if (password.length < 6) {
-        errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].passwordLength;
-        errorMsg.style.display = 'block';
-        return false;
-    }
-
-    if (password !== confirmPassword) {
-    errorMsg.textContent = i18n[localStorage.getItem('lang') || 'en'].passwordMismatch;
-    errorMsg.style.display = 'block';
-    return false;
-}
-
-const lang = localStorage.getItem('lang') || 'en';
+    if (!fullname || !email || !password || !confirmPassword) return showError(t.fillAllFields);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError(t.invalidEmail);
+    if (password.length < 6) return showError(t.passwordLength);
+    if (password !== confirmPassword) return showError(t.passwordMismatch);
 
     // Looks like a typo (e.g. @gmil.com): stop once and suggest the fix. Pressing again with the same email goes through.
     if (showEmailSuggestion() && typoWarnedFor !== email) {
         typoWarnedFor = email;
-        errorMsg.textContent = i18n[lang].typoAgain;
-        errorMsg.style.display = 'block';
-        return false;
+        return showError(t.typoAgain);
     }
 
-const { data: existingProfile, error: usernameCheckError } = await supabaseClient
-    .from('profiles')
-    .select('id')
-    .ilike('fullname', fullname)
-    .maybeSingle();
-
-    if (usernameCheckError) {
-        errorMsg.textContent = usernameCheckError.message;
-        errorMsg.style.display = 'block';
-        return false;
-    }
-
-    if (existingProfile) {
-        errorMsg.textContent = i18n[lang].usernameExists;
-        errorMsg.style.display = 'block';
-        return false;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `${i18n[lang].sendingCode}<span class="spinner"></span>`;
+    signupInFlight = true;
+    setBusy(submitBtn, true, t.checking);
     const resetButton = () => {
-        submitBtn.disabled = false;
-        submitBtn.textContent = i18n[lang].submitBtn;
+        signupInFlight = false;
+        setBusy(submitBtn, false, t.submitBtn);
     };
 
-    // Supabase creates the account and emails the 6-digit code itself.
-    // With "Confirm email" turned on, the account can't log in until that code is entered.
-    const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: { data: { fullname } }
-    });
+    try {
+        const { data: existingProfile, error: usernameCheckError } = await supabaseClient
+            .from('profiles')
+            .select('id')
+            .ilike('fullname', fullname)
+            .maybeSingle();
 
-    if (signUpError) {
-    resetButton();
-    const duplicateUsername =
-        signUpError.message.includes('profiles_fullname_unique_idx') ||
-        signUpError.message.includes('duplicate key');
+        if (usernameCheckError) {
+            console.error(usernameCheckError);
+            resetButton();
+            return showError(t.sendError);
+        }
 
-    errorMsg.textContent = duplicateUsername
-        ? i18n[lang].usernameExists
-        : signUpError.message.includes('already registered')
-            ? i18n[lang].emailExists
-            : signUpError.message;
+        if (existingProfile) {
+            resetButton();
+            document.getElementById('fullname').focus();
+            return showError(t.usernameExists);
+        }
 
-    errorMsg.style.display = 'block';
-    return false;
-    }
+        setBusy(submitBtn, true, t.sendingCode);
 
-    // When confirmation is on, Supabase doesn't say if an email is taken; it returns a user with no identities instead.
-    const identities = signUpData?.user?.identities;
-    if (Array.isArray(identities) && identities.length === 0) {
+        // Supabase creates the account and emails the 6-digit code itself.
+        // With "Confirm email" turned on, the account can't log in until that code is entered.
+        const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: { data: { fullname } }
+        });
+
+        if (signUpError) {
+            resetButton();
+            return showError(friendlySignupError(signUpError, t));
+        }
+
+        // When confirmation is on, Supabase doesn't say if an email is taken; it returns a user with no identities instead.
+        const identities = signUpData?.user?.identities;
+        if (Array.isArray(identities) && identities.length === 0) {
+            resetButton();
+            return showError(t.emailExists);
+        }
+
+        // Logged in straight away means "Confirm email" is still off in Supabase, so there's no code to enter.
+        if (signUpData?.session) {
+            window.location.href = 'index.html';
+            return false;
+        }
+
+        // Only what the next page needs to show; never the password.
+        sessionStorage.setItem('bb_pending_user', JSON.stringify({ email, fullname, sentAt: Date.now() }));
+        successMsg.textContent = t.successMsg;
+        successMsg.style.display = 'block';
+        setTimeout(() => { window.location.href = 'verify.html'; }, 900);
+    } catch (err) {
+        console.error(err);
         resetButton();
-        errorMsg.textContent = i18n[lang].emailExists;
-        errorMsg.style.display = 'block';
-        return false;
+        showError(t.networkError);
     }
-
-    // Logged in straight away means "Confirm email" is still off in Supabase, so there's no code to enter.
-    if (signUpData?.session) {
-        window.location.href = 'index.html';
-        return false;
-    }
-
-    // Only what the next page needs to show; never the password.
-    sessionStorage.setItem('bb_pending_user', JSON.stringify({ email, fullname, sentAt: Date.now() }));
-    successMsg.textContent = i18n[lang].successMsg;
-    successMsg.style.display = 'block';
-    setTimeout(() => { window.location.href = 'verify.html'; }, 900);
     return false;
 }
+
+initPasswordToggles();
+watchCapsLock([document.getElementById('password'), document.getElementById('confirmPassword')], 'CapsHint');
 applyTranslations(localStorage.getItem('lang') || 'en');
 </script>
 
